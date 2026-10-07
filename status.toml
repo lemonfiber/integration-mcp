@@ -1,0 +1,22 @@
+# What this repository implements, one row per requirement (OPS-R74).
+#
+# `done` means the requirement is met in full by what is here, `partial` that this
+# repository holds its part and the rest lives elsewhere, `open` that nothing here
+# meets it yet. The release gate and the no-stubs gate read this file; a pull
+# request that changes whether a requirement is met changes its row.
+#
+# The repository holds no server, so every requirement of F13 is open.
+
+requirement = [
+  { id = "F13-R1", state = "open" },
+  { id = "F13-R2", state = "open" },
+  { id = "F13-R3", state = "open" },
+  { id = "F13-R4", state = "open" },
+  { id = "F13-R5", state = "open" },
+  { id = "F13-R6", state = "open" },
+  { id = "F13-R7", state = "open" },
+  { id = "F13-R8", state = "open" },
+  { id = "F13-R9", state = "open" },
+  { id = "F13-R10", state = "open" },
+  { id = "F13-R11", state = "open" },
+]
