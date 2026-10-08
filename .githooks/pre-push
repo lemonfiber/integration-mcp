@@ -1,0 +1,93 @@
+#!/bin/sh
+# Refuse a push that would leave a branch carrying nothing of its own.
+#
+# Twice, a `git checkout` that failed silently left the shell on the trunk, and
+# the push that followed sent the trunk over a feature branch — deleting its
+# commits and closing its pull request. Neither time was the mistake visible
+# while it happened: every command in the sequence succeeded on its own terms,
+# `git rebase` correctly reported "up to date", and the push was a legitimate
+# force-push to a branch that legitimately existed.
+#
+# So this asks the one question the sequence never did: does what is being pushed
+# differ from the trunk at all? A branch that does not is either a mistake of
+# this shape or a branch with nothing to say.
+#
+# It permits every ordinary force-push. A rebased branch is still ahead of the
+# trunk; only one that has been *replaced* by the trunk is not.
+
+set -eu
+
+trunk=refs/remotes/origin/main
+empty=0000000000000000000000000000000000000000
+
+# Whether the trunk is here to compare against. A clone of one branch that is not
+# the trunk has no `origin/main`, and neither does one that has never fetched.
+# That silences the comparison below — but only that. Refusing a push to the
+# trunk needs nothing but the name it is being pushed to, and a guard that goes
+# quiet in the case it was never told about is how this one came to pass a push
+# it exists to stop.
+if git rev-parse --verify --quiet "$trunk" >/dev/null; then
+	comparable=yes
+else
+	comparable=no
+fi
+
+while read -r _ pushing onto existing; do
+	# A deletion pushes the empty object; there is nothing to check.
+	if [ "$pushing" = "$empty" ]; then
+		continue
+	fi
+
+	# Only a branch can be emptied by this mistake. A tag names a commit that is
+	# already somewhere — a release tag names one on the trunk by definition — so
+	# every tag answers yes to the question below and none of them is the accident
+	# this exists to catch. A tag has no commits of its own to lose and no pull
+	# request to close.
+	case "$onto" in
+	refs/heads/*) ;;
+	*) continue ;;
+	esac
+
+	branch=${onto#refs/heads/}
+
+	case "$onto" in
+	refs/heads/main | refs/heads/master)
+		# One push to the trunk cannot go through a pull request: the one that
+		# creates it. There is no branch to open a request against, and nothing
+		# on the remote for this to overwrite, so neither reason for the refusal
+		# below applies. Git names what is on the remote now as the fourth field,
+		# and for a ref the remote does not have it is the empty object — which
+		# is what separates seeding a repository from every later push to a trunk
+		# that already exists.
+		if [ "$existing" = "$empty" ]; then
+			echo "pre-push: ${branch} does not exist on the remote; creating it." >&2
+			echo "          This is the one push to it that cannot be reviewed first." >&2
+			continue
+		fi
+		echo "pre-push: refusing to push straight to ${branch}." >&2
+		echo "          Branch, push that, and open a pull request." >&2
+		exit 1
+		;;
+	esac
+
+	if [ "$comparable" = "no" ]; then
+		continue
+	fi
+
+	if git merge-base --is-ancestor "$pushing" "$trunk"; then
+		echo "pre-push: ${branch} would carry no commit that origin/main does not." >&2
+		echo "" >&2
+		echo "          This is what pushing the trunk over a branch looks like: the" >&2
+		echo "          branch's own commits go, and its pull request closes." >&2
+		echo "" >&2
+		echo "          Check where you are before pushing again:" >&2
+		echo "              git branch --show-current" >&2
+		echo "              git rev-list --count origin/main..HEAD" >&2
+		echo "" >&2
+		echo "          If the branch really is finished with, delete it rather than" >&2
+		echo "          emptying it: git push origin --delete ${branch}" >&2
+		exit 1
+	fi
+done
+
+exit 0

@@ -1,0 +1,19 @@
+# Canonical typos configuration for every lemonfiber repo.
+#
+# Unlike the markdownlint config, this one is a floor rather than a copy: a repo
+# may add words and patterns its own tree needs, but every entry below must be
+# present with the same value. The `shared-files` job in the hygiene gate checks
+# that (GOV-R12, Q-R56).
+#
+# A repo starting from scratch copies this file to its root as `typos.toml` and
+# adds to it.
+
+[default]
+# Ignore hotkey mockup notation like [e]rror, [s]ervice in TUI examples.
+extend-ignore-re = ["\\[[a-z]\\][a-zA-Z]+"]
+
+[default.extend-words]
+ratatui = "ratatui"
+Ratatui = "Ratatui"
+lemonfiber = "lemonfiber"
+Servarr = "Servarr"
