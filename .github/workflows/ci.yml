@@ -21,24 +21,24 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    uses: lemonfiber/spec/.github/workflows/spec-check.yml@eaedb9b9ddd3c3208f4fbe898718d19e45e04d74 # v1.0.49
+    uses: lemonfiber/spec/.github/workflows/spec-check.yml@ca6f4563337ae61c15af99c9b18436fd170781c1 # v1.0.51
   hygiene:
-    uses: lemonfiber/spec/.github/workflows/hygiene.yml@eaedb9b9ddd3c3208f4fbe898718d19e45e04d74 # v1.0.49
+    uses: lemonfiber/spec/.github/workflows/hygiene.yml@ca6f4563337ae61c15af99c9b18436fd170781c1 # v1.0.51
   # Every pin this repository holds on a shared workflow, against what the spec's
   # default branch holds now. It fails naming the commits a pin has not taken; a
   # run that could not ask which they are says so rather than reporting clean.
   workflow-pins:
-    uses: lemonfiber/spec/.github/workflows/workflow-pins.yml@eaedb9b9ddd3c3208f4fbe898718d19e45e04d74 # v1.0.49
+    uses: lemonfiber/spec/.github/workflows/workflow-pins.yml@ca6f4563337ae61c15af99c9b18436fd170781c1 # v1.0.51
   security:
-    uses: lemonfiber/spec/.github/workflows/security.yml@eaedb9b9ddd3c3208f4fbe898718d19e45e04d74 # v1.0.49
+    uses: lemonfiber/spec/.github/workflows/security.yml@ca6f4563337ae61c15af99c9b18436fd170781c1 # v1.0.51
   dco:
-    uses: lemonfiber/spec/.github/workflows/dco.yml@eaedb9b9ddd3c3208f4fbe898718d19e45e04d74 # v1.0.49
+    uses: lemonfiber/spec/.github/workflows/dco.yml@ca6f4563337ae61c15af99c9b18436fd170781c1 # v1.0.51
   attribution:
-    uses: lemonfiber/spec/.github/workflows/attribution.yml@eaedb9b9ddd3c3208f4fbe898718d19e45e04d74 # v1.0.49
+    uses: lemonfiber/spec/.github/workflows/attribution.yml@ca6f4563337ae61c15af99c9b18436fd170781c1 # v1.0.51
   commitlint:
-    uses: lemonfiber/spec/.github/workflows/commitlint.yml@eaedb9b9ddd3c3208f4fbe898718d19e45e04d74 # v1.0.49
+    uses: lemonfiber/spec/.github/workflows/commitlint.yml@ca6f4563337ae61c15af99c9b18436fd170781c1 # v1.0.51
   labeler:
     permissions:
       contents: read
       pull-requests: write
-    uses: lemonfiber/spec/.github/workflows/labeler.yml@eaedb9b9ddd3c3208f4fbe898718d19e45e04d74 # v1.0.49
+    uses: lemonfiber/spec/.github/workflows/labeler.yml@ca6f4563337ae61c15af99c9b18436fd170781c1 # v1.0.51
