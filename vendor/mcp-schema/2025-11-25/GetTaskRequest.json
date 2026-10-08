@@ -1,0 +1,35 @@
+{
+  "description": "A request to retrieve the state of a task.",
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/RequestId"
+    },
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    },
+    "method": {
+      "const": "tasks/get",
+      "type": "string"
+    },
+    "params": {
+      "properties": {
+        "taskId": {
+          "description": "The task identifier to query.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "taskId"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "id",
+    "jsonrpc",
+    "method",
+    "params"
+  ],
+  "type": "object"
+}

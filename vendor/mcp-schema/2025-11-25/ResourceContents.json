@@ -1,0 +1,23 @@
+{
+  "description": "The contents of a specific resource or sub-resource.",
+  "properties": {
+    "_meta": {
+      "additionalProperties": {},
+      "description": "See [General fields: `_meta`](/specification/2025-11-25/basic/index#meta) for notes on `_meta` usage.",
+      "type": "object"
+    },
+    "mimeType": {
+      "description": "The MIME type of this resource, if known.",
+      "type": "string"
+    },
+    "uri": {
+      "description": "The URI of this resource.",
+      "format": "uri",
+      "type": "string"
+    }
+  },
+  "required": [
+    "uri"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,21 @@
+{
+  "description": "Sent from the server to request a list of root URIs from the client. Roots allow\nservers to ask for specific directories or files to operate on. A common example\nfor roots is providing a set of repositories or directories a server should operate\non.\n\nThis request is typically used when the server needs to understand the file system\nstructure or access specific locations that the client has permission to read from.",
+  "properties": {
+    "method": {
+      "const": "roots/list",
+      "type": "string"
+    },
+    "params": {
+      "properties": {
+        "_meta": {
+          "$ref": "#/$defs/MetaObject"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "required": [
+    "method"
+  ],
+  "type": "object"
+}

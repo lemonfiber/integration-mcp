@@ -1,0 +1,31 @@
+{
+  "description": "An image provided to or from an LLM.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/MetaObject"
+    },
+    "annotations": {
+      "$ref": "#/$defs/Annotations",
+      "description": "Optional annotations for the client."
+    },
+    "data": {
+      "description": "The base64-encoded image data.",
+      "format": "byte",
+      "type": "string"
+    },
+    "mimeType": {
+      "description": "The MIME type of the image. Different providers may support different image types.",
+      "type": "string"
+    },
+    "type": {
+      "const": "image",
+      "type": "string"
+    }
+  },
+  "required": [
+    "data",
+    "mimeType",
+    "type"
+  ],
+  "type": "object"
+}

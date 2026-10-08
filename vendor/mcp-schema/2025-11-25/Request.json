@@ -1,0 +1,15 @@
+{
+  "properties": {
+    "method": {
+      "type": "string"
+    },
+    "params": {
+      "additionalProperties": {},
+      "type": "object"
+    }
+  },
+  "required": [
+    "method"
+  ],
+  "type": "object"
+}

@@ -4,19 +4,34 @@
 # repository holds its part and the rest lives elsewhere, `open` that nothing here
 # meets it yet. The release gate and the no-stubs gate read this file; a pull
 # request that changes whether a requirement is met changes its row.
-#
-# The repository holds no server, so every requirement of F13 is open.
 
 requirement = [
-  { id = "F13-R1", state = "open" },
-  { id = "F13-R2", state = "open" },
+  { id = "F13-R1", state = "done", evidence = ["src/lemonfiber_mcp/settings.py", "src/lemonfiber_mcp/stack.py", "tests/test_architecture.py", "tests/test_settings.py"] },
+  { id = "F13-R2", state = "done", evidence = ["scripts/generate_tools.py", "src/lemonfiber_mcp/_generated/tools.py", "src/lemonfiber_mcp/descriptions.toml", "tests/test_catalogue.py", "tests/test_generate_tools.py"] },
   { id = "F13-R3", state = "open" },
   { id = "F13-R4", state = "open" },
-  { id = "F13-R5", state = "open" },
+  { id = "F13-R5", state = "done", evidence = ["scripts/generate_tools.py", "src/lemonfiber_mcp/catalogue.py", "tests/test_catalogue.py::test_every_write_tool_states_whether_it_is_destructive_and_idempotent"] },
   { id = "F13-R6", state = "open" },
   { id = "F13-R7", state = "open" },
   { id = "F13-R8", state = "open" },
   { id = "F13-R9", state = "open" },
   { id = "F13-R10", state = "open" },
-  { id = "F13-R11", state = "open" },
+  { id = "F13-R11", state = "done", evidence = ["README.md"] },
+  { id = "F13-R12", state = "open" },
+  { id = "F13-R13", state = "open" },
+  { id = "F13-R14", state = "done", evidence = ["src/lemonfiber_mcp/outcome.py", "src/lemonfiber_mcp/serving.py", "tests/test_outcome.py", "tests/test_server.py"] },
+  { id = "ARCH-R185", state = "open" },
+  { id = "ARCH-R186", state = "open" },
+  { id = "ARCH-R187", state = "open" },
+  { id = "ARCH-R188", state = "open" },
+  { id = "ARCH-R189", state = "open" },
+  { id = "ARCH-R190", state = "open" },
+  { id = "ARCH-R191", state = "open" },
+  { id = "ARCH-R192", state = "open" },
+  { id = "ARCH-R193", state = "open" },
+  { id = "ARCH-R194", state = "open" },
+  { id = "ARCH-R195", state = "open" },
+  { id = "ARCH-R196", state = "open" },
+  { id = "ARCH-R197", state = "open" },
+  { id = "ARCH-R198", state = "open" },
 ]

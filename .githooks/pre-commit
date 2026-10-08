@@ -1,0 +1,25 @@
+#!/bin/sh
+# The fast checks CI runs, before the commit rather than after the push.
+#
+# Fast only: types, the suite and mutation stay in `just ci` and CI, because a
+# hook that takes a minute is a hook people turn off (OPS-R51, Q-R57). Skipped
+# where the environment is absent, so a contributor without it gets CI's answer
+# rather than a hook that cannot run.
+
+set -eu
+
+staged=$(git diff --cached --name-only --diff-filter=ACM -- '*.py')
+[ -n "$staged" ] || exit 0
+[ -x .venv/bin/ruff ] || exit 0
+
+# shellcheck disable=SC2086
+.venv/bin/ruff format --check $staged || {
+	echo "pre-commit: ruff would reformat a staged file. Run \`uv run just fix\`." >&2
+	exit 1
+}
+# shellcheck disable=SC2086
+.venv/bin/ruff check $staged || {
+	echo "pre-commit: ruff found something in a staged file. Run \`uv run just fix\`, then fix what remains." >&2
+	exit 1
+}
+exit 0

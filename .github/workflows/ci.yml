@@ -1,9 +1,16 @@
-# Calls the reusable workflows defined once in lemonfiber/spec (Q-R56). The
-# repository holds no code yet, so the shared gates are all it runs.
+# The shared gates, defined once in lemonfiber/spec (Q-R56), and the server's
+# own: formatting, lint, strict types, the generated tools, the suite with full
+# coverage, and mutation.
 name: ci
 on: [pull_request]
 permissions:
   contents: read
+
+# The environment is installed from the lockfile and nothing else, and no `uv`
+# a recipe runs syncs it again.
+env:
+  UV_LOCKED: "1"
+  UV_NO_SYNC: "1"
 
 # A pull request pushed again cancels the run on its old head, which nobody
 # will read and which holds runners the org shares (Q-R75). Every other event
@@ -13,6 +20,135 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Which of the server's gates are worth running at all. A documentation change
+  # starts no Python toolchain, and asking costs one checkout.
+  scope:
+    name: what changed
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: diff
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          # No base to compare against means every gate runs.
+          if [ -z "${BASE}" ] || ! git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "No usable base commit, so every gate runs."
+            exit 0
+          fi
+          changed="$(git diff --name-only "${BASE}" HEAD)"
+          # Anything that is not documentation is code, so a new kind of file
+          # runs the gates. Under `.github/`, only this file runs them, and a
+          # change to it runs none where every changed line is a pin on a
+          # shared workflow from `lemonfiber/spec`: those jobs run no Python.
+          code=false
+          while IFS= read -r path; do
+            case "${path}" in
+            '' | *.md | LICENSE) ;;
+            .github/workflows/ci.yml)
+              # Captured and tested for emptiness rather than piped to
+              # `grep -q`, which stops at the first line and lets `pipefail`
+              # read the writers' SIGPIPE as no such line.
+              moved="$(git diff -U0 "${BASE}" HEAD -- "${path}" \
+                | grep -E '^[-+]' | grep -vE '^(\+\+\+|---) ' \
+                | grep -vE '^[-+][[:space:]]*uses: lemonfiber/spec/\.github/workflows/[^@]+@[0-9a-f]{40}( # .*)?$' || true)"
+              if [ -n "${moved}" ]; then
+                code=true
+              fi
+              ;;
+            .github/*) ;;
+            *) code=true ;;
+            esac
+          done <<< "${changed}"
+          echo "code=${code}" >> "$GITHUB_OUTPUT"
+          if [ "${code}" = false ]; then
+            echo "Documentation, and workflows that run no Python gate; the Python gates are skipped."
+          fi
+
+  # Formatting, every lint rule, strict types, and the tools against the
+  # contract they are generated from. One checkout, one environment, cheapest
+  # first.
+  checks:
+    name: checks
+    needs: scope
+    # The result is asked as well as the output: a `scope` that failed leaves no
+    # output, and no output is not a "no".
+    if: ${{ !cancelled() && (needs.scope.result != 'success' || needs.scope.outputs.code == 'true') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Install exactly what the lockfile says
+        run: uv sync --locked
+      - name: Formatting and lint
+        run: uv run just lint
+      - name: Strict types
+        run: uv run just types
+      - name: The tools are what the vendored contract generates
+        run: uv run just generated
+
+  tests:
+    name: tests and coverage
+    needs: scope
+    if: ${{ !cancelled() && (needs.scope.result != 'success' || needs.scope.outputs.code == 'true') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Install exactly what the lockfile says
+        run: uv sync --locked
+      - name: The suite, with 100% line and branch coverage
+        run: uv run just coverage
+
+  # The most expensive gate, so the most guarded: only on a pull request, and
+  # only once the tests have passed. Mutating code whose tests already fail
+  # measures nothing.
+  mutation:
+    name: mutation testing
+    needs: [scope, tests]
+    if: ${{ !cancelled() && (needs.scope.result != 'success' || needs.scope.outputs.code == 'true') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: The tests passed, so there is something to measure
+        env:
+          TESTS: ${{ needs.tests.result }}
+        run: |
+          if [ "${TESTS}" != success ]; then
+            echo "::error::Mutation did not run: the tests did not pass (${TESTS})."
+            exit 1
+          fi
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Install exactly what the lockfile says
+        run: uv sync --locked
+      - name: Mutate, and hold the score to its minimum
+        run: uv run just mutation
+      - name: The mutants that survived, each as the change it made
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+          survived="$(uv run mutmut results | awk -F: '/: survived$/ { gsub(/^[ \t]+/, "", $1); print $1 }')"
+          for mutant in ${survived}; do
+            uv run mutmut show "${mutant}"
+          done
+
   # `pull-requests: write` is what lets the gate close a pull request whose
   # citation is missing or names an identifier that does not exist, rather than
   # only going red at it. A job-level block replaces the workflow-level default

@@ -1,0 +1,22 @@
+{
+  "description": "A JSON-RPC error indicating that the requested method does not exist or is not available.\n\nIn MCP, a server returns this error when a client invokes a method the server does not implement — either a genuinely unknown method, or one gated behind a server capability the server did not advertise (e.g., calling `prompts/list` when the `prompts` capability was not advertised).\n\nA request that requires a client capability the client did not declare is signalled instead by {@link MissingRequiredClientCapabilityError} (`-32021`).",
+  "properties": {
+    "code": {
+      "const": -32601,
+      "description": "The error type that occurred.",
+      "type": "integer"
+    },
+    "data": {
+      "description": "Additional information about the error. The value of this member is defined by the sender (e.g. detailed error information, nested errors etc.)."
+    },
+    "message": {
+      "description": "A short description of the error. The message SHOULD be limited to a concise single sentence.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "code",
+    "message"
+  ],
+  "type": "object"
+}

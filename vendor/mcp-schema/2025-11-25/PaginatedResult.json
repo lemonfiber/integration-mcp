@@ -1,0 +1,14 @@
+{
+  "properties": {
+    "_meta": {
+      "additionalProperties": {},
+      "description": "See [General fields: `_meta`](/specification/2025-11-25/basic/index#meta) for notes on `_meta` usage.",
+      "type": "object"
+    },
+    "nextCursor": {
+      "description": "An opaque token representing the pagination position after the last returned result.\nIf present, there may be more results available.",
+      "type": "string"
+    }
+  },
+  "type": "object"
+}

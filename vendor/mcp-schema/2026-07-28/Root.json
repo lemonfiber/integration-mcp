@@ -1,0 +1,21 @@
+{
+  "description": "Represents a root directory or file that the server can operate on.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/MetaObject"
+    },
+    "name": {
+      "description": "An optional name for the root. This can be used to provide a human-readable\nidentifier for the root, which may be useful for display purposes or for\nreferencing the root in other parts of the application.",
+      "type": "string"
+    },
+    "uri": {
+      "description": "The URI identifying the root. This *must* start with `file://` for now.\nThis restriction may be relaxed in future versions of the protocol to allow\nother URI schemes.",
+      "format": "uri",
+      "type": "string"
+    }
+  },
+  "required": [
+    "uri"
+  ],
+  "type": "object"
+}

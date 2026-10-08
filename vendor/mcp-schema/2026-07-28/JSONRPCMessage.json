@@ -1,0 +1,17 @@
+{
+  "anyOf": [
+    {
+      "$ref": "#/$defs/JSONRPCRequest"
+    },
+    {
+      "$ref": "#/$defs/JSONRPCNotification"
+    },
+    {
+      "$ref": "#/$defs/JSONRPCResultResponse"
+    },
+    {
+      "$ref": "#/$defs/JSONRPCErrorResponse"
+    }
+  ],
+  "description": "Refers to any valid JSON-RPC object that can be decoded off the wire, or encoded to be sent."
+}

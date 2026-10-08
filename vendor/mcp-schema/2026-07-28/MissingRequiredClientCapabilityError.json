@@ -1,0 +1,49 @@
+{
+  "description": "Returned when processing a request requires a capability the client did not\ndeclare in `clientCapabilities`. For HTTP, the response status code MUST be\n`400 Bad Request`.",
+  "properties": {
+    "error": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Error"
+        },
+        {
+          "properties": {
+            "code": {
+              "const": -32021,
+              "type": "integer"
+            },
+            "data": {
+              "properties": {
+                "requiredCapabilities": {
+                  "$ref": "#/$defs/ClientCapabilities",
+                  "description": "The capabilities the server requires from the client to process this request."
+                }
+              },
+              "required": [
+                "requiredCapabilities"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "code",
+            "data"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "id": {
+      "$ref": "#/$defs/RequestId"
+    },
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    }
+  },
+  "required": [
+    "error",
+    "jsonrpc"
+  ],
+  "type": "object"
+}

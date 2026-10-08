@@ -1,0 +1,13 @@
+{
+  "anyOf": [
+    {
+      "$ref": "#/$defs/CreateMessageRequest"
+    },
+    {
+      "$ref": "#/$defs/ListRootsRequest"
+    },
+    {
+      "$ref": "#/$defs/ElicitRequest"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "description": "A reference to a resource or resource template definition.",
+  "properties": {
+    "type": {
+      "const": "ref/resource",
+      "type": "string"
+    },
+    "uri": {
+      "description": "The URI or URI template of the resource.",
+      "format": "uri-template",
+      "type": "string"
+    }
+  },
+  "required": [
+    "type",
+    "uri"
+  ],
+  "type": "object"
+}

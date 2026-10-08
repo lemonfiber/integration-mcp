@@ -1,0 +1,21 @@
+{
+  "description": "An optional notification from the server to the client, informing it that the list of resources it can read from has changed. This is only delivered on a {@link SubscriptionsListenRequestsubscriptions/listen} stream when the client requested it via the `resourcesListChanged` filter field.",
+  "properties": {
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    },
+    "method": {
+      "const": "notifications/resources/list_changed",
+      "type": "string"
+    },
+    "params": {
+      "$ref": "#/$defs/NotificationParams"
+    }
+  },
+  "required": [
+    "jsonrpc",
+    "method"
+  ],
+  "type": "object"
+}

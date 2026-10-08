@@ -1,0 +1,266 @@
+# Take sdk-python, so that nobody else has to.
+#
+# `sdk-drift` runs on every pull request here and compares the vendored client
+# in `src/lemonfiber_mcp/_vendor/lemonfiber/` and the contract in `contract/`
+# with what sdk-python's main ships (`Q-R68`), so a change to either turns every
+# open pull request red, including ones that touch nothing near it. This takes
+# both instead, writes the tools again from the new contract, on a branch of its
+# own, so an author who came to fix a tool is not handed a vendor bump.
+#
+# It merges itself only when lint, strict types, the generated tools and the
+# suite still pass against the new copy. A client or contract that changes what
+# the server uses is a change here rather than a bump, and that is not a thing
+# to merge unread.
+name: sdk-bump
+
+on:
+  # How the client asks: `sdk-moved` in sdk-python dispatches this on every
+  # push to its main.
+  workflow_dispatch:
+  # The floor, for a dispatch that never arrived.
+  schedule:
+    - cron: "30 8 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  # One bump at a time: two runs would each reset the branch under the other.
+  group: sdk-bump
+  cancel-in-progress: false
+
+env:
+  BRANCH: chore/the-server-takes-the-client
+  SDK: lemonfiber/sdk-python
+  VENDOR: src/lemonfiber_mcp/_vendor
+  CONTRACT: contract
+  GENERATED: src/lemonfiber_mcp/_generated
+  # Every `uv` these steps run reads the lockfile and nothing else, and syncs
+  # only where a step says so.
+  UV_LOCKED: "1"
+  UV_NO_SYNC: "1"
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      # `main` requires signed commits, and only commits GitHub itself makes are
+      # signed here; a pull request opened with `GITHUB_TOKEN` triggers no
+      # workflows, so its required checks would never report. An app token
+      # answers both.
+      - name: Mint a token that can open a pull request here
+        id: token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.RELEASE_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          # The commit and the branch it moves, and the pull request it opens
+          # and arms; nothing the installation grants beyond that.
+          permission-contents: write
+          permission-pull-requests: write
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+
+      # The copy decides, not the revision. sdk-python's main moves for a test,
+      # a workflow or a README as well, and none of those changes what the copy
+      # holds; `sdk-drift` passes them by, and so does this. Taking main and
+      # finding nothing changed but `REVISION` is nothing to take.
+      - name: Take sdk-python's main, and see whether the copy moved
+        id: behind
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+        run: |
+          set -euo pipefail
+          pin="$(tr -d '[:space:]' < "${VENDOR}/lemonfiber/REVISION")"
+          head="$(gh api "repos/${SDK}/commits/main" --jq .sha)"
+          echo "pin=${pin}" >> "$GITHUB_OUTPUT"
+          echo "head=${head}" >> "$GITHUB_OUTPUT"
+          python3 scripts/vendor_sdk.py take "${head}"
+          python3 scripts/generate_tools.py
+          changed="$(git status --porcelain --untracked-files=all -- "${VENDOR}" "${CONTRACT}" "${GENERATED}" ":!${VENDOR}/lemonfiber/REVISION")"
+          if [ -z "$changed" ]; then
+            echo "moved=no" >> "$GITHUB_OUTPUT"
+            echo "## The copy already holds what sdk-python ${head:0:7} ships" >>"${GITHUB_STEP_SUMMARY:-/dev/null}"
+          else
+            echo "moved=yes" >> "$GITHUB_OUTPUT"
+            echo "The copy is ${pin}; sdk-python's main is ${head}, and it changes what the copy holds."
+          fi
+
+      - name: Check the server still holds
+        id: build
+        if: steps.behind.outputs.moved == 'yes'
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          uv sync --locked
+          uv run just lint
+          uv run just types
+          uv run just generated
+          uv run just test
+
+      - name: Put the change on the branch, signed
+        id: commit
+        if: steps.behind.outputs.moved == 'yes'
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+          PIN: ${{ steps.behind.outputs.pin }}
+          HEAD_SHA: ${{ steps.behind.outputs.head }}
+          CLEAN: ${{ steps.build.outcome }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          # What the take wrote or removed under the copy, and nothing else. A
+          # change anywhere else refuses the whole commit rather than riding
+          # along with a token that can write here.
+          git status --porcelain=v1 -z --untracked-files=all > "${RUNNER_TEMP}/status"
+
+          base="$(gh api "repos/${REPO}/commits/main" --jq .sha)"
+
+          # Built on a scratch ref and moved across in one step. Resetting the
+          # pull request's own branch to `main` first would leave it briefly
+          # equal to `main`, and GitHub closes a pull request whose branch holds
+          # no commits ahead of its base.
+          staging="${BRANCH}-staging"
+          if gh api "repos/${REPO}/git/ref/heads/${staging}" >/dev/null 2>&1; then
+            gh api --method PATCH "repos/${REPO}/git/refs/heads/${staging}" \
+              -F sha="${base}" -F force=true >/dev/null
+          else
+            gh api --method POST "repos/${REPO}/git/refs" \
+              -f ref="refs/heads/${staging}" -f sha="${base}" >/dev/null
+          fi
+
+          if [ "$CLEAN" = "success" ]; then
+            note="Lint, strict types, the generated tools and the suite still pass against it."
+          else
+            note="Lint, strict types, the generated tools or the suite did not pass against it, so this is a change here rather than a bump. Read it before merging."
+          fi
+
+          # The request goes in a file: the copy's base64 on a command line
+          # exceeds the argument limit.
+          python3 - "$REPO" "$staging" "$base" "$HEAD_SHA" "$PIN" "$note" "$VENDOR $CONTRACT $GENERATED" "${RUNNER_TEMP}/status" \
+            > "${RUNNER_TEMP}/request.json" <<'PY'
+          import base64
+          import json
+          import sys
+
+          repo, branch, base, head, pin, note, kept, status = sys.argv[1:9]
+          held = tuple(f"{directory}/" for directory in kept.split())
+          with open(status, "rb") as handle:
+              entries = handle.read().decode().split("\0")
+          additions, deletions = [], []
+          for entry in filter(None, entries):
+              code, path = entry[:2], entry[3:]
+              if not path.startswith(held):
+                  sys.exit(f"the take changed {path}, outside {' '.join(held)}; nothing is committed")
+              if code.strip() == "D":
+                  deletions.append({"path": path})
+              elif code.strip() in {"M", "A", "??"}:
+                  with open(path, "rb") as handle:
+                      additions.append({"path": path, "contents": base64.b64encode(handle.read()).decode()})
+              else:
+                  sys.exit(f"the take left {path} as {code!r}, which is neither written nor removed")
+
+          print(json.dumps({
+              "query": (
+                  "mutation($input: CreateCommitOnBranchInput!) "
+                  "{ createCommitOnBranch(input: $input) { commit { oid } } }"
+              ),
+              "variables": {
+                  "input": {
+                      "branch": {"repositoryNameWithOwner": repo, "branchName": branch},
+                      "expectedHeadOid": base,
+                      "message": {
+                          "headline": f"chore(vendor): take sdk-python {head[:7]}",
+                          # commitlint, dco and spec-check each read this, and
+                          # spec-check closes a pull request whose citation it
+                          # cannot resolve.
+                          "body": (
+                              "The server reaches a stack through sdk-python alone, vendored by commit with its contract, "
+                              f"so a client it has not taken is a fact about this repository. {note}\n\n"
+                              f"Was {pin}.\n\n"
+                              "Spec: Q-R68\n\n"
+                              "Signed-off-by: lemonfiber release <release@lemonfiber.app>"
+                          ),
+                      },
+                      "fileChanges": {"additions": additions, "deletions": deletions},
+                  }
+              },
+          }))
+          PY
+
+          built="$(gh api graphql --input "${RUNNER_TEMP}/request.json" --jq '.data.createCommitOnBranch.commit.oid')"
+          if ! printf '%s' "$built" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "::error::the commit was not created; got '${built}'"
+            exit 1
+          fi
+
+          # One move, so the branch goes from the last bump to this one without
+          # ever being equal to `main`.
+          if gh api "repos/${REPO}/git/ref/heads/${BRANCH}" >/dev/null 2>&1; then
+            gh api --method PATCH "repos/${REPO}/git/refs/heads/${BRANCH}" \
+              -F sha="${built}" -F force=true >/dev/null
+          else
+            gh api --method POST "repos/${REPO}/git/refs" \
+              -f ref="refs/heads/${BRANCH}" -f sha="${built}" >/dev/null
+          fi
+          gh api --method DELETE "repos/${REPO}/git/refs/heads/${staging}" >/dev/null 2>&1 || true
+
+      - name: Open the pull request, or leave the open one updated
+        if: steps.behind.outputs.moved == 'yes'
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+          PIN: ${{ steps.behind.outputs.pin }}
+          HEAD_SHA: ${{ steps.behind.outputs.head }}
+          CLEAN: ${{ steps.build.outcome }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          title="chore(vendor): take sdk-python ${HEAD_SHA:0:7}"
+          if [ "$CLEAN" = "success" ]; then
+            verdict="**Lint, strict types, the generated tools and the suite still pass.** Nothing the server uses changed shape."
+          else
+            verdict="**Lint, strict types, the generated tools or the suite did not pass.** The client or the contract changed something the server uses, so taking it is a change here rather than a bump. Read the failing run before merging."
+          fi
+
+          body="$(printf '%s\n' \
+            "\`sdk-drift\` compares the vendored client with sdk-python's main, and the copy was behind. This takes the client and its contract so that the next author to open a pull request is not handed a vendor bump they did not come for." \
+            "" \
+            "- was: \`${PIN}\`" \
+            "- now: \`${HEAD_SHA}\`" \
+            "" \
+            "${verdict}" \
+            "" \
+            "Opened by \`sdk-bump\`, which sdk-python's \`sdk-moved\` dispatches on every push to its main." \
+            "" \
+            "Spec: Q-R68")"
+
+          # The title, the revision and the verdict belong to the latest run, so
+          # an open pull request has all three rewritten.
+          existing="$(gh api "repos/${REPO}/pulls?head=${GITHUB_REPOSITORY_OWNER}:${BRANCH}&state=open" --jq '.[0].number // ""')"
+          if [ -n "$existing" ]; then
+            gh api --method PATCH "repos/${REPO}/pulls/${existing}" -f title="${title}" -f body="${body}" >/dev/null
+            echo "::notice::#${existing} updated to ${HEAD_SHA}"
+          else
+            existing="$(gh api --method POST "repos/${REPO}/pulls" -f title="${title}" -f head="${BRANCH}" \
+              -f base=main -f body="${body}" --jq .number)"
+            echo "::notice::opened #${existing}"
+          fi
+
+          if [ "$CLEAN" = "success" ]; then
+            gh pr merge "${existing}" --repo "${REPO}" --squash --auto \
+              && echo "auto-merge armed on #${existing}." \
+              || echo "::warning::could not arm auto-merge on #${existing}; merge it by hand."
+          else
+            # An earlier clean run may have armed it; a take that is not clean
+            # waits for a person.
+            gh pr merge "${existing}" --repo "${REPO}" --disable-auto >/dev/null 2>&1 || true
+            echo "::warning::#${existing} needs reading: the client did not come out clean."
+          fi

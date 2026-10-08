@@ -1,0 +1,17 @@
+{
+  "description": "Parameters for a `notifications/resources/updated` notification.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/NotificationMetaObject"
+    },
+    "uri": {
+      "description": "The URI of the resource that has been updated. This might be a sub-resource of the one that the client actually subscribed to.",
+      "format": "uri",
+      "type": "string"
+    }
+  },
+  "required": [
+    "uri"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,17 @@
+{
+  "description": "A request from the server to elicit additional information from the user via the client.",
+  "properties": {
+    "method": {
+      "const": "elicitation/create",
+      "type": "string"
+    },
+    "params": {
+      "$ref": "#/$defs/ElicitRequestParams"
+    }
+  },
+  "required": [
+    "method",
+    "params"
+  ],
+  "type": "object"
+}

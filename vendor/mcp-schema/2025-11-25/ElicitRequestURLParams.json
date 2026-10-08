@@ -1,0 +1,45 @@
+{
+  "description": "The parameters for a request to elicit information from the user via a URL in the client.",
+  "properties": {
+    "_meta": {
+      "additionalProperties": {},
+      "description": "See [General fields: `_meta`](/specification/2025-11-25/basic/index#meta) for notes on `_meta` usage.",
+      "properties": {
+        "progressToken": {
+          "$ref": "#/$defs/ProgressToken",
+          "description": "If specified, the caller is requesting out-of-band progress notifications for this request (as represented by notifications/progress). The value of this parameter is an opaque token that will be attached to any subsequent notifications. The receiver is not obligated to provide these notifications."
+        }
+      },
+      "type": "object"
+    },
+    "elicitationId": {
+      "description": "The ID of the elicitation, which must be unique within the context of the server.\nThe client MUST treat this ID as an opaque value.",
+      "type": "string"
+    },
+    "message": {
+      "description": "The message to present to the user explaining why the interaction is needed.",
+      "type": "string"
+    },
+    "mode": {
+      "const": "url",
+      "description": "The elicitation mode.",
+      "type": "string"
+    },
+    "task": {
+      "$ref": "#/$defs/TaskMetadata",
+      "description": "If specified, the caller is requesting task-augmented execution for this request.\nThe request will return a CreateTaskResult immediately, and the actual result can be\nretrieved later via tasks/result.\n\nTask augmentation is subject to capability negotiation - receivers MUST declare support\nfor task augmentation of specific request types in their capabilities."
+    },
+    "url": {
+      "description": "The URL that the user should navigate to.",
+      "format": "uri",
+      "type": "string"
+    }
+  },
+  "required": [
+    "elicitationId",
+    "message",
+    "mode",
+    "url"
+  ],
+  "type": "object"
+}

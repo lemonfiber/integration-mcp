@@ -1,0 +1,4 @@
+{
+  "description": "An opaque token used to represent a cursor for pagination.",
+  "type": "string"
+}

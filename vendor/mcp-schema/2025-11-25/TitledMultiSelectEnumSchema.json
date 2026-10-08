@@ -1,0 +1,67 @@
+{
+  "description": "Schema for multiple-selection enumeration with display titles for each option.",
+  "properties": {
+    "default": {
+      "description": "Optional default value.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "description": {
+      "description": "Optional description for the enum field.",
+      "type": "string"
+    },
+    "items": {
+      "description": "Schema for array items with enum options and display labels.",
+      "properties": {
+        "anyOf": {
+          "description": "Array of enum options with values and display labels.",
+          "items": {
+            "properties": {
+              "const": {
+                "description": "The constant enum value.",
+                "type": "string"
+              },
+              "title": {
+                "description": "Display title for this option.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "const",
+              "title"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "anyOf"
+      ],
+      "type": "object"
+    },
+    "maxItems": {
+      "description": "Maximum number of items to select.",
+      "type": "integer"
+    },
+    "minItems": {
+      "description": "Minimum number of items to select.",
+      "type": "integer"
+    },
+    "title": {
+      "description": "Optional title for the enum field.",
+      "type": "string"
+    },
+    "type": {
+      "const": "array",
+      "type": "string"
+    }
+  },
+  "required": [
+    "items",
+    "type"
+  ],
+  "type": "object"
+}

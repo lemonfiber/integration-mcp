@@ -1,0 +1,107 @@
+{
+  "description": "Capabilities a client may support. Known capabilities are defined here, in this schema, but this is not a closed set: any client can define its own, additional capabilities.",
+  "properties": {
+    "elicitation": {
+      "description": "Present if the client supports elicitation from the server.",
+      "properties": {
+        "form": {
+          "additionalProperties": true,
+          "properties": {},
+          "type": "object"
+        },
+        "url": {
+          "additionalProperties": true,
+          "properties": {},
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "experimental": {
+      "additionalProperties": {
+        "additionalProperties": true,
+        "properties": {},
+        "type": "object"
+      },
+      "description": "Experimental, non-standard capabilities that the client supports.",
+      "type": "object"
+    },
+    "roots": {
+      "description": "Present if the client supports listing roots.",
+      "properties": {
+        "listChanged": {
+          "description": "Whether the client supports notifications for changes to the roots list.",
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "sampling": {
+      "description": "Present if the client supports sampling from an LLM.",
+      "properties": {
+        "context": {
+          "additionalProperties": true,
+          "description": "Whether the client supports context inclusion via includeContext parameter.\nIf not declared, servers SHOULD only use `includeContext: \"none\"` (or omit it).",
+          "properties": {},
+          "type": "object"
+        },
+        "tools": {
+          "additionalProperties": true,
+          "description": "Whether the client supports tool use via tools and toolChoice parameters.",
+          "properties": {},
+          "type": "object"
+        }
+      },
+      "type": "object"
+    },
+    "tasks": {
+      "description": "Present if the client supports task-augmented requests.",
+      "properties": {
+        "cancel": {
+          "additionalProperties": true,
+          "description": "Whether this client supports tasks/cancel.",
+          "properties": {},
+          "type": "object"
+        },
+        "list": {
+          "additionalProperties": true,
+          "description": "Whether this client supports tasks/list.",
+          "properties": {},
+          "type": "object"
+        },
+        "requests": {
+          "description": "Specifies which request types can be augmented with tasks.",
+          "properties": {
+            "elicitation": {
+              "description": "Task support for elicitation-related requests.",
+              "properties": {
+                "create": {
+                  "additionalProperties": true,
+                  "description": "Whether the client supports task-augmented elicitation/create requests.",
+                  "properties": {},
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "sampling": {
+              "description": "Task support for sampling-related requests.",
+              "properties": {
+                "createMessage": {
+                  "additionalProperties": true,
+                  "description": "Whether the client supports task-augmented sampling/createMessage requests.",
+                  "properties": {},
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "type": "object"
+}

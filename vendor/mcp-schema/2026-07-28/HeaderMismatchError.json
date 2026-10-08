@@ -1,0 +1,36 @@
+{
+  "description": "Returned when a server rejects a request because the values in the HTTP\nheaders do not match the corresponding values in the request body, or\nbecause required headers are missing or malformed. For HTTP, the response\nstatus code MUST be `400 Bad Request`.",
+  "properties": {
+    "error": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Error"
+        },
+        {
+          "properties": {
+            "code": {
+              "const": -32020,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "code"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "id": {
+      "$ref": "#/$defs/RequestId"
+    },
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    }
+  },
+  "required": [
+    "error",
+    "jsonrpc"
+  ],
+  "type": "object"
+}

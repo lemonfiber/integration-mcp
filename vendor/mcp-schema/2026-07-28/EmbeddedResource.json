@@ -1,0 +1,31 @@
+{
+  "description": "The contents of a resource, embedded into a prompt or tool call result.\n\nIt is up to the client how best to render embedded resources for the benefit\nof the LLM and/or the user.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/MetaObject"
+    },
+    "annotations": {
+      "$ref": "#/$defs/Annotations",
+      "description": "Optional annotations for the client."
+    },
+    "resource": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TextResourceContents"
+        },
+        {
+          "$ref": "#/$defs/BlobResourceContents"
+        }
+      ]
+    },
+    "type": {
+      "const": "resource",
+      "type": "string"
+    }
+  },
+  "required": [
+    "resource",
+    "type"
+  ],
+  "type": "object"
+}

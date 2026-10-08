@@ -1,0 +1,20 @@
+{
+  "anyOf": [
+    {
+      "$ref": "#/$defs/JSONObject"
+    },
+    {
+      "items": {
+        "$ref": "#/$defs/JSONValue"
+      },
+      "type": "array"
+    },
+    {
+      "type": [
+        "string",
+        "integer",
+        "boolean"
+      ]
+    }
+  ]
+}

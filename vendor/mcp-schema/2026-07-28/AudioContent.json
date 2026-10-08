@@ -1,0 +1,31 @@
+{
+  "description": "Audio provided to or from an LLM.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/MetaObject"
+    },
+    "annotations": {
+      "$ref": "#/$defs/Annotations",
+      "description": "Optional annotations for the client."
+    },
+    "data": {
+      "description": "The base64-encoded audio data.",
+      "format": "byte",
+      "type": "string"
+    },
+    "mimeType": {
+      "description": "The MIME type of the audio. Different providers may support different audio types.",
+      "type": "string"
+    },
+    "type": {
+      "const": "audio",
+      "type": "string"
+    }
+  },
+  "required": [
+    "data",
+    "mimeType",
+    "type"
+  ],
+  "type": "object"
+}

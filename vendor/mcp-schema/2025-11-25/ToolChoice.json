@@ -1,0 +1,15 @@
+{
+  "description": "Controls tool selection behavior for sampling requests.",
+  "properties": {
+    "mode": {
+      "description": "Controls the tool use ability of the model:\n- \"auto\": Model decides whether to use tools (default)\n- \"required\": Model MUST use at least one tool before completing\n- \"none\": Model MUST NOT use any tools",
+      "enum": [
+        "auto",
+        "none",
+        "required"
+      ],
+      "type": "string"
+    }
+  },
+  "type": "object"
+}

@@ -1,0 +1,7 @@
+{
+  "additionalProperties": {
+    "$ref": "#/$defs/InputRequest"
+  },
+  "description": "A map of server-initiated requests that the client must fulfill.\nKeys are server-assigned identifiers; values are the request objects.",
+  "type": "object"
+}

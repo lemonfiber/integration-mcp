@@ -1,15 +1,11 @@
 # Dependency updates (spec ADR-0016).
 #
-# One file per repo. Dependabot cannot extend a shared preset the way Renovate
-# could, so this is copied rather than inherited and kept alike by review.
+# One file per repo. Dependabot cannot extend a shared preset, so this is copied
+# rather than inherited and kept alike by review.
 #
 # The pull requests it opens cite nothing — Dependabot composes its own commit
 # message and offers no way to add a `Spec:` trailer. `spec_check.py` supplies
 # `GOV-R12` for a pull request GitHub says `dependabot[bot]` opened (Q-R55).
-#
-# Not configured here, deliberately:
-#   - anything but workflows. This repository holds no code yet, and no
-#     package manifest.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -24,8 +20,7 @@ updates:
       include: scope
     # A release waits three days before it is offered. The shared gates are
     # excluded from that wait: a repo running a stale gate is the failure this
-    # grouping exists to prevent, and the delay is the whole cost of it.
-    # Security updates are never subject to cooldown.
+    # grouping exists to prevent. Security updates are never subject to cooldown.
     cooldown:
       default-days: 3
       exclude: ["lemonfiber/spec*"]
@@ -37,4 +32,28 @@ updates:
         patterns: ["*"]
         exclude-patterns: ["lemonfiber/spec*"]
         # Majors are left out, so each arrives on its own carrying `major`.
+        update-types: ["minor", "patch"]
+
+  - package-ecosystem: uv
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "05:00"
+      timezone: Europe/Amsterdam
+    labels: ["dependencies"]
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    cooldown:
+      default-days: 3
+    groups:
+      # The tooling lands together, and before the wildcard claims it.
+      quality-tooling:
+        dependency-type: development
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
+      runtime:
+        patterns: ["*"]
         update-types: ["minor", "patch"]

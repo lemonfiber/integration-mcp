@@ -1,0 +1,33 @@
+{
+  "description": "An image provided to or from an LLM.",
+  "properties": {
+    "_meta": {
+      "additionalProperties": {},
+      "description": "See [General fields: `_meta`](/specification/2025-11-25/basic/index#meta) for notes on `_meta` usage.",
+      "type": "object"
+    },
+    "annotations": {
+      "$ref": "#/$defs/Annotations",
+      "description": "Optional annotations for the client."
+    },
+    "data": {
+      "description": "The base64-encoded image data.",
+      "format": "byte",
+      "type": "string"
+    },
+    "mimeType": {
+      "description": "The MIME type of the image. Different providers may support different image types.",
+      "type": "string"
+    },
+    "type": {
+      "const": "image",
+      "type": "string"
+    }
+  },
+  "required": [
+    "data",
+    "mimeType",
+    "type"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,4 @@
+{
+  "$ref": "#/$defs/Result",
+  "description": "Common result fields."
+}

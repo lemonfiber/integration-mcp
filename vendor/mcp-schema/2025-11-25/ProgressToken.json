@@ -1,0 +1,7 @@
+{
+  "description": "A progress token, used to associate progress notifications with the original request.",
+  "type": [
+    "string",
+    "integer"
+  ]
+}

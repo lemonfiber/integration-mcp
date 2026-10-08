@@ -1,0 +1,21 @@
+{
+  "description": "A notification which does not expect a response.",
+  "properties": {
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    },
+    "method": {
+      "type": "string"
+    },
+    "params": {
+      "additionalProperties": {},
+      "type": "object"
+    }
+  },
+  "required": [
+    "jsonrpc",
+    "method"
+  ],
+  "type": "object"
+}

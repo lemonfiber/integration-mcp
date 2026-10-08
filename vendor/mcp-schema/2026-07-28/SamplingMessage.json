@@ -1,0 +1,41 @@
+{
+  "description": "Describes a message issued to or received from an LLM API.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/MetaObject"
+    },
+    "content": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TextContent"
+        },
+        {
+          "$ref": "#/$defs/ImageContent"
+        },
+        {
+          "$ref": "#/$defs/AudioContent"
+        },
+        {
+          "$ref": "#/$defs/ToolUseContent"
+        },
+        {
+          "$ref": "#/$defs/ToolResultContent"
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/SamplingMessageContentBlock"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    "role": {
+      "$ref": "#/$defs/Role"
+    }
+  },
+  "required": [
+    "content",
+    "role"
+  ],
+  "type": "object"
+}

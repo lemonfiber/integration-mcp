@@ -1,0 +1,21 @@
+{
+  "description": "This notification is sent from the client to the server after initialization has finished.",
+  "properties": {
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    },
+    "method": {
+      "const": "notifications/initialized",
+      "type": "string"
+    },
+    "params": {
+      "$ref": "#/$defs/NotificationParams"
+    }
+  },
+  "required": [
+    "jsonrpc",
+    "method"
+  ],
+  "type": "object"
+}

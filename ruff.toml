@@ -1,0 +1,50 @@
+# The lint and format configuration for the server, its tests and its scripts.
+#
+# The server stands between an assistant and a stack, holding the key to it, so
+# it is held to every rule ruff has rather than to the organisation's floor
+# alone: `ALL` selects them, and the floor's own rules are named beside it so
+# `check_shared_files.py` finds each one selected. Nothing the floor keeps is
+# ignored here.
+target-version = "py314"
+line-length = 110
+
+# A byte-identical copy of the spec's shared gate, linted where it is maintained;
+# sdk-python, copied byte for byte and linted in its own repository; and what the
+# generator writes, which `scripts/generate_tools.py --check` holds to the
+# contract instead.
+extend-exclude = ["scripts/no_open_codeql_alert.py", "src/lemonfiber_mcp/_vendor", "src/lemonfiber_mcp/_generated"]
+
+[lint]
+select = ["ALL", "E", "W", "F", "B", "I", "SIM", "UP", "RUF", "EXE", "FURB", "ISC"]
+
+ignore = [
+    # The organisation's floor ignores these, and so does this repository.
+    # Prose quoted from the stack uses typographic dashes and quotes deliberately.
+    "RUF001",
+    "RUF002",
+    "RUF003",
+    "E501",
+]
+
+[lint.per-file-ignores]
+# `assert` is how pytest states what it checks, a test names the status or count
+# it expects as the number itself, a test's name is its description, and a test
+# takes every fixture and parameter it is given as an argument, some of them for
+# what they set up rather than for a value.
+"tests/**" = ["S101", "PLR2004", "D103", "PLR0913", "PLR0917", "ARG001"]
+# The vendoring script, and the test that builds a repository for it to read,
+# run git, found on the PATH, with arguments they write themselves.
+"{scripts/vendor_sdk.py,tests/test_vendor_sdk.py}" = ["S603", "S607"]
+# The schema's vendoring script fetches the one https address it builds from a
+# pinned revision.
+"scripts/vendor_mcp_schema.py" = ["S310"]
+
+[lint.pydocstyle]
+convention = "pep257"
+
+[lint.isort]
+known-first-party = ["lemonfiber_mcp", "scripts", "tests"]
+known-third-party = ["lemonfiber"]
+
+[format]
+docstring-code-format = true

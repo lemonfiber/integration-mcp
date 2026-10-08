@@ -1,0 +1,34 @@
+{
+  "anyOf": [
+    {
+      "$ref": "#/$defs/DiscoverRequest"
+    },
+    {
+      "$ref": "#/$defs/ListResourcesRequest"
+    },
+    {
+      "$ref": "#/$defs/ListResourceTemplatesRequest"
+    },
+    {
+      "$ref": "#/$defs/ReadResourceRequest"
+    },
+    {
+      "$ref": "#/$defs/SubscriptionsListenRequest"
+    },
+    {
+      "$ref": "#/$defs/ListPromptsRequest"
+    },
+    {
+      "$ref": "#/$defs/GetPromptRequest"
+    },
+    {
+      "$ref": "#/$defs/ListToolsRequest"
+    },
+    {
+      "$ref": "#/$defs/CallToolRequest"
+    },
+    {
+      "$ref": "#/$defs/CompleteRequest"
+    }
+  ]
+}

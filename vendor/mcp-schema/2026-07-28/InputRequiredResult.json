@@ -1,0 +1,22 @@
+{
+  "description": "An InputRequiredResult sent by the server to indicate that additional input is needed\nbefore the request can be completed.\n\nAt least one of `inputRequests` or `requestState` MUST be present.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/ResultMetaObject"
+    },
+    "inputRequests": {
+      "$ref": "#/$defs/InputRequests"
+    },
+    "requestState": {
+      "type": "string"
+    },
+    "resultType": {
+      "description": "Indicates the type of the result, which allows the client to determine\nhow to parse the result object.\n\nServers implementing this protocol version MUST include this field.\nFor backward compatibility, when a client receives a result from a\nserver implementing an earlier protocol version (which does not include\n`resultType`), the client MUST treat the absent field as `\"complete\"`.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "resultType"
+  ],
+  "type": "object"
+}

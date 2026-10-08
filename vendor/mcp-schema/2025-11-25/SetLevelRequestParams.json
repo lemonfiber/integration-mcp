@@ -1,0 +1,24 @@
+{
+  "description": "Parameters for a `logging/setLevel` request.",
+  "properties": {
+    "_meta": {
+      "additionalProperties": {},
+      "description": "See [General fields: `_meta`](/specification/2025-11-25/basic/index#meta) for notes on `_meta` usage.",
+      "properties": {
+        "progressToken": {
+          "$ref": "#/$defs/ProgressToken",
+          "description": "If specified, the caller is requesting out-of-band progress notifications for this request (as represented by notifications/progress). The value of this parameter is an opaque token that will be attached to any subsequent notifications. The receiver is not obligated to provide these notifications."
+        }
+      },
+      "type": "object"
+    },
+    "level": {
+      "$ref": "#/$defs/LoggingLevel",
+      "description": "The level of logging that the client wants to receive from the server. The server should send all logs at this level and higher (i.e., more severe) to the client as notifications/message."
+    }
+  },
+  "required": [
+    "level"
+  ],
+  "type": "object"
+}

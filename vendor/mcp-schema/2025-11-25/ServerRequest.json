@@ -1,0 +1,28 @@
+{
+  "anyOf": [
+    {
+      "$ref": "#/$defs/PingRequest"
+    },
+    {
+      "$ref": "#/$defs/GetTaskRequest"
+    },
+    {
+      "$ref": "#/$defs/GetTaskPayloadRequest"
+    },
+    {
+      "$ref": "#/$defs/CancelTaskRequest"
+    },
+    {
+      "$ref": "#/$defs/ListTasksRequest"
+    },
+    {
+      "$ref": "#/$defs/CreateMessageRequest"
+    },
+    {
+      "$ref": "#/$defs/ListRootsRequest"
+    },
+    {
+      "$ref": "#/$defs/ElicitRequest"
+    }
+  ]
+}

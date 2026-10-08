@@ -1,0 +1,36 @@
+{
+  "properties": {
+    "default": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "format": {
+      "enum": [
+        "date",
+        "date-time",
+        "email",
+        "uri"
+      ],
+      "type": "string"
+    },
+    "maxLength": {
+      "type": "integer"
+    },
+    "minLength": {
+      "type": "integer"
+    },
+    "title": {
+      "type": "string"
+    },
+    "type": {
+      "const": "string",
+      "type": "string"
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "type": "object"
+}

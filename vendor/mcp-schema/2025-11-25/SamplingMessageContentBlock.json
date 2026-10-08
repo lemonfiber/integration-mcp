@@ -1,0 +1,19 @@
+{
+  "anyOf": [
+    {
+      "$ref": "#/$defs/TextContent"
+    },
+    {
+      "$ref": "#/$defs/ImageContent"
+    },
+    {
+      "$ref": "#/$defs/AudioContent"
+    },
+    {
+      "$ref": "#/$defs/ToolUseContent"
+    },
+    {
+      "$ref": "#/$defs/ToolResultContent"
+    }
+  ]
+}

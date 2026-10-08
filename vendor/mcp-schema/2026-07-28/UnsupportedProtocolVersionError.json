@@ -1,0 +1,57 @@
+{
+  "description": "Returned when the request's protocol version is unknown to the server or\nunsupported (e.g., a known experimental or draft version the server has\nchosen not to implement). For HTTP, the response status code MUST be\n`400 Bad Request`.",
+  "properties": {
+    "error": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Error"
+        },
+        {
+          "properties": {
+            "code": {
+              "const": -32022,
+              "type": "integer"
+            },
+            "data": {
+              "properties": {
+                "requested": {
+                  "description": "The protocol version that was requested by the client.",
+                  "type": "string"
+                },
+                "supported": {
+                  "description": "Protocol versions the server supports. The client should choose a\nmutually supported version from this list and retry.",
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                }
+              },
+              "required": [
+                "requested",
+                "supported"
+              ],
+              "type": "object"
+            }
+          },
+          "required": [
+            "code",
+            "data"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "id": {
+      "$ref": "#/$defs/RequestId"
+    },
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    }
+  },
+  "required": [
+    "error",
+    "jsonrpc"
+  ],
+  "type": "object"
+}

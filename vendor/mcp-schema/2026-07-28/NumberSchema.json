@@ -1,0 +1,30 @@
+{
+  "properties": {
+    "default": {
+      "type": "number"
+    },
+    "description": {
+      "type": "string"
+    },
+    "maximum": {
+      "type": "number"
+    },
+    "minimum": {
+      "type": "number"
+    },
+    "title": {
+      "type": "string"
+    },
+    "type": {
+      "enum": [
+        "integer",
+        "number"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "type": "object"
+}

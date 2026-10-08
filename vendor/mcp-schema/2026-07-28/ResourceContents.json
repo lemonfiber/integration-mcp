@@ -1,0 +1,21 @@
+{
+  "description": "The contents of a specific resource or sub-resource.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/MetaObject"
+    },
+    "mimeType": {
+      "description": "The MIME type of this resource, if known.",
+      "type": "string"
+    },
+    "uri": {
+      "description": "The URI of this resource.",
+      "format": "uri",
+      "type": "string"
+    }
+  },
+  "required": [
+    "uri"
+  ],
+  "type": "object"
+}

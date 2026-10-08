@@ -1,0 +1,50 @@
+{
+  "description": "The result returned by the client for a {@link CreateMessageRequestsampling/createMessage} request.\nThe client should inform the user before returning the sampled message, to allow them\nto inspect the response (human in the loop) and decide whether to allow the server to see it.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/MetaObject"
+    },
+    "content": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/TextContent"
+        },
+        {
+          "$ref": "#/$defs/ImageContent"
+        },
+        {
+          "$ref": "#/$defs/AudioContent"
+        },
+        {
+          "$ref": "#/$defs/ToolUseContent"
+        },
+        {
+          "$ref": "#/$defs/ToolResultContent"
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/SamplingMessageContentBlock"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    "model": {
+      "description": "The name of the model that generated the message.",
+      "type": "string"
+    },
+    "role": {
+      "$ref": "#/$defs/Role"
+    },
+    "stopReason": {
+      "description": "The reason why sampling stopped, if known.\n\nStandard values:\n- `\"endTurn\"`: Natural end of the assistant's turn\n- `\"stopSequence\"`: A stop sequence was encountered\n- `\"maxTokens\"`: Maximum token limit was reached\n- `\"toolUse\"`: The model wants to use one or more tools\n\nThis field is an open string to allow for provider-specific stop reasons.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "content",
+    "model",
+    "role"
+  ],
+  "type": "object"
+}

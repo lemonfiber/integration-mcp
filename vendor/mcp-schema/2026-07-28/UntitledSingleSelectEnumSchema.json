@@ -1,0 +1,33 @@
+{
+  "description": "Schema for single-selection enumeration without display titles for options.",
+  "properties": {
+    "default": {
+      "description": "Optional default value.",
+      "type": "string"
+    },
+    "description": {
+      "description": "Optional description for the enum field.",
+      "type": "string"
+    },
+    "enum": {
+      "description": "Array of enum values to choose from.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "title": {
+      "description": "Optional title for the enum field.",
+      "type": "string"
+    },
+    "type": {
+      "const": "string",
+      "type": "string"
+    }
+  },
+  "required": [
+    "enum",
+    "type"
+  ],
+  "type": "object"
+}

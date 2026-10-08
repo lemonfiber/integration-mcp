@@ -1,0 +1,16 @@
+{
+  "description": "Parameters for a {@link SubscriptionsAcknowledgedNotificationnotifications/subscriptions/acknowledged} notification.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/NotificationMetaObject"
+    },
+    "notifications": {
+      "$ref": "#/$defs/SubscriptionFilter",
+      "description": "The subset of requested notification types the server agreed to honor.\nOnly includes notification types the server actually supports; if the\nclient requested an unsupported type (e.g., `promptsListChanged` when\nthe server has no prompts), it is omitted from this set."
+    }
+  },
+  "required": [
+    "notifications"
+  ],
+  "type": "object"
+}

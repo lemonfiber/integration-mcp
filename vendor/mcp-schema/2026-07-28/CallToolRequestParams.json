@@ -1,0 +1,28 @@
+{
+  "description": "Parameters for a `tools/call` request.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/RequestMetaObject"
+    },
+    "arguments": {
+      "additionalProperties": {},
+      "description": "Arguments to use for the tool call.",
+      "type": "object"
+    },
+    "inputResponses": {
+      "$ref": "#/$defs/InputResponses"
+    },
+    "name": {
+      "description": "The name of the tool.",
+      "type": "string"
+    },
+    "requestState": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "_meta",
+    "name"
+  ],
+  "type": "object"
+}

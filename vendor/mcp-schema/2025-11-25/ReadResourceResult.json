@@ -1,0 +1,27 @@
+{
+  "description": "The server's response to a resources/read request from the client.",
+  "properties": {
+    "_meta": {
+      "additionalProperties": {},
+      "description": "See [General fields: `_meta`](/specification/2025-11-25/basic/index#meta) for notes on `_meta` usage.",
+      "type": "object"
+    },
+    "contents": {
+      "items": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/TextResourceContents"
+          },
+          {
+            "$ref": "#/$defs/BlobResourceContents"
+          }
+        ]
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "contents"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,25 @@
+{
+  "description": "The set of notification types a client may opt in to on a\n{@link SubscriptionsListenRequestsubscriptions/listen} request.\n\nEach notification type is **opt-in**; the server **MUST NOT** send\nnotification types the client has not explicitly requested here.",
+  "properties": {
+    "promptsListChanged": {
+      "description": "If true, receive {@link PromptListChangedNotificationnotifications/prompts/list_changed}.",
+      "type": "boolean"
+    },
+    "resourceSubscriptions": {
+      "description": "Subscribe to {@link ResourceUpdatedNotificationnotifications/resources/updated} for these resource URIs.\nReplaces the former `resources/subscribe` RPC.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "resourcesListChanged": {
+      "description": "If true, receive {@link ResourceListChangedNotificationnotifications/resources/list_changed}.",
+      "type": "boolean"
+    },
+    "toolsListChanged": {
+      "description": "If true, receive {@link ToolListChangedNotificationnotifications/tools/list_changed}.",
+      "type": "boolean"
+    }
+  },
+  "type": "object"
+}

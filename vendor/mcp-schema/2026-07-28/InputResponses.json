@@ -1,0 +1,7 @@
+{
+  "additionalProperties": {
+    "$ref": "#/$defs/InputResponse"
+  },
+  "description": "A map of client responses to server-initiated requests.\nKeys correspond to the keys in the {@link InputRequests} map;\nvalues are the client's result for each request.",
+  "type": "object"
+}

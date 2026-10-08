@@ -1,0 +1,10 @@
+{
+  "anyOf": [
+    {
+      "$ref": "#/$defs/UntitledMultiSelectEnumSchema"
+    },
+    {
+      "$ref": "#/$defs/TitledMultiSelectEnumSchema"
+    }
+  ]
+}

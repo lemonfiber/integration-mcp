@@ -1,0 +1,21 @@
+{
+  "description": "A successful response from the server for a {@link ListResourceTemplatesRequestresources/templates/list} request.",
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/RequestId"
+    },
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    },
+    "result": {
+      "$ref": "#/$defs/ListResourceTemplatesResult"
+    }
+  },
+  "required": [
+    "id",
+    "jsonrpc",
+    "result"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,26 @@
+{
+  "description": "A request from the client to the server, to enable or adjust logging.",
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/RequestId"
+    },
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    },
+    "method": {
+      "const": "logging/setLevel",
+      "type": "string"
+    },
+    "params": {
+      "$ref": "#/$defs/SetLevelRequestParams"
+    }
+  },
+  "required": [
+    "id",
+    "jsonrpc",
+    "method",
+    "params"
+  ],
+  "type": "object"
+}

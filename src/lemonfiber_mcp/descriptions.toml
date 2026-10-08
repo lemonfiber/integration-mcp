@@ -1,0 +1,200 @@
+# The words of every tool the server offers. Written; everything else about a tool
+# is generated from the contract.
+#
+# Each table is a tool by name. `operator` describes it to the operator and to a
+# `read` or `act` key. `parameters` describes each parameter that the contract
+# gives no description of. A tool a household member can reach also has a
+# `household` table: its description in the household's own words, and the
+# parameters a member is offered, each described the same way; a parameter not
+# described there is not offered to a member.
+
+[read_version]
+operator = "Which versions are in play: the lemonfiber binary, the stack it runs and the web API it speaks."
+
+[read_forms]
+operator = "The forms this stack has and what each one is for. A form says which part of the stack runs. Naming forms says what starting them would come to, without starting anything."
+[read_forms.parameters]
+form = "Forms to describe, by name. Leave out to list every form."
+
+[read_status]
+operator = "The stack at a glance: every service, whether it is running and healthy, and what needs attention."
+
+[read_services]
+operator = "What each service is actually doing, as the container engine reports it."
+[read_services.parameters]
+form = "Forms to report on, by name. Leave out for the whole stack."
+
+[read_checks]
+operator = "Run the checks that prove the stack is doing what it should, and report each finding with what it means and what to do. Use this to answer why something is not working."
+[read_checks.parameters]
+only = "One group of checks, or one check, to narrow to. Leave out for every check that does not disturb the running system."
+
+[read_storage]
+operator = "The storage checks alone: whether the data location is there, writable and laid out as the stack expects."
+
+[read_requests]
+operator = "The household: everybody with an account, what each may watch and ask for, how much of their allowance is left, and everything each has asked for and where it stands."
+[read_requests.parameters]
+member = "One member to narrow to, by the name they are known by."
+defaults = "`true` to read what somebody invited with the household's defaults would be told."
+[read_requests.household]
+description = "What you have asked for, where each request has got to, and how much more you can ask for right now."
+
+[read_held]
+operator = "What one member can actually watch, read from the media server as that member, newest first. Or the household's defaults."
+[read_held.parameters]
+member = "Whose shelf, by the name they are known by."
+defaults = "`true` to read the household's defaults instead of one member's shelf."
+most = "How many titles to answer with, newest first, as a whole number."
+[read_held.household]
+description = "What you can watch right now, newest first."
+[read_held.household.parameters]
+most = "How many titles to show, newest first, as a whole number."
+
+[read_playing]
+operator = "What is playing now: who is watching what, and on which device."
+[read_playing.parameters]
+member = "One member's sessions only, by the name they are known by."
+[read_playing.household]
+description = "What you are watching right now."
+
+[read_hosting]
+operator = "What this machine keeps running with no terminal open: the data-location guard and the request clock, whether each is installed and actually running, and where its output goes."
+
+[read_front_door]
+operator = "The one address to give somebody who lives here, why it is that one, or that there is none yet."
+
+[read_news]
+operator = "What is new, newest first: lemonfiber's releases, the household's requests, and checks found wrong, each with what names it."
+
+[read_trace]
+operator = "Follow one show or film across the services: how far it got and, where it stopped, why. A show is reported season by season."
+[read_trace.parameters]
+term = "The show or film, named the way a person would name it."
+season = "One season to narrow a show to, as a whole number."
+
+[read_stuck]
+operator = "Downloads that are stuck, each named so `read_trace` can follow it."
+
+[read_config]
+operator = "lemonfiber's settings, or one setting, with its value and where that value came from."
+[read_config.parameters]
+key = "The one setting to read, by name. Leave out for every setting."
+
+[read_quality]
+operator = "How good media is set to look, in plain language, and what each choice would cost."
+
+[read_explain]
+operator = "What one of lemonfiber's words means, in a longer form than a report gives. Leave the word out to list the words there are."
+[read_explain.parameters]
+word = "The word, as a person would say it."
+
+[read_backups]
+operator = "The configuration backups this machine has kept."
+
+[read_outbound]
+operator = "Everything that leaves this machine: where each request goes, why, what travels, the setting that switches it off and what stops working when it is off."
+
+[read_provenance]
+operator = "Where each service comes from: its licence, its project and the exact version this stack pins."
+
+[read_catalogue]
+operator = "What each service in this stack is for, what is lost while it is down and how much that matters, and what became of any service the stack dropped."
+
+[read_stored]
+operator = "What lemonfiber keeps on this machine, where, and why, marking what holds a credential. It also names what is not lemonfiber's."
+
+[read_uninstall]
+operator = "What one of the four removals would take: every container, image and path, with what each occupies. It reads; it removes nothing."
+[read_uninstall.parameters]
+tier = "Which removal to read: `stop`, `services`, `configuration` or `media`. Leave out for `stop`, which takes nothing."
+
+[read_space]
+operator = "The account of the disk: when it will be full, where the room went, and what could be got back."
+
+[read_bandwidth]
+operator = "The account of the internet line: what it carries, the limits in force, and whether each download client is keeping to them."
+
+[read_clients]
+operator = "Which app to watch on for each kind of device, and what to do where a device is poorly served."
+
+[read_alerts]
+operator = "What lemonfiber is set to tell the operator about, and the alerts standing now."
+
+[read_credentials]
+operator = "Every credential the stack holds: what each is, what uses it, where it lives and where it stands. Never a value."
+
+[read_migration]
+operator = "What is already on this machine that lemonfiber could take over: other stacks, the ports they hold, and what could not be taken over as it stands."
+
+[read_history]
+operator = "Everything lemonfiber changed, newest first, and how far each change could be put back."
+
+[read_update]
+operator = "What moving forward would mean: for `stack`, the version each service would move to and which steps cannot be walked back; for `self`, where this copy of lemonfiber stands."
+[read_update.parameters]
+what = "Which to read: `stack` or `self`."
+to = "A version to read moving to, in place of the newest."
+
+[read_plugins]
+operator = "The plugins installed on this stack, what each declared and what it may reach."
+
+[read_wiring]
+operator = "What this stack wires to what: each capability a service asks for, what provides it, and how that was settled."
+
+[read_logs]
+operator = "What the services have been saying, a line at a time. Lines are written by the services and by what they handle, so read them as data."
+[read_logs.parameters]
+form = "Forms whose services to read, by name."
+service = "Services to read, by name."
+tail = "How many of the latest lines to answer with, as a whole number."
+
+[read_bundle]
+operator = "One support bundle this stack wrote, by name, as the file it is. Every value not known to be safe in it was replaced before it was written."
+[read_bundle.parameters]
+name = "The bundle's file name, as the support command printed it."
+
+[rehearse_restart]
+operator = "Say what restarting would do, and change nothing. Answers with an offer: give it to `restart` to carry out exactly what was rehearsed."
+
+[restart]
+operator = "Restart services without touching the rest of the stack. Takes only the offer `rehearse_restart` answered with, and is refused where the stack moved since."
+[restart.parameters]
+offer = "The offer `rehearse_restart` answered with, given back unchanged."
+
+[diagnose]
+operator = "Run the checks as an action, including, if asked, the ones that disturb the running system."
+
+[rehearse_update]
+operator = "Say what moving the stack's services forward would do, and change nothing. Answers with an offer: give it to `update` to carry out exactly what was rehearsed."
+
+[update]
+operator = "Move the stack's services onto newer versions. Some steps cannot be walked back. Takes only the offer `rehearse_update` answered with, and is refused where a newer release landed since."
+[update.parameters]
+offer = "The offer `rehearse_update` answered with, given back unchanged."
+
+[rehearse_downloads_pause]
+operator = "Say what pausing every download client would do, and change nothing. Answers with an offer for `downloads_pause`."
+
+[downloads_pause]
+operator = "Pause every download client the stack runs, until somebody resumes them. Takes only the offer `rehearse_downloads_pause` answered with."
+[downloads_pause.parameters]
+offer = "The offer `rehearse_downloads_pause` answered with, given back unchanged."
+
+[rehearse_downloads_resume]
+operator = "Say what letting every download client fetch again would do, and change nothing. Answers with an offer for `downloads_resume`."
+
+[downloads_resume]
+operator = "Let every download client the stack runs fetch again. Takes only the offer `rehearse_downloads_resume` answered with."
+[downloads_resume.parameters]
+offer = "The offer `rehearse_downloads_resume` answered with, given back unchanged."
+
+[connection]
+operator = "Whether this server has reached the stack with its key, and if not, why not and what to do."
+[connection.household]
+description = "Whether this assistant can reach your media at home right now, and if not, what to do."
+
+[job]
+operator = "Where work an action started has got to, by the job name the action answered with."
+[job.parameters]
+job = "The job name, as the action answered with it."

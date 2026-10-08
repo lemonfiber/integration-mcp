@@ -1,0 +1,27 @@
+{
+  "description": "Text provided to or from an LLM.",
+  "properties": {
+    "_meta": {
+      "additionalProperties": {},
+      "description": "See [General fields: `_meta`](/specification/2025-11-25/basic/index#meta) for notes on `_meta` usage.",
+      "type": "object"
+    },
+    "annotations": {
+      "$ref": "#/$defs/Annotations",
+      "description": "Optional annotations for the client."
+    },
+    "text": {
+      "description": "The text content of the message.",
+      "type": "string"
+    },
+    "type": {
+      "const": "text",
+      "type": "string"
+    }
+  },
+  "required": [
+    "text",
+    "type"
+  ],
+  "type": "object"
+}

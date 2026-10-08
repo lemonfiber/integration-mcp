@@ -1,0 +1,20 @@
+{
+  "description": "The client's response to a roots/list request from the server.\nThis result contains an array of Root objects, each representing a root directory\nor file that the server can operate on.",
+  "properties": {
+    "_meta": {
+      "additionalProperties": {},
+      "description": "See [General fields: `_meta`](/specification/2025-11-25/basic/index#meta) for notes on `_meta` usage.",
+      "type": "object"
+    },
+    "roots": {
+      "items": {
+        "$ref": "#/$defs/Root"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "roots"
+  ],
+  "type": "object"
+}

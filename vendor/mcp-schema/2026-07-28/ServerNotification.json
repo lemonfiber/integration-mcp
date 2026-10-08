@@ -1,0 +1,28 @@
+{
+  "anyOf": [
+    {
+      "$ref": "#/$defs/CancelledNotification"
+    },
+    {
+      "$ref": "#/$defs/ProgressNotification"
+    },
+    {
+      "$ref": "#/$defs/ResourceListChangedNotification"
+    },
+    {
+      "$ref": "#/$defs/SubscriptionsAcknowledgedNotification"
+    },
+    {
+      "$ref": "#/$defs/ResourceUpdatedNotification"
+    },
+    {
+      "$ref": "#/$defs/PromptListChangedNotification"
+    },
+    {
+      "$ref": "#/$defs/ToolListChangedNotification"
+    },
+    {
+      "$ref": "#/$defs/LoggingMessageNotification"
+    }
+  ]
+}

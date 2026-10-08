@@ -1,0 +1,45 @@
+# The vendored client is a copy, and a copy goes stale in silence.
+#
+# The server reaches a stack through sdk-python alone, copied byte for byte into
+# `src/lemonfiber_mcp/_vendor/lemonfiber/`, and generates its tools from the
+# contract copied into `contract/`, both at the commit `REVISION` names. This
+# holds the copies to two things: each is exactly that commit's tree, so nothing
+# in them was edited here, and sdk-python's `main` has changed neither since, so
+# the server speaks the client and offers the tools the core's contract asks
+# for. A commit to sdk-python that touches only its tests, tooling or workflows
+# changes nothing the copies hold and is not drift.
+#
+# `Q-R68` requires the comparison to run on pull requests, fail them, and be a
+# required status check. A failure names the command that takes the new commit.
+name: sdk-drift
+
+on:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Weekly, as the floor: a pull request is what usually asks the question,
+    # and this catches a `main` that went a week without one while the client moved.
+    - cron: "50 7 * * 1"
+
+permissions:
+  contents: read
+
+# A pull request pushed again cancels the run on its old head, which nobody
+# will read and which holds runners the org shares (Q-R75). Every other event
+# is grouped by its own run, so it is never cancelled and never cancels.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  sdk-drift:
+    name: sdk-drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # The script needs Python's standard library and git, both on the runner.
+      - name: The copy is its commit, and main has changed none of it since
+        run: python3 scripts/vendor_sdk.py check

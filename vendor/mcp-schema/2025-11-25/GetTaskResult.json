@@ -1,0 +1,11 @@
+{
+  "allOf": [
+    {
+      "$ref": "#/$defs/Result"
+    },
+    {
+      "$ref": "#/$defs/Task"
+    }
+  ],
+  "description": "The response to a tasks/get request."
+}
