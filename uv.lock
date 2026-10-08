@@ -499,7 +499,7 @@ wheels = [
 [[package]]
 name = "lemonfiber-mcp"
 version = "0.0.0"
-source = { editable = "." }
+source = { virtual = "." }
 dependencies = [
     { name = "aiohttp" },
     { name = "mcp" },

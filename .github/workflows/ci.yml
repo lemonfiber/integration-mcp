@@ -6,10 +6,11 @@ on: [pull_request]
 permissions:
   contents: read
 
-# The environment is installed from the lockfile and nothing else, and no `uv`
-# a recipe runs syncs it again.
+# The environment is installed from the lockfile and nothing else, building no
+# source distribution, and no `uv` a recipe runs syncs it again.
 env:
   UV_LOCKED: "1"
+  UV_NO_BUILD: "1"
   UV_NO_SYNC: "1"
 
 # A pull request pushed again cancels the run on its old head, which nobody
@@ -90,13 +91,13 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       - name: Install exactly what the lockfile says
-        run: uv sync --locked
+        run: uv sync --locked --no-build
       - name: Formatting and lint
-        run: uv run just lint
+        run: uv run --locked --no-build --no-sync just lint
       - name: Strict types
-        run: uv run just types
+        run: uv run --locked --no-build --no-sync just types
       - name: The tools are what the vendored contract generates
-        run: uv run just generated
+        run: uv run --locked --no-build --no-sync just generated
 
   tests:
     name: tests and coverage
@@ -110,9 +111,9 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       - name: Install exactly what the lockfile says
-        run: uv sync --locked
+        run: uv sync --locked --no-build
       - name: The suite, with 100% line and branch coverage
-        run: uv run just coverage
+        run: uv run --locked --no-build --no-sync just coverage
 
   # The most expensive gate, so the most guarded: only on a pull request, and
   # only once the tests have passed. Mutating code whose tests already fail
@@ -137,16 +138,16 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       - name: Install exactly what the lockfile says
-        run: uv sync --locked
+        run: uv sync --locked --no-build
       - name: Mutate, and hold the score to its minimum
-        run: uv run just mutation
+        run: uv run --locked --no-build --no-sync just mutation
       - name: The mutants that survived, each as the change it made
         if: ${{ !cancelled() }}
         run: |
           set -euo pipefail
-          survived="$(uv run mutmut results | awk -F: '/: survived$/ { gsub(/^[ \t]+/, "", $1); print $1 }')"
+          survived="$(uv run --locked --no-build --no-sync mutmut results | awk -F: '/: survived$/ { gsub(/^[ \t]+/, "", $1); print $1 }')"
           for mutant in ${survived}; do
-            uv run mutmut show "${mutant}"
+            uv run --locked --no-build --no-sync mutmut show "${mutant}"
           done
 
   # `pull-requests: write` is what lets the gate close a pull request whose

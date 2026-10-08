@@ -35,9 +35,10 @@ env:
   VENDOR: src/lemonfiber_mcp/_vendor
   CONTRACT: contract
   GENERATED: src/lemonfiber_mcp/_generated
-  # Every `uv` these steps run reads the lockfile and nothing else, and syncs
-  # only where a step says so.
+  # Every `uv` these steps run reads the lockfile and nothing else, builds no
+  # source distribution, and syncs only where a step says so.
   UV_LOCKED: "1"
+  UV_NO_BUILD: "1"
   UV_NO_SYNC: "1"
 
 jobs:
@@ -99,11 +100,11 @@ jobs:
         continue-on-error: true
         run: |
           set -euo pipefail
-          uv sync --locked
-          uv run just lint
-          uv run just types
-          uv run just generated
-          uv run just test
+          uv sync --locked --no-build
+          uv run --locked --no-build --no-sync just lint
+          uv run --locked --no-build --no-sync just types
+          uv run --locked --no-build --no-sync just generated
+          uv run --locked --no-build --no-sync just test
 
       - name: Put the change on the branch, signed
         id: commit

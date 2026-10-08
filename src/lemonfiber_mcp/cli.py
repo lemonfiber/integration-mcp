@@ -33,9 +33,16 @@ REFUSED_TO_START: Final = 2
 logger = logging.getLogger(__name__)
 
 
+UNINSTALLED: Final = "unreleased"
+"""The version a server run from a checkout says it is, where no installed package names one."""
+
+
 def version() -> str:
     """Return this server's version, as the package it was installed from says."""
-    return importlib.metadata.version(PACKAGE)
+    try:
+        return importlib.metadata.version(PACKAGE)
+    except importlib.metadata.PackageNotFoundError:
+        return UNINSTALLED
 
 
 async def serve_stdio(environment: Mapping[str, str]) -> None:

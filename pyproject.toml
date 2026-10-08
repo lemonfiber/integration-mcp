@@ -45,13 +45,17 @@ build-backend = "uv_build"
 
 [tool.uv]
 required-version = ">=0.11"
+# The package is read from `src/` where it stands rather than installed, so a
+# sync builds nothing and CI syncs with `--no-build`, which refuses anything that
+# would run a setup script. `uvx --from` and `uv build` still build the package.
+package = false
 
 [tool.pyright]
 include = ["src", "tests", "scripts"]
 # The vendored client is held to strict typing in its own repository, and is
 # found here through `extraPaths`, where its own absolute imports find it.
 exclude = ["src/lemonfiber_mcp/_vendor", "scripts/no_open_codeql_alert.py", "**/__pycache__", ".venv"]
-extraPaths = ["src/lemonfiber_mcp/_vendor"]
+extraPaths = ["src", "src/lemonfiber_mcp/_vendor"]
 pythonVersion = "3.14"
 typeCheckingMode = "strict"
 reportUnnecessaryTypeIgnoreComment = "error"
@@ -64,7 +68,7 @@ reportUninitializedInstanceVariable = "error"
 # rule holds there too.
 executionEnvironments = [
     { root = "tests", extraPaths = [".", "src", "src/lemonfiber_mcp/_vendor"], reportUnknownMemberType = false },
-    { root = "." },
+    { root = ".", extraPaths = ["src", "src/lemonfiber_mcp/_vendor"] },
 ]
 
 [tool.pytest.ini_options]

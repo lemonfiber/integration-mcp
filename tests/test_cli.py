@@ -56,8 +56,16 @@ def test_a_start_with_a_refused_setting_names_it_and_not_its_value(
     assert "hunter2" not in said
 
 
-def test_the_version_is_the_installed_packages() -> None:
-    assert cli.version()
+def test_the_version_is_the_installed_packages(monkeypatch: pytest.MonkeyPatch) -> None:
+    def installed(_: str) -> str:
+        return "1.2.3"
+
+    monkeypatch.setattr(cli.importlib.metadata, "version", installed)
+    assert cli.version() == "1.2.3"
+
+
+def test_a_server_run_from_a_checkout_says_it_is_unreleased() -> None:
+    assert cli.version() == cli.UNINSTALLED
 
 
 def test_a_mode_is_required() -> None:
