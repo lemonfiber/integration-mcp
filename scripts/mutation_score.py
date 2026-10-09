@@ -3,9 +3,10 @@
 
 Reads what `mutmut export-cicd-stats` wrote. The score is the share of mutants
 the suite told apart from the code it was written against: a mutant killed or
-timed out counts, and one that survived, that no test reached, or that was
-suspicious does not. A run that mutated nothing is a failure rather than a pass,
-since a score over no mutants says nothing about the suite.
+timed out counts, and one that survived, that no test reached, that was
+suspicious or that crashed does not. A mutant the run did not try, being
+another shard's, is not judged. A run that judged nothing is a failure rather
+than a pass, since a score over no mutants says nothing about the suite.
 
     uv run python scripts/mutation_score.py
 """
@@ -26,10 +27,15 @@ def minimum(root: pathlib.Path) -> float:
     return float(project["tool"]["lemonfiber"]["mutation"]["minimum-score"])
 
 
+DETECTED = ("killed", "timeout")
+MISSED = ("survived", "no_tests", "suspicious", "segfault")
+"""What a tried mutant came to: told apart from the code, or not."""
+
+
 def score(stats: dict[str, int]) -> tuple[float, int, int]:
     """Return the score as a percentage, the mutants told apart, and the mutants judged."""
-    judged = stats.get("total", 0) - stats.get("skipped", 0)
-    detected = stats.get("killed", 0) + stats.get("timeout", 0)
+    detected = sum(stats.get(outcome, 0) for outcome in DETECTED)
+    judged = detected + sum(stats.get(outcome, 0) for outcome in MISSED)
     return (100.0 * detected / judged if judged > 0 else 0.0), detected, judged
 
 

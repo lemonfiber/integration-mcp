@@ -9,16 +9,22 @@ import sys
 from typing import TYPE_CHECKING
 
 import anyio
+import anyio.lowlevel
 import pytest
+import uvicorn
+from cryptography import x509
 from mcp import ClientSession
 from mcp.shared.message import SessionMessage
 
-from lemonfiber_mcp import cli, serving, settings
+from lemonfiber_mcp import cli, serving, settings, web
+from lemonfiber_mcp.certificates import making, modes
+from lemonfiber_mcp.certificates import settings as tls
 from lemonfiber_mcp.withheld import WITHHELD
 from tests.conftest import KEY
 from tests.stack import Reply, Stack, envelope
 
 if TYPE_CHECKING:
+    import pathlib
     from collections.abc import AsyncGenerator, Iterator
 
 
@@ -98,10 +104,18 @@ def test_the_help_says_what_the_command_is_and_how_it_serves(capsys: pytest.Capt
     with pytest.raises(SystemExit):
         cli.main(["--help"], {})
     said = capsys.readouterr().out
-    assert said.startswith("usage: lemonfiber-mcp [-h] {stdio} ...\n\nlemonfiber for AI assistants.\n")
-    assert "stdio serve one assistant on this machine over standard input and output" in " ".join(
-        said.split(),
+    assert said.startswith(
+        "usage: lemonfiber-mcp [-h] {stdio,http,ca,pinned,health} ...\n\nlemonfiber for AI assistants.\n",
     )
+    words = " ".join(said.split())
+    for line in (
+        "stdio serve one assistant on this machine over standard input and output",
+        "http serve assistants anywhere over Streamable HTTP and TLS",
+        "ca act on the private root",
+        "pinned act on the pinned certificate",
+        "health whether the HTTP mode beside this answers healthy",
+    ):
+        assert line in words
 
 
 def test_a_start_with_a_refused_setting_names_it_and_not_its_value(
@@ -137,3 +151,134 @@ def test_the_module_runs_as_the_command(monkeypatch: pytest.MonkeyPatch) -> None
     monkeypatch.setattr(sys, "argv", ["lemonfiber-mcp"])
     with pytest.raises(SystemExit):
         runpy.run_module("lemonfiber_mcp", run_name="__main__")
+
+
+def http_environment(root: pathlib.Path, **more: str) -> dict[str, str]:
+    """Return settings the HTTP mode starts with, its state kept under `root`."""
+    held = root / "state"
+    held.mkdir(mode=0o700, exist_ok=True)
+    return {
+        settings.ADDRESS: "http://127.0.0.1:9",
+        web.LISTEN: "127.0.0.1:8443",
+        tls.NAMES: "mcp.home.example",
+        tls.STATE: str(held),
+        **more,
+    }
+
+
+@pytest.mark.parametrize("key", [settings.KEY, settings.KEY_FILE])
+def test_the_http_mode_refuses_a_key_of_its_own(key: str, tmp_path: pathlib.Path) -> None:
+    environment = http_environment(tmp_path, **{key: KEY})
+    with pytest.raises(settings.SettingsError) as refused:
+        cli.http_server(environment)
+    assert str(refused.value) == cli.HOLDS_NO_KEY
+
+
+@pytest.mark.parametrize(
+    "listen",
+    ["", "8443", "mcp.home.example:", ":8443", "host:0", "host:65536", "host:84a3"],
+)
+def test_the_http_mode_refuses_to_guess_where_to_listen(listen: str, tmp_path: pathlib.Path) -> None:
+    environment = http_environment(tmp_path, **{web.LISTEN: listen})
+    with pytest.raises(settings.SettingsError) as refused:
+        cli.http_server(environment)
+    assert str(refused.value) == cli.LISTEN_NEEDED
+
+
+@pytest.mark.parametrize(
+    ("listen", "where"),
+    [
+        ("0.0.0.0:8443", ("0.0.0.0", 8443)),
+        ("[::]:443", ("::", 443)),
+        ("mcp.home.example:65535", ("mcp.home.example", 65535)),
+        (" 192.0.2.1:1 ", ("192.0.2.1", 1)),
+    ],
+)
+def test_where_the_http_mode_listens_is_read_as_given(listen: str, where: tuple[str, int]) -> None:
+    assert cli.listen_from({web.LISTEN: listen}) == where
+
+
+def test_the_address_is_shown_as_a_person_types_it() -> None:
+    assert cli.shown("::", 8443) == "https://[::]:8443/mcp"
+    assert cli.shown("192.0.2.1", 443) == "https://192.0.2.1:443/mcp"
+    assert cli.shown("mcp.home.example", 8443) == "https://mcp.home.example:8443/mcp"
+
+
+def test_the_operators_files_need_no_state(tmp_path: pathlib.Path) -> None:
+    environment = {
+        tls.CERTIFICATE: str(tmp_path / "c.pem"),
+        tls.PRIVATE_KEY: str(tmp_path / "k.pem"),
+        tls.STATE: str(tmp_path / "never"),
+    }
+    assert cli.kept_tls(environment).mode is tls.Mode.FILES
+    assert not (tmp_path / "never").exists()
+
+
+def test_the_http_mode_serves_until_stopped_and_stops_its_watch(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    async def stopped(_: uvicorn.Server) -> None:
+        await anyio.lowlevel.checkpoint()
+
+    monkeypatch.setattr(uvicorn.Server, "serve", stopped)
+    assert cli.main(["http"], http_environment(tmp_path)) == 0
+    assert "serving over HTTPS at https://127.0.0.1:8443/mcp" in capsys.readouterr().err
+
+
+def test_a_private_root_is_replaced_and_switched_on_command(
+    tmp_path: pathlib.Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    environment = http_environment(tmp_path, **{tls.MODE: "private-ca"})
+    assert cli.main(["ca", "switch"], environment) == 0
+    assert capsys.readouterr().out == "No replacement root waits; `lemonfiber-mcp ca replace` makes one.\n"
+    assert cli.main(["ca", "replace"], environment) == 0
+    replaced = capsys.readouterr().out
+    waiting = x509.load_pem_x509_certificate((tmp_path / "state" / modes.CA / modes.NEXT_ROOT).read_bytes())
+    assert replaced == (
+        f"A replacement root waits to be installed; its fingerprint is {making.fingerprint(waiting)}. "
+        "Install it on every device, then run `lemonfiber-mcp ca switch`.\n"
+    )
+    assert cli.main(["ca", "switch"], environment) == 0
+    assert capsys.readouterr().out == (
+        "The replacement root is in force, and the old root's key is deleted. "
+        "A running server takes it within a minute.\n"
+    )
+    assert (tmp_path / "state" / modes.CA / modes.ROOT).read_bytes() == making.certificate_pem(waiting)
+
+
+def test_a_pinned_certificate_is_replaced_on_command(
+    tmp_path: pathlib.Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert cli.main(["pinned", "replace"], http_environment(tmp_path)) == 0
+    chain = tmp_path / "state" / modes.CERTIFICATES / "mcp.home.example" / modes.CHAIN
+    made = x509.load_pem_x509_certificate(chain.read_bytes())
+    assert capsys.readouterr().out == (
+        f"A new pinned certificate is made; give every client its fingerprint: {making.fingerprint(made)}\n"
+    )
+
+
+@pytest.mark.parametrize(
+    ("command", "mode", "said"),
+    [
+        (["ca", "replace"], "pinned", "replaced or switched only where LEMONFIBER_TLS_MODE is private-ca."),
+        (["ca", "switch"], "pinned", "replaced or switched only where LEMONFIBER_TLS_MODE is private-ca."),
+        (["pinned", "replace"], "private-ca", "replaced only where LEMONFIBER_TLS_MODE is pinned or unset."),
+    ],
+)
+def test_a_command_for_another_mode_is_refused_by_name(
+    command: list[str],
+    mode: str,
+    said: str,
+    tmp_path: pathlib.Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    assert cli.main(command, http_environment(tmp_path, **{tls.MODE: mode})) == cli.REFUSED_TO_START
+    assert capsys.readouterr().err.endswith(f"{said}\n")
+
+
+def test_an_unhealthy_server_is_a_failed_check(tmp_path: pathlib.Path) -> None:
+    assert cli.main(["health"], http_environment(tmp_path, **{web.LISTEN: "127.0.0.1:9"})) == cli.UNHEALTHY

@@ -35,7 +35,7 @@ INSTRUCTIONS: Final = (
     "its rehearsal answered with, so rehearse first and show the person what it would do."
 )
 
-type Opened = Callable[[], Awaitable[Connection]]
+type Opened = Callable[[], Connection]
 """Return the connection the request being answered is answered from."""
 
 logger = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 def always(connection: Connection) -> Opened:
     """Return an opener answering every request from one connection, as stdio does."""
 
-    async def opened() -> Connection:
+    def opened() -> Connection:
         return connection
 
     return opened
@@ -66,7 +66,7 @@ class Handlers:
     async def _guarded[T](self, what: str, work: Callable[[Connection], Awaitable[T]]) -> T:
         """Run one request's work, turning anything unexpected into the protocol's error and saying no more."""
         try:
-            return await work(await self._opened())
+            return await work(self._opened())
         except MCPError:
             raise
         except Exception:

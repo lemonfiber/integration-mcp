@@ -117,13 +117,18 @@ jobs:
 
   # The most expensive gate, so the most guarded: only on a pull request, and
   # only once the tests have passed. Mutating code whose tests already fail
-  # measures nothing.
-  mutation:
-    name: mutation testing
+  # measures nothing. The modules are split across shards that run at once, each
+  # held to the minimum score.
+  mutation-shards:
+    name: mutation (${{ matrix.shard }})
     needs: [scope, tests]
     if: ${{ !cancelled() && (needs.scope.result != 'success' || needs.scope.outputs.code == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5]
     steps:
       - name: The tests passed, so there is something to measure
         env:
@@ -139,8 +144,11 @@ jobs:
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       - name: Install exactly what the lockfile says
         run: uv sync --locked --no-build
-      - name: Mutate, and hold the score to its minimum
-        run: uv run --locked --no-build --no-sync just mutation
+      - name: Mutate this shard, and hold its score to the minimum
+        env:
+          INDEX: ${{ strategy.job-index }}
+          TOTAL: ${{ strategy.job-total }}
+        run: uv run --locked --no-build --no-sync just mutation-shard "${INDEX}" "${TOTAL}"
       - name: The mutants that survived, each as the change it made
         if: ${{ !cancelled() }}
         run: |
@@ -149,6 +157,74 @@ jobs:
           for mutant in ${survived}; do
             uv run --locked --no-build --no-sync mutmut show "${mutant}"
           done
+
+  # One answer for the whole mutation run: every shard met the minimum.
+  mutation:
+    name: mutation testing
+    needs: mutation-shards
+    if: ${{ !cancelled() && needs.mutation-shards.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every shard met the minimum
+        env:
+          SHARDS: ${{ needs.mutation-shards.result }}
+        run: |
+          if [ "${SHARDS}" != success ]; then
+            echo "::error::A mutation shard did not meet the minimum or did not finish (${SHARDS})."
+            exit 1
+          fi
+
+  # The image builds for both platforms the release publishes, runs locked
+  # down, read-only, as its own user and with no capability, and answers its
+  # own health check and a request without a key. Nothing is pushed: a version
+  # tag is the only thing that publishes.
+  image:
+    name: image
+    needs: scope
+    if: ${{ !cancelled() && (needs.scope.result != 'success' || needs.scope.outputs.code == 'true') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Builds for both platforms
+        run: |
+          set -euo pipefail
+          docker buildx create --use --name integration-mcp-check
+          docker buildx build --platform linux/amd64,linux/arm64 .
+          docker buildx build --platform linux/amd64 --load --tag integration-mcp:check .
+      - name: Runs locked down, answers its health, and refuses a request without a key
+        run: |
+          set -euo pipefail
+          docker run -d --name integration-mcp-check --read-only --cap-drop ALL \
+            --security-opt no-new-privileges \
+            -e LEMONFIBER_ADDRESS=http://127.0.0.1:9 -e LEMONFIBER_NAMES=localhost,127.0.0.1 \
+            integration-mcp:check
+          healthy=false
+          for _ in $(seq 1 30); do
+            if docker exec integration-mcp-check python -m lemonfiber_mcp health; then
+              healthy=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "${healthy}" != true ]; then
+            docker logs integration-mcp-check
+            echo "::error::the image did not answer its own health check"
+            exit 1
+          fi
+          status="$(docker exec integration-mcp-check python -c 'import ssl, urllib.error, urllib.request
+          try:
+              urllib.request.urlopen("https://127.0.0.1:8443/mcp", context=ssl._create_unverified_context())
+          except urllib.error.HTTPError as answered:
+              print(answered.code)')"
+          if [ "${status}" != 401 ]; then
+            docker logs integration-mcp-check
+            echo "::error::a request without a key was answered ${status}, not 401"
+            exit 1
+          fi
 
   # `pull-requests: write` is what lets the gate close a pull request whose
   # citation is missing or names an identifier that does not exist, rather than
