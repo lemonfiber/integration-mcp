@@ -7,7 +7,6 @@ and CI fails on any difference.
 
 import typing
 
-from ...shared.alert__dashboard import Alert
 from ...shared.alert__dashboard__doctor__error__plugins import ProblemSeverity
 from ...shared.dashboard__front_door import FrontDoorReport
 from ...shared.dashboard__household import HouseholdReport
@@ -86,6 +85,19 @@ class DashboardReadingUnknown(typing.TypedDict):
     reading: typing.Literal["unknown"]
 
 
+class Downloader(typing.TypedDict):
+    """One download client, and whether it is paused."""
+
+    client: str
+    """The client, by the name the stack knows it under."""
+    state: DownloaderState
+    """Whether it is paused, as the client reads it back."""
+
+
+type DownloaderState = typing.Literal["paused", "fetching", "unknown"]
+"""Whether a download client is fetching, as it reads it back."""
+
+
 class Duration(typing.TypedDict):
     nanos: int
     secs: int
@@ -124,6 +136,35 @@ class HealthSummary(typing.TypedDict):
     """The worst thing, named, so the line says something rather than only
     grading. Absent where nothing is wrong.
     """
+
+
+type PanelArray_of_Downloader = PanelArray_of_DownloaderReady | PanelArray_of_DownloaderUnavailable
+"""A panel's content, or the reason its source could not fill it.
+
+The difference between \"this panel is up to date\" and \"this panel's source is
+unreachable\" is the whole of degrading honestly: an unavailable panel says so,
+in its own words, rather than showing stale data as current or blank data as
+zero — and the panels beside it stay live.
+"""
+
+
+class PanelArray_of_DownloaderReady(typing.TypedDict):
+    """The source answered; here is the panel."""
+
+    data: list[Downloader]
+    panel: typing.Literal["ready"]
+
+
+class PanelArray_of_DownloaderUnavailable(typing.TypedDict):
+    """The source could not be reached, for this stated reason."""
+
+    data: PanelArray_of_DownloaderUnavailableData
+    panel: typing.Literal["unavailable"]
+
+
+class PanelArray_of_DownloaderUnavailableData(typing.TypedDict):
+    reason: str
+    """Why the panel could not be filled, in the operator's terms."""
 
 
 type PanelArray_of_Queue = PanelArray_of_QueueReady | PanelArray_of_QueueUnavailable
@@ -340,65 +381,6 @@ class Queue(typing.TypedDict):
     """How many of them are stuck rather than progressing."""
 
 
-class Snapshot(typing.TypedDict):
-    """Everything the dashboard shows at one moment.
-
-    Each source's panel is filled or marked unavailable on its own, so one dead
-    source degrades one region rather than the screen. The surface builds this from
-    what it gathered; the standing is read from the same facts so it cannot
-    disagree with the panels.
-    """
-
-    alerts: list[Alert]
-    """What the operator has been told, newest first: what is owed them where a
-    channel is refusing, then what has already been said.
-    """
-    door: PanelFrontDoorReport
-    """The one address to hand somebody who lives here.
-
-    On the screen rather than only behind a question, because the operator who
-    needs it is not the one who thought to ask: they have just been asked \"what
-    do I open?\" by somebody in the next room. Built from the same reading as the
-    panels beside it, so the screen and `front-door` cannot name different doors.
-    """
-    health: HealthSummary
-    """The one-line health summary — the same computation every other surface
-    uses, so no two of them can grade the same stack differently.
-
-    Always present, unlike the panels: a stack that could not be reached has a
-    summary, and it says `unknown`. An absent summary would leave the operator
-    to infer health from a blank space, which is the one reading this must never
-    be open to.
-    """
-    household: PanelHouseholdReport
-    """What the household has asked for that is not moving.
-
-    On the screen rather than only behind a question, for the reason the door
-    beside it is: a request waiting on a decision or failed after one is waiting
-    on the operator, and an operator who has to think to ask is one who finds out
-    when somebody comes to complain.
-    """
-    queue: PanelArray_of_Queue
-    """The per-service queues."""
-    services: PanelArray_of_Service
-    """Every service and what it is doing."""
-    storage: PanelStorage
-    """The storage picture."""
-    stuck: list[Stuck]
-    """What in the pipeline has stopped, worst first — assessed across the
-    download clients and the \\*arrs together, because the failure that matters
-    most is invisible inside either.
-    """
-    telemetry: Telemetry
-    """Whether the screen itself can be trusted to be current."""
-    transfers: PanelArray_of_Transfer
-    """The active transfers."""
-    vpn: typing.NotRequired[PanelVpn | None]
-    """The VPN, or `None` where no VPN is configured and the panel is omitted
-    rather than shown permanently red.
-    """
-
-
 type Stall = typing.Literal[
     "redownload-loop",
     "repeated-import-failure",
@@ -418,6 +400,11 @@ a summary that leads with the worst category needs no second ranking.
 class Storage(typing.TypedDict):
     """The storage picture: what is free, when it runs out, and whether imports link."""
 
+    config_free: DashboardReading
+    """Bytes free on the volume the services keep their configuration and databases
+    on, which fills apart from the data volume where the two are different disks
+    and stops every service when it does. A [`Reading`] for the same reason.
+    """
     exhaustion: typing.NotRequired[Duration | None]
     """The time until the disk fills at the current rate of the queue draining
     onto it, or `None` where it is not projected to fill.
@@ -506,10 +493,16 @@ __all__ = [
     "DashboardReadingKnown",
     "DashboardReadingStale",
     "DashboardReadingUnknown",
+    "Downloader",
+    "DownloaderState",
     "Duration",
     "Hardlink",
     "HealthStanding",
     "HealthSummary",
+    "PanelArray_of_Downloader",
+    "PanelArray_of_DownloaderReady",
+    "PanelArray_of_DownloaderUnavailable",
+    "PanelArray_of_DownloaderUnavailableData",
     "PanelArray_of_Queue",
     "PanelArray_of_QueueReady",
     "PanelArray_of_QueueUnavailable",
@@ -539,7 +532,6 @@ __all__ = [
     "PanelVpnUnavailable",
     "PanelVpnUnavailableData",
     "Queue",
-    "Snapshot",
     "Stall",
     "Storage",
     "Stuck",

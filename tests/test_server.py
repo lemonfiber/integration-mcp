@@ -83,6 +83,26 @@ async def test_a_read_key_is_offered_no_write(stack: Stack, mcp_client: Client) 
     assert not offered & {"restart", "rehearse_restart", "diagnose", "job"}
 
 
+async def test_a_member_key_is_offered_no_technical_tool_and_reads_the_households_words(
+    stack: Stack,
+    mcp_client: Client,
+) -> None:
+    stack.reply("/api/capabilities", Reply(body=capabilities("member")))
+    listed = await mcp_client.list_tools()
+    written = catalogue.words()
+    assert names(listed) == {"read_requests", "read_held", "read_playing"}
+    assert {tool.name: tool.description for tool in listed.tools} == {
+        name: written[name].household for name in names(listed)
+    }
+
+
+async def test_an_operator_key_reads_the_operators_words(stack: Stack, mcp_client: Client) -> None:
+    stack.reply("/api/capabilities", Reply(body=capabilities("operator")))
+    listed = await mcp_client.list_tools()
+    status = next(tool for tool in listed.tools if tool.name == "read_status")
+    assert status.description == catalogue.words()["read_status"].operator
+
+
 async def test_the_server_introduces_itself_with_its_version_and_how_to_read_its_answers(
     mcp_client: Client,
 ) -> None:
@@ -91,10 +111,12 @@ async def test_the_server_introduces_itself_with_its_version_and_how_to_read_its
     assert mcp_client.instructions == serving.INSTRUCTIONS
 
 
-async def test_before_the_stack_answers_the_one_tool_is_connection_and_it_says_why(elsewhere: Client) -> None:
+async def test_before_the_stack_answers_the_one_tool_is_connection_in_the_households_words(
+    elsewhere: Client,
+) -> None:
     listed = await elsewhere.list_tools()
     assert names(listed) == {"connection"}
-    assert listed.tools[0].description == catalogue.words()["connection"].operator
+    assert listed.tools[0].description == catalogue.words()["connection"].household
     result = await elsewhere.call_tool("connection", {})
     assert result.is_error
     assert texts(result) == [outcome.UNANSWERED]

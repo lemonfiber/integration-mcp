@@ -159,12 +159,16 @@ every hour inside those seven days.
 
 Every read the stack serves is a tool and a resource, and every action a key may call is a tool,
 all generated from the contract the core publishes. The assistant is offered only what the
-key's scope admits, as the stack itself says on every listing. An action that can be rehearsed
-is two tools: the rehearsal writes nothing and answers with an offer, and the action takes that
-offer as its yes. Every write tool says whether it disturbs the running system and whether
+key's scope admits, as the stack itself says on every listing. A household member's key is
+offered their requests, their shelf and what they are playing, described in the household's
+words and never in technical ones. An action that can be rehearsed is two tools: the rehearsal
+writes nothing and answers with an offer, and the action takes that offer as its yes. Where what
+the offer was made on has changed before the action is called, the stack refuses it and the
+assistant is told to rehearse again. Every write tool says whether it disturbs the running system and whether
 repeating it is safe, so your assistant's client can ask you first.
 
-Until the stack has answered, the one tool is `connection`, which says why it has not. A key the
+Until the stack has answered, the one tool is `connection`, which says why it has not, in the
+household's words, since whose key it is is not yet known. A key the
 stack refuses is reported as refused by every tool, with the reminder that a new key is needed,
 and is never sent again.
 

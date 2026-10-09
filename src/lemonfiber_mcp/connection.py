@@ -71,7 +71,7 @@ class Connection:
         self._client = client
         self._clock = clock
         self._withholding = withholding
-        self._audience = catalogue.Audience.OPERATOR
+        self._audience = catalogue.UNKNOWN
         self._held = Held() if held is None else held
 
     @property
@@ -93,6 +93,7 @@ class Connection:
         self._held.capabilities = capabilities
         self._held.read_at = self._clock()
         self._held.failure = None
+        self._audience = catalogue.audience_of(capabilities.scope)
         self._held.tools = catalogue.offered(capabilities, self._audience)
         return None
 

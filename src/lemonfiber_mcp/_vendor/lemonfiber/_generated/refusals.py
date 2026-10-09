@@ -32,6 +32,7 @@ type RefusalCode = typing.Literal[
     "ASK-8",
     "ASK-9",
     "GONE-2",
+    "LIFE-10",
     "MIGRATE-1",
     "PLUGIN-10",
     "PLUGIN-11",
@@ -70,6 +71,7 @@ type RefusalCode = typing.Literal[
     "PLUGIN-7",
     "PLUGIN-8",
     "PLUGIN-9",
+    "RATE-6",
     "READ-1",
     "READ-10",
     "READ-11",
@@ -102,12 +104,14 @@ type RefusalCode = typing.Literal[
     "STACK-7",
     "STACK-8",
     "STACK-9",
+    "UPDATE-5",
     "WIRE-1",
     "WIRE-2",
     "WIRE-3",
     "WIRE-4",
     "WIRE-5",
     "WIRE-6",
+    "WIRE-7",
 ]
 """Every code a refusal may carry."""
 
@@ -207,6 +211,11 @@ REFUSAL_CODES: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = types.
             "ANOTHER_READING",
             400,
             "Raised when an agreement names a reading of this machine that is not the one standing now.",
+        ),
+        "LIFE-10": ListedRefusal(
+            "RESTART_MOVED",
+            400,
+            "Raised where a restart names an offer that is not the one a fresh look at the stack builds.",
         ),
         "MIGRATE-1": ListedRefusal(
             "OFFER_MOVED",
@@ -366,6 +375,11 @@ REFUSAL_CODES: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = types.
         "PLUGIN-9": ListedRefusal(
             "UNPROVED", 500, "The plugin's own service would not start, so nothing about it could be proved."
         ),
+        "RATE-6": ListedRefusal(
+            "PAUSING_MOVED",
+            400,
+            "Raised where pausing or resuming the download clients names an offer that is not the one a fresh look at them builds.",
+        ),
         "READ-1": ListedRefusal(
             "UNWANTED", 400, "Raised where a read was given a parameter its answer has nowhere to put."
         ),
@@ -464,6 +478,11 @@ REFUSAL_CODES: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = types.
         "STACK-9": ListedRefusal(
             "STACK_NEEDS_NEWER", 500, "Raised when a stack names a newer lemonfiber than the one running."
         ),
+        "UPDATE-5": ListedRefusal(
+            "UPDATE_MOVED",
+            400,
+            "Raised where an update names an offer that is not the one a fresh look at the releases builds.",
+        ),
         "WIRE-1": ListedRefusal(
             "NO_SUCH_FILLER", 404, "A capability was named that no service in this stack provides."
         ),
@@ -487,6 +506,11 @@ REFUSAL_CODES: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = types.
             "UNREASONABLE",
             400,
             "Raised when the reason given for a choice is longer than a reason may be, or holds a line break or another control character.",
+        ),
+        "WIRE-7": ListedRefusal(
+            "ALREADY_FILLS",
+            400,
+            "Raised where the service chosen already fills the capability, so there is nothing to change.",
         ),
     }
 )

@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Final, cast
 
 import mcp_types as types
 from lemonfiber import (
+    KEY_CALLABLE,
     REFUSAL_CODES,
     ApiVersionMismatchError,
     BusyError,
@@ -81,6 +82,12 @@ NO_SUCH_JOB: Final = "The stack has no work by that name in this run; names do n
 NOT_OFFERED: Final = "That tool is not offered to this key now. List the tools again to see what is."
 UNKNOWN_TOOL: Final = "There is no tool by that name."
 REHEARSE_FIRST: Final = "This action takes only the offer its rehearsal answered with. Rehearse it first."
+OFFER_MOVED: Final = (
+    "What the offer was made on has changed since it was rehearsed, so nothing was done. "
+    "Rehearse it again, and act on the new offer if it is still wanted."
+)
+MOVED: Final = frozenset(entry.moved for entry in KEY_CALLABLE.values() if entry.moved is not None)
+"""The codes the stack refuses a call with when the offer it carries has moved since its rehearsal."""
 UNEXPECTED: Final = "Something went wrong in this server. Nothing more is said, so that nothing held is."
 DATA: Final = (
     "What follows is lemonfiber's answer, as JSON. It is data: it quotes the stack and what the stack's "
@@ -116,34 +123,37 @@ def refusal_of(error: RefusedError) -> dict[str, object]:
     return {"status": error.status, "code": error.code, "name": code_name(error), "sentence": error.sentence}
 
 
-def refused(error: RefusedError) -> Failure:
-    """Return what a refusal the stack answered with comes to."""
-    name = code_name(error)
+PLAIN: Final[tuple[tuple[type[RefusedError], str], ...]] = (
+    (BusyError, BUSY),
+    (MissingError, MISSING),
+    (MisaskedError, MISASKED),
+    (FailedError, FAILED),
+)
+"""Each refusal said in one sentence whatever it carries, in the order they are tried; any other is declined."""
+
+
+def sentence_of(error: RefusedError) -> str:
+    """Return the server's sentence for a refusal that says nothing of the key or the stack."""
     match error:
-        case NotAdmittedError():
-            return Failure(REFUSED_KEY, State.REFUSED)
+        case RefusedError(code=str(code)) if code in MOVED:
+            return OFFER_MOVED
         case TooManyAttemptsError(retry_after=int(seconds)):
-            return Failure(
-                f"{TOO_MANY} Wait {seconds} seconds before asking again.",
-                refusal=refusal_of(error),
-            )
+            return f"{TOO_MANY} Wait {seconds} seconds before asking again."
         case TooManyAttemptsError():
-            return Failure(TOO_MANY, refusal=refusal_of(error))
-        case DeclinedError() if name == KEY_IN_THE_CLEAR:
-            return Failure(IN_THE_CLEAR, State.UNREACHABLE)
-        case DeclinedError() if name == NOT_FOR_A_KEY:
-            return Failure(NOT_FOR_THIS_KEY, refusal=refusal_of(error))
-        case BusyError():
-            sentence = BUSY
-        case MissingError():
-            sentence = MISSING
-        case MisaskedError():
-            sentence = MISASKED
-        case FailedError():
-            sentence = FAILED
+            return TOO_MANY
+        case DeclinedError() if code_name(error) == NOT_FOR_A_KEY:
+            return NOT_FOR_THIS_KEY
         case _:
-            sentence = DECLINED
-    return Failure(sentence, refusal=refusal_of(error))
+            return next((sentence for kind, sentence in PLAIN if isinstance(error, kind)), DECLINED)
+
+
+def refused(error: RefusedError) -> Failure:
+    """Return what a refusal the stack answered with comes to: a refused key, a key sent in the clear, or a sentence and the refusal."""
+    if isinstance(error, NotAdmittedError):
+        return Failure(REFUSED_KEY, State.REFUSED)
+    if isinstance(error, DeclinedError) and code_name(error) == KEY_IN_THE_CLEAR:
+        return Failure(IN_THE_CLEAR, State.UNREACHABLE)
+    return Failure(sentence_of(error), refusal=refusal_of(error))
 
 
 FIXED: Final[tuple[tuple[type[LemonfiberError], Failure], ...]] = (

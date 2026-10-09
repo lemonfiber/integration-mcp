@@ -23,15 +23,17 @@ class KeyCallable(typing.NamedTuple):
     """Whether it takes `dry_run`, so it can be rehearsed before the real call is offered."""
     idempotent: bool
     """Whether calling it again with the same arguments leaves the stack as calling it once did."""
+    moved: str | None = None
+    """The code a call is refused with when the offer it carries has moved since its rehearsal, or None."""
 
 
 KEY_CALLABLE: typing.Final[typing.Mapping[KeyCallableAction, KeyCallable]] = types.MappingProxyType(
     {
-        "restart": KeyCallable(True, True, True),
-        "diagnose": KeyCallable(True, False, False),
-        "update": KeyCallable(True, True, False),
-        "downloads-pause": KeyCallable(False, True, True),
-        "downloads-resume": KeyCallable(False, True, True),
+        "restart": KeyCallable(True, True, True, "LIFE-10"),
+        "diagnose": KeyCallable(True, False, False, None),
+        "update": KeyCallable(True, True, False, "UPDATE-5"),
+        "downloads-pause": KeyCallable(False, True, True, "RATE-6"),
+        "downloads-resume": KeyCallable(False, True, True, "RATE-6"),
     }
 )
 """What the contract says of each action a key may call, in the order it lists them."""

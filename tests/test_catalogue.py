@@ -16,7 +16,7 @@ from lemonfiber_mcp.catalogue import Audience
 from lemonfiber_mcp.shapes import Reach, ToolShape
 
 if TYPE_CHECKING:
-    from lemonfiber._generated import CapabilityState
+    from lemonfiber._generated import CapabilityState, CredentialScope
 
 ROOT: Final = pathlib.Path(__file__).resolve().parent.parent
 CONTRACT: Final = ROOT / "contract" / "web-api"
@@ -24,9 +24,9 @@ HOUSEHOLD_TOOLS: Final = frozenset({"read_requests", "read_held", "read_playing"
 """The tools a household member is offered words for: their requests, their shelf, what they are playing, and the connection."""
 
 
-def capability_set(states: dict[str, CapabilityState]) -> CapabilitySet:
-    """Return a capability set as the client reads one."""
-    return CapabilitySet(builtin_types.MappingProxyType(states), datetime.datetime.now(datetime.UTC))
+def capability_set(states: dict[str, CapabilityState], scope: CredentialScope = "operator") -> CapabilitySet:
+    """Return a capability set as the client reads one, for a credential of a scope."""
+    return CapabilitySet(builtin_types.MappingProxyType(states), datetime.datetime.now(datetime.UTC), scope)
 
 
 def contract(name: str) -> list[dict[str, object]]:
@@ -109,6 +109,19 @@ def test_a_member_is_not_offered_the_household_or_another_members_name() -> None
     held = catalogue.tool(catalogue.SHAPES["read_held"], Audience.HOUSEHOLD)
     assert held is not None
     assert set(held.input_schema["properties"]) == {"most"}
+
+
+@pytest.mark.parametrize(
+    ("scope", "audience"),
+    [
+        ("member", Audience.HOUSEHOLD),
+        ("operator", Audience.OPERATOR),
+        ("read", Audience.OPERATOR),
+        ("act", Audience.OPERATOR),
+    ],
+)
+def test_a_credential_reads_the_words_of_its_scope(scope: CredentialScope, audience: Audience) -> None:
+    assert catalogue.audience_of(scope) is audience
 
 
 def test_a_tool_with_no_household_words_is_not_offered_to_a_member() -> None:

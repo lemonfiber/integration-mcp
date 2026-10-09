@@ -58,6 +58,11 @@ class StackUpdateReport(typing.TypedDict):
     """What the download clients are still working on, named so an operator can
     tell whether the thing they have been waiting for is among them.
     """
+    offer: str
+    """The offer this answers: every step, from the release each service stands on to
+    the one it would move to, named so that an update carrying it back takes those
+    steps or is refused.
+    """
     rehearsed: bool
     """Whether this was a rehearsal: what would have happened, with none of it done.
 
