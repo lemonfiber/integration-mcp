@@ -1,0 +1,88 @@
+# Publish the HTTP mode's image when a version is tagged: both platforms, as
+# one index, at ghcr.io/lemonfiber/integration-mcp:<version>, with a signed
+# attestation of how it was built.
+#
+# The version is the tag's. It is written into the package the image holds,
+# so the server says which release it is; `pyproject.toml` stays at 0.0.0 in
+# the tree. Stdio needs no release: it runs from this repository.
+name: release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: read
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      # Pushing the image. This job is the only one in the repository that may.
+      packages: write
+      # Signing the image's attestation.
+      id-token: write
+      attestations: write
+    steps:
+      # The tag reaches a registry tag below, so its shape is settled before
+      # anything uses it.
+      - name: Refuse a tag that is not a version
+        id: tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if ! printf '%s' "${TAG}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::error::refusing to publish for a tag that is not a version: ${TAG}"
+            exit 1
+          fi
+          printf 'version=%s\n' "${TAG#v}" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Plain buildx rather than an action: the final stage only copies, so both
+      # platforms build without an emulator on the builder the runner has. Its
+      # own unsigned provenance is left off, because the attestation below is
+      # the signed one.
+      - name: Build and push the image
+        id: pushed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ACTOR: ${{ github.actor }}
+          VERSION: ${{ steps.tag.outputs.version }}
+          REVISION: ${{ github.sha }}
+          IMAGE: ghcr.io/${{ github.repository }}
+        run: |
+          set -euo pipefail
+          printf '%s' "${GH_TOKEN}" | docker login ghcr.io --username "${ACTOR}" --password-stdin
+          docker buildx create --use --name integration-mcp-release
+          docker buildx build . \
+            --platform linux/amd64,linux/arm64 \
+            --build-arg "VERSION=${VERSION}" \
+            --provenance=false --sbom=false \
+            --label "org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}" \
+            --label "org.opencontainers.image.version=${VERSION}" \
+            --label "org.opencontainers.image.revision=${REVISION}" \
+            --tag "${IMAGE}:${VERSION}" \
+            --metadata-file "${RUNNER_TEMP}/image.json" \
+            --push
+          digest="$(jq -r '."containerimage.digest"' "${RUNNER_TEMP}/image.json")"
+          if ! printf '%s' "${digest}" | grep -Eq '^sha256:[0-9a-f]{64}$'; then
+            echo "::error::the build reported no digest for what it pushed: ${digest}"
+            exit 1
+          fi
+          # Both platforms, read back from the registry rather than assumed.
+          platforms="$(docker buildx imagetools inspect "${IMAGE}@${digest}" --raw \
+            | jq -r '[.manifests[].platform | "\(.os)/\(.architecture)"] | sort | join(",")')"
+          if [ "${platforms}" != "linux/amd64,linux/arm64" ]; then
+            echo "::error::the pushed image holds ${platforms}, not linux/amd64 and linux/arm64"
+            exit 1
+          fi
+          printf 'digest=%s\n' "${digest}" >> "$GITHUB_OUTPUT"
+      - name: Attest the image
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-name: ghcr.io/${{ github.repository }}
+          subject-digest: ${{ steps.pushed.outputs.digest }}
+          push-to-registry: true
+          create-storage-record: false

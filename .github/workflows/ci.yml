@@ -150,6 +150,57 @@ jobs:
             uv run --locked --no-build --no-sync mutmut show "${mutant}"
           done
 
+  # The image builds for both platforms the release publishes, runs locked
+  # down, read-only, as its own user and with no capability, and answers its
+  # own health check and a request without a key. Nothing is pushed: a version
+  # tag is the only thing that publishes.
+  image:
+    name: image
+    needs: scope
+    if: ${{ !cancelled() && (needs.scope.result != 'success' || needs.scope.outputs.code == 'true') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Builds for both platforms
+        run: |
+          set -euo pipefail
+          docker buildx create --use --name integration-mcp-check
+          docker buildx build --platform linux/amd64,linux/arm64 .
+          docker buildx build --platform linux/amd64 --load --tag integration-mcp:check .
+      - name: Runs locked down, answers its health, and refuses a request without a key
+        run: |
+          set -euo pipefail
+          docker run -d --name integration-mcp-check --read-only --cap-drop ALL \
+            --security-opt no-new-privileges \
+            -e LEMONFIBER_ADDRESS=http://127.0.0.1:9 -e LEMONFIBER_NAMES=localhost,127.0.0.1 \
+            integration-mcp:check
+          healthy=false
+          for _ in $(seq 1 30); do
+            if docker exec integration-mcp-check python -m lemonfiber_mcp health; then
+              healthy=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "${healthy}" != true ]; then
+            docker logs integration-mcp-check
+            echo "::error::the image did not answer its own health check"
+            exit 1
+          fi
+          status="$(docker exec integration-mcp-check python -c 'import ssl, urllib.error, urllib.request
+          try:
+              urllib.request.urlopen("https://127.0.0.1:8443/mcp", context=ssl._create_unverified_context())
+          except urllib.error.HTTPError as answered:
+              print(answered.code)')"
+          if [ "${status}" != 401 ]; then
+            docker logs integration-mcp-check
+            echo "::error::a request without a key was answered ${status}, not 401"
+            exit 1
+          fi
+
   # `pull-requests: write` is what lets the gate close a pull request whose
   # citation is missing or names an identifier that does not exist, rather than
   # only going red at it. A job-level block replaces the workflow-level default

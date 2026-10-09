@@ -30,8 +30,9 @@ ignore = [
 # `assert` is how pytest states what it checks, a test names the status or count
 # it expects as the number itself, a test's name is its description, and a test
 # takes every fixture and parameter it is given as an argument, some of them for
-# what they set up rather than for a value.
-"tests/**" = ["S101", "PLR2004", "D103", "PLR0913", "PLR0917", "ARG001"]
+# what they set up rather than for a value. A test names the addresses a server
+# listening on every interface is given, and binds none of them.
+"tests/**" = ["S101", "PLR2004", "D103", "PLR0913", "PLR0917", "ARG001", "S104"]
 # The vendoring script, and the test that builds a repository for it to read,
 # run git, found on the PATH, with arguments they write themselves.
 "{scripts/vendor_sdk.py,tests/test_vendor_sdk.py}" = ["S603", "S607"]

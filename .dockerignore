@@ -1,0 +1,9 @@
+# The image is built from the project's metadata, its lockfile and `src/`;
+# nothing else is sent to the builder.
+*
+!pyproject.toml
+!uv.lock
+!README.md
+!LICENSE
+!src/
+src/**/__pycache__

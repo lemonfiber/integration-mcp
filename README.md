@@ -9,8 +9,8 @@ It reaches the stack only through [sdk-python](https://github.com/lemonfiber/sdk
 an integration key the operator mints, so an assistant can do exactly what that key allows and
 nothing more. It never asks for, accepts or stores the operator's password.
 
-The server speaks stdio, for an assistant on your own machine. Streamable HTTP, for an
-assistant on a phone or in a browser, is not in this repository yet.
+The server speaks stdio, for an assistant on your own machine, and Streamable HTTP over TLS,
+for assistants elsewhere on your network or beyond it.
 
 ## Set it up
 
@@ -53,6 +53,60 @@ assistant on a phone or in a browser, is not in this repository yet.
 
 The key is never taken on the command line, where any process listing would show it, and
 nothing but an integration key is accepted.
+
+## Serve it over HTTP
+
+The HTTP mode serves assistants anywhere, from the image each release publishes for amd64 and
+arm64 at `ghcr.io/lemonfiber/integration-mcp`. It holds no key of its own: every request brings
+the person's key as `Authorization: Bearer <key>`, the stack is asked with that key, and a
+request without one is refused before the protocol sees it. It refuses to start where
+`LEMONFIBER_KEY` or `LEMONFIBER_KEY_FILE` is set. It answers only over TLS.
+
+```
+$ docker run -d --name lemonfiber-mcp -p 8443:8443 \
+    -e LEMONFIBER_ADDRESS=https://192.168.1.42:8443 -e LEMONFIBER_PIN=<the stack's pin> \
+    -e LEMONFIBER_NAMES=mcp.home.example,192.168.1.50 \
+    -v lemonfiber-mcp:/var/lib/lemonfiber-mcp ghcr.io/lemonfiber/integration-mcp:<version>
+```
+
+The protocol is served at `https://<name>:8443/mcp`. The image runs as a user of its own, keeps
+its certificates in the volume, and checks its own health with `lemonfiber-mcp health`. Outside
+the image, `lemonfiber-mcp http` serves the same way.
+
+| Setting | Holds |
+|---|---|
+| `LEMONFIBER_ADDRESS`, `LEMONFIBER_PIN` | The stack, as for stdio |
+| `LEMONFIBER_LISTEN` | Where to listen, as `0.0.0.0:8443` or `[::]:8443`. The image sets `0.0.0.0:8443`; outside it there is no default |
+| `LEMONFIBER_NAMES` | Every host name and address assistants reach the server by, separated by commas. Required in every mode but `files` |
+| `LEMONFIBER_TLS_MODE` | How the certificate comes: `pinned` where nothing is chosen, `private-ca`, or `files` |
+| `LEMONFIBER_TLS_CERTIFICATE`, `LEMONFIBER_TLS_PRIVATE_KEY` | Your own certificate chain and key. Setting both chooses `files` |
+| `LEMONFIBER_TLS_KEY_TYPE` | The served certificate's key: `ec-p256` by default, `ec-p384`, `rsa-2048` or `rsa-3072` |
+| `LEMONFIBER_STATE` | Where certificates are kept: `/var/lib/lemonfiber-mcp` by default, a directory only the server's user may open |
+
+### Who can check its certificate
+
+The server says at every start which mode it serves and who can check its certificate.
+
+| Mode | The certificate | Who can check it |
+|---|---|---|
+| `pinned` | Made by the server for `LEMONFIBER_NAMES`, valid for ten years, its fingerprint printed at every start | Only a client given that fingerprint |
+| `private-ca` | Issued for 30 days by a root the server makes, which may sign only for `LEMONFIBER_NAMES` and only for TLS servers | Only a device that installed the root, printed at start and served at `/root.pem` |
+| `files` | Yours, read again when either file changes | Whoever trusts the authority that issued it |
+
+An assistant on a phone or in a browser is reached through its provider's servers, and the
+provider connects only to a certificate a public authority issued. With `pinned` or
+`private-ca` it cannot connect; with `files` it can, where your certificate is publicly trusted.
+`acme`, which the certificates contract also names, is refused by this version.
+
+`lemonfiber-mcp pinned replace` makes a new pinned certificate, which every client must then be
+given again. `lemonfiber-mcp ca replace` makes a replacement root beside the one in force, and
+`lemonfiber-mcp ca switch` puts it in force once it is installed everywhere. A root with a year
+of its life left makes its replacement itself, and switches to it 30 days before it ends.
+
+`GET /health` answers the mode, when the certificate expires and how its last check went,
+without a key: `200`, or `503` once the certificate in force has seven days or less left.
+Renewal is tried every minute it is due, and a failure is logged as an error, then as critical
+every hour inside those seven days.
 
 ## What the assistant sees and does
 

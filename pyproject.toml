@@ -13,12 +13,17 @@ classifiers = [
     "Typing :: Typed",
 ]
 # `aiohttp` and `urllib3` are the vendored sdk-python's own two dependencies,
-# which it imports from its package root.
+# which it imports from its package root; every other is imported here.
 dependencies = [
     "aiohttp>=3.14",
+    "anyio>=4.15",
+    "cryptography>=50",
+    "jsonschema>=4.26",
     "mcp>=2.3,<3",
+    "mcp-types>=2.3,<3",
+    "starlette>=1.7",
     "urllib3>=2.5",
-    "uvicorn>=0.37",
+    "uvicorn>=0.54",
 ]
 
 [project.scripts]
@@ -33,6 +38,7 @@ dev = [
     "mutmut>=3.8",
     "pyright[nodejs]>=1.1.414",
     "pytest>=9.1",
+    "httpx2>=2.13",
     "pytest-cov>=7.1",
     "ruff>=0.16",
     "rust-just>=1.58",

@@ -9,6 +9,7 @@ key is refused nothing is sent with it again, and every tool says so.
 
 import datetime
 import urllib.parse
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Final, cast
 
 import jsonschema
@@ -41,6 +42,21 @@ def utc_now() -> datetime.datetime:
     return datetime.datetime.now(datetime.UTC)
 
 
+@dataclass(slots=True)
+class Held:
+    """What is known of one credential between its calls: the stack's last word on it, and never the credential.
+
+    Over stdio one is held for the life of the process. Over HTTP one is held
+    for each key a request brings, by its digest, so a refused key stays
+    refused and a reading of the capabilities is not asked for on every call.
+    """
+
+    capabilities: CapabilitySet | None = None
+    read_at: datetime.datetime | None = None
+    tools: dict[str, types.Tool] = field(default_factory=dict[str, types.Tool])
+    failure: Failure | None = None
+
+
 class Connection:
     """What one credential is offered, and its calls to the stack."""
 
@@ -48,55 +64,53 @@ class Connection:
         self,
         client: AsyncClient,
         withholding: Withholding,
+        held: Held | None = None,
         clock: Callable[[], datetime.datetime] = utc_now,
     ) -> None:
-        """Hold the client the credential asks through; nothing is asked until a tool is listed or called."""
+        """Hold the client the credential asks through and what is known of it; nothing is asked until a tool is listed or called."""
         self._client = client
         self._clock = clock
         self._withholding = withholding
         self._audience = catalogue.Audience.OPERATOR
-        self._capabilities: CapabilitySet | None = None
-        self._read_at: datetime.datetime | None = None
-        self._tools: dict[str, types.Tool] = {}
-        self._failure: Failure | None = None
+        self._held = Held() if held is None else held
 
     @property
     def state(self) -> State | None:
         """Return where this credential stands with the stack, or None before it has been asked anything."""
-        if self._failure is not None and self._failure.state is not None:
-            return self._failure.state
-        return None if self._capabilities is None else State.CONNECTED
+        if self._held.failure is not None and self._held.failure.state is not None:
+            return self._held.failure.state
+        return None if self._held.capabilities is None else State.CONNECTED
 
     async def refresh(self) -> Failure | None:
         """Read the capabilities again, unless the key was refused; return why not, where they could not be read."""
         if self.state is State.REFUSED:
-            return self._failure
+            return self._held.failure
         try:
             capabilities = await self._client.capabilities()
         except LemonfiberError as error:
-            self._failure = outcome.failure_of(error)
-            return self._failure
-        self._capabilities = capabilities
-        self._read_at = self._clock()
-        self._failure = None
-        self._tools = catalogue.offered(capabilities, self._audience)
+            self._held.failure = outcome.failure_of(error)
+            return self._held.failure
+        self._held.capabilities = capabilities
+        self._held.read_at = self._clock()
+        self._held.failure = None
+        self._held.tools = catalogue.offered(capabilities, self._audience)
         return None
 
     def offered(self) -> dict[str, types.Tool]:
         """Return the tools the last listing offered, by name, without asking the stack."""
-        return dict(self._tools)
+        return dict(self._held.tools)
 
     async def tools(self) -> list[types.Tool]:
         """Return the tools offered now: the capabilities' answer, the last list, or `connection` alone."""
         await self.refresh()
-        return list((self._tools or catalogue.connection_only(self._audience)).values())
+        return list((self._held.tools or catalogue.connection_only(self._audience)).values())
 
     async def resources(self) -> tuple[list[types.Resource], list[types.ResourceTemplate]]:
         """Return the resource and the resource template of every read tool offered now."""
         await self.refresh()
         addressed = [
             (name, tool.description, address)
-            for name, tool in self._tools.items()
+            for name, tool in self._held.tools.items()
             if (address := catalogue.SHAPES[name].resource) is not None
         ]
         plain = [
@@ -112,7 +126,7 @@ class Connection:
         return plain, templates
 
     async def _fresh(self) -> Failure | None:
-        if self._read_at is None or self._clock() - self._read_at > FRESH_FOR:
+        if self._held.read_at is None or self._clock() - self._held.read_at > FRESH_FOR:
             return await self.refresh()
         return None
 
@@ -145,7 +159,7 @@ class Connection:
         failure = await self.refresh()
         if failure is None:
             return outcome.answered(
-                {"state": State.CONNECTED.value, "tools": len(self._tools)},
+                {"state": State.CONNECTED.value, "tools": len(self._held.tools)},
                 self._withholding,
             )
         return outcome.failed(failure, self._withholding)
@@ -153,9 +167,9 @@ class Connection:
     async def _ready(self, shape: ToolShape, arguments: Mapping[str, object]) -> Failure | None:
         """Return why a call cannot be sent, or None where it can: refused, unread, not offered, or misasked."""
         if self.state is State.REFUSED:
-            return self._failure
+            return self._held.failure
         stale = await self._fresh()
-        tool = self._tools.get(shape.name)
+        tool = self._held.tools.get(shape.name)
         if stale is not None or tool is None:
             return stale or Failure(outcome.NOT_OFFERED)
         if shape.reach is Reach.ACTION and stack.OFFER in shape.parameters and stack.OFFER not in arguments:
@@ -176,9 +190,9 @@ class Connection:
         except stack.NotAWholeNumberError as refused:
             return Failure(ARGUMENTS_REFUSED + str(refused))
         except LemonfiberError as error:
-            self._failure = outcome.failure_of(error)
-            return self._failure
-        self._failure = None
+            self._held.failure = outcome.failure_of(error)
+            return self._held.failure
+        self._held.failure = None
         return answer
 
     async def _dispatch(self, shape: ToolShape, arguments: Mapping[str, object]) -> object:
