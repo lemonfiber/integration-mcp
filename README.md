@@ -77,7 +77,7 @@ the image, `lemonfiber-mcp http` serves the same way.
 |---|---|
 | `LEMONFIBER_ADDRESS`, `LEMONFIBER_PIN` | The stack, as for stdio |
 | `LEMONFIBER_LISTEN` | Where to listen, as `0.0.0.0:8443` or `[::]:8443`. The image sets `0.0.0.0:8443`; outside it there is no default |
-| `LEMONFIBER_NAMES` | Every host name and address assistants reach the server by, separated by commas. Required in every mode but `files` |
+| `LEMONFIBER_NAMES` | Every host name and address assistants reach the server by, separated by commas. Required in every mode but `files`. A wildcard such as `*.home.example` is refused: a key for it would be good for every name under the domain |
 | `LEMONFIBER_TLS_MODE` | How the certificate comes: `pinned` where nothing is chosen, `private-ca`, or `files` |
 | `LEMONFIBER_TLS_CERTIFICATE`, `LEMONFIBER_TLS_PRIVATE_KEY` | Your own certificate chain and key. Setting both chooses `files` |
 | `LEMONFIBER_TLS_KEY_TYPE` | The served certificate's key: `ec-p256` by default, `ec-p384`, `rsa-2048` or `rsa-3072` |

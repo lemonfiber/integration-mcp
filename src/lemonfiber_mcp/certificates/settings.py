@@ -29,6 +29,8 @@ HOST_NAME: Final = re.compile(
     r"(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*",
 )
 """A host name: dot-separated labels of letters, digits and inner hyphens, lower-cased."""
+WILDCARD: Final = "*."
+"""How a wildcard name begins, which `LEMONFIBER_NAMES` refuses."""
 
 
 class Mode(enum.StrEnum):
@@ -99,6 +101,13 @@ def name_of(written: str) -> Name:
     except ValueError:
         pass
     host = written.lower().rstrip(".")
+    if host.startswith(WILDCARD):
+        domain = host.removeprefix(WILDCARD)
+        msg = (
+            f"{NAMES} holds {written!r}, a wildcard. A certificate names exactly this server's names: "
+            f"a key for a wildcard would be good for every name under {domain}. Name each host instead."
+        )
+        raise TlsSettingsError(msg)
     if not HOST_NAME.fullmatch(host):
         msg = f"{NAMES} holds {written!r}, which is neither a host name nor an address."
         raise TlsSettingsError(msg)

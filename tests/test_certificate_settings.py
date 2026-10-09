@@ -54,6 +54,10 @@ def test_names_are_lower_cased_and_given_once() -> None:
         ({settings.MODE: "self-signed", settings.NAMES: "a.example"}, "is 'self-signed'"),
         ({}, "LEMONFIBER_NAMES is not set"),
         ({settings.NAMES: "not a name!"}, "neither a host name nor an address"),
+        (
+            {settings.NAMES: "mcp.home.example, *.Home.example"},
+            r"holds '\*\.Home\.example', a wildcard\. .* would be good for every name under home\.example\.",
+        ),
         ({settings.MODE: "acme", settings.NAMES: "192.168.1.42"}, "issues for host names"),
         ({settings.NAMES: "a.example", settings.KEY_TYPE: "dsa"}, "is 'dsa'"),
     ],
