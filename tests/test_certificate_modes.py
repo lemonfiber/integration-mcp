@@ -10,7 +10,10 @@ from cryptography import x509
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-from lemonfiber_mcp.certificates import making, modes, state
+from lemonfiber_mcp.certificates import making, modes, sources, state
+from lemonfiber_mcp.certificates.acme import AcmeSource
+from lemonfiber_mcp.certificates.acme_settings import CHALLENGE as LEMONFIBER_ACME_CHALLENGE
+from lemonfiber_mcp.certificates.alpn import Challenges
 from lemonfiber_mcp.certificates.modes import CertificateError
 from lemonfiber_mcp.certificates.settings import KeyType, Mode, Name, Tls
 
@@ -246,14 +249,19 @@ def test_a_key_of_a_kind_this_server_does_not_make_is_refused(tmp_path: pathlib.
     [(Mode.PINNED, modes.Pinned), (Mode.PRIVATE_CA, modes.PrivateCa)],
 )
 def test_each_mode_has_its_source(tmp_path: pathlib.Path, mode: Mode, kind: type) -> None:
-    assert isinstance(modes.source_of(tls_of(tmp_path, mode)), kind)
+    assert isinstance(sources.source_of(tls_of(tmp_path, mode), {}, Challenges(tmp_path)), kind)
 
 
 def test_the_operators_files_have_their_source(tmp_path: pathlib.Path) -> None:
-    assert isinstance(modes.source_of(files_tls(tmp_path)), modes.Files)
+    assert isinstance(sources.source_of(files_tls(tmp_path), {}, Challenges(tmp_path)), modes.Files)
 
 
-def test_acme_is_refused_by_this_version(tmp_path: pathlib.Path) -> None:
+def test_an_authority_has_its_source(tmp_path: pathlib.Path) -> None:
     tls = tls_of(tmp_path, Mode.ACME, ("mcp.example.org",))
-    with pytest.raises(CertificateError, match="does not serve yet"):
-        modes.source_of(tls)
+    assert isinstance(sources.source_of(tls, {}, Challenges(tmp_path)), AcmeSource)
+
+
+def test_dns_01_is_refused_by_this_version(tmp_path: pathlib.Path) -> None:
+    tls = tls_of(tmp_path, Mode.ACME, ("mcp.example.org",))
+    with pytest.raises(CertificateError, match="does not answer yet"):
+        sources.source_of(tls, {LEMONFIBER_ACME_CHALLENGE: "dns-01"}, Challenges(tmp_path))

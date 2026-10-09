@@ -112,6 +112,10 @@ jobs:
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       - name: Install exactly what the lockfile says
         run: uv sync --locked --no-build
+      # The ACME tests ask Pebble, the authority Let's Encrypt publishes for
+      # testing; without it they are skipped and coverage falls short.
+      - name: Pebble, the test authority
+        run: scripts/pebble.sh >> "$GITHUB_ENV"
       - name: The suite, with 100% line and branch coverage
         run: uv run --locked --no-build --no-sync just coverage
 
@@ -144,6 +148,8 @@ jobs:
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       - name: Install exactly what the lockfile says
         run: uv sync --locked --no-build
+      - name: Pebble, the test authority
+        run: scripts/pebble.sh >> "$GITHUB_ENV"
       - name: Mutate this shard, and hold its score to the minimum
         env:
           INDEX: ${{ strategy.job-index }}

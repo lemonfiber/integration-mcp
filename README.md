@@ -78,7 +78,7 @@ the image, `lemonfiber-mcp http` serves the same way.
 | `LEMONFIBER_ADDRESS`, `LEMONFIBER_PIN` | The stack, as for stdio |
 | `LEMONFIBER_LISTEN` | Where to listen, as `0.0.0.0:8443` or `[::]:8443`. The image sets `0.0.0.0:8443`; outside it there is no default |
 | `LEMONFIBER_NAMES` | Every host name and address assistants reach the server by, separated by commas. Required in every mode but `files`. A wildcard such as `*.home.example` is refused: a key for it would be good for every name under the domain |
-| `LEMONFIBER_TLS_MODE` | How the certificate comes: `pinned` where nothing is chosen, `private-ca`, or `files` |
+| `LEMONFIBER_TLS_MODE` | How the certificate comes: `pinned` where nothing is chosen, `acme`, `private-ca`, or `files` |
 | `LEMONFIBER_TLS_CERTIFICATE`, `LEMONFIBER_TLS_PRIVATE_KEY` | Your own certificate chain and key. Setting both chooses `files` |
 | `LEMONFIBER_TLS_KEY_TYPE` | The served certificate's key: `ec-p256` by default, `ec-p384`, `rsa-2048` or `rsa-3072` |
 | `LEMONFIBER_STATE` | Where certificates are kept: `/var/lib/lemonfiber-mcp` by default, a directory only the server's user may open |
@@ -91,12 +91,33 @@ The server says at every start which mode it serves and who can check its certif
 |---|---|---|
 | `pinned` | Made by the server for `LEMONFIBER_NAMES`, valid for ten years, its fingerprint printed at every start | Only a client given that fingerprint |
 | `private-ca` | Issued for 30 days by a root the server makes, which may sign only for `LEMONFIBER_NAMES` and only for TLS servers | Only a device that installed the root, printed at start and served at `/root.pem` |
+| `acme` | Issued by an ACME authority, Let's Encrypt where none is named, and renewed by the server | Every client, where the authority is public; whoever trusts its root, where it is your own |
 | `files` | Yours, read again when either file changes | Whoever trusts the authority that issued it |
 
 An assistant on a phone or in a browser is reached through its provider's servers, and the
 provider connects only to a certificate a public authority issued. With `pinned` or
-`private-ca` it cannot connect; with `files` it can, where your certificate is publicly trusted.
-`acme`, which the certificates contract also names, is refused by this version.
+`private-ca` it cannot connect; with `acme` from a public authority, or `files` holding a
+publicly trusted certificate, it can.
+
+### A certificate from an ACME authority
+
+**Choosing `acme` is agreeing to the authority's terms of service.** The server writes their
+address to its log when it registers its account.
+
+| Setting | Holds |
+|---|---|
+| `LEMONFIBER_ACME_DIRECTORY` | Any RFC 8555 directory: `https://acme-v02.api.letsencrypt.org/directory` by default, or your own, such as step-ca |
+| `LEMONFIBER_ACME_ROOTS` | A PEM file of the roots your own authority's directory is checked against |
+| `LEMONFIBER_ACME_CONTACT` | A `mailto:` address the authority may write to |
+| `LEMONFIBER_ACME_EAB_KID`, `LEMONFIBER_ACME_EAB_HMAC_FILE` | An External Account Binding, for an authority that requires one: its key identifier, and a file holding its HMAC key |
+| `LEMONFIBER_ACME_CHALLENGE` | `tls-alpn-01` by default, answered on the port the server serves on, or `http-01`, which needs port 80 |
+
+With `http-01` the server opens port 80 while an order is pending, answers the challenge and
+nothing else, and closes it again; publish it with `-p 80:80`. `dns-01` is refused by this
+version. Until the first certificate is issued the server serves one standing in, which no
+client trusts, and its health answer is `503`. A certificate is renewed when the authority's
+renewal information says, or once a third of its lifetime is left; a failed attempt is tried
+again after a minute, doubling to six hours, never sooner than the authority asks.
 
 `lemonfiber-mcp pinned replace` makes a new pinned certificate, which every client must then be
 given again. `lemonfiber-mcp ca replace` makes a replacement root beside the one in force, and

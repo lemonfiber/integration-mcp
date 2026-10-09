@@ -27,8 +27,10 @@ from mcp.server.stdio import stdio_server
 
 from lemonfiber_mcp import serving, settings, web
 from lemonfiber_mcp.certificates import making, modes, probe, state
+from lemonfiber_mcp.certificates.alpn import Challenges
 from lemonfiber_mcp.certificates.manager import Certificates, utc_now
 from lemonfiber_mcp.certificates.settings import Mode, Tls, TlsSettingsError, tls_from
+from lemonfiber_mcp.certificates.sources import source_of
 from lemonfiber_mcp.connection import Connection
 from lemonfiber_mcp.withheld import Withholding, install
 
@@ -112,8 +114,9 @@ def http_server(environment: Mapping[str, str]) -> tuple[uvicorn.Server, Certifi
     tls = kept_tls(environment)
     withholding = Withholding([] if stack.pin is None else [stack.pin.hex])
     install(withholding)
-    source = modes.source_of(tls)
-    certificates = Certificates(source)
+    pending = Challenges(tls.state)
+    source = source_of(tls, environment, pending)
+    certificates = Certificates(source, pending)
     certificates.start()
     root = source.root_file if isinstance(source, modes.PrivateCa) else None
     gate = web.Gate(

@@ -22,7 +22,6 @@ from lemonfiber_mcp.certificates.settings import CERTIFICATE, PRIVATE_KEY, KeyTy
 
 if TYPE_CHECKING:
     import pathlib
-    from collections.abc import Callable, Mapping
 
     from lemonfiber_mcp.certificates.making import PrivateKey
     from lemonfiber_mcp.certificates.settings import Name, Tls
@@ -57,6 +56,8 @@ class Served:
     chain: pathlib.Path
     key: pathlib.Path
     leaf: x509.Certificate
+    standing_in: bool = False
+    """Whether it stands in until the first certificate is issued, which no client trusts."""
 
     @property
     def expires(self) -> datetime.datetime:
@@ -73,6 +74,10 @@ class Source(Protocol):
     """Where the served certificate comes from."""
 
     mode: Mode
+
+    def first(self, now: datetime.datetime) -> Served:
+        """Return the certificate to start serving with, before the server answers anything."""
+        ...
 
     def obtain(self, now: datetime.datetime) -> Served:
         """Return the certificate to serve now, making or reading a new one where one is due."""
@@ -138,6 +143,10 @@ class Files:
         self._certificate = cast("pathlib.Path", tls.certificate)
         self._key = cast("pathlib.Path", tls.private_key)
         self._names = tls.names
+
+    def first(self, now: datetime.datetime) -> Served:
+        """Return the certificate to start serving with: the one this source obtains."""
+        return self.obtain(now)
 
     def obtain(self, now: datetime.datetime) -> Served:
         """Return the operator's certificate, refusing one that cannot be served, by what is wrong with it."""
@@ -208,6 +217,10 @@ class Pinned:
         self._directory = leaf_dir(tls)
         self._made = False
         self._served: Served | None = None
+
+    def first(self, now: datetime.datetime) -> Served:
+        """Return the certificate to start serving with: the one this source obtains."""
+        return self.obtain(now)
 
     def obtain(self, now: datetime.datetime) -> Served:
         """Return the kept certificate, or make one where none is kept for these names."""
@@ -309,6 +322,10 @@ class PrivateCa:
         self._root, self._next = held[0], replacement
         return held
 
+    def first(self, now: datetime.datetime) -> Served:
+        """Return the certificate to start serving with: the one this source obtains."""
+        return self.obtain(now)
+
     def obtain(self, now: datetime.datetime) -> Served:
         """Return the certificate the root issued, issuing the next once ten days are left or the root changed."""
         root, signer = self.roots(now)
@@ -368,25 +385,3 @@ class PrivateCa:
     def renewal(self) -> pathlib.Path | None:
         """Return where the record of renewal is kept."""
         return self._directory / RENEWAL
-
-
-NOT_YET: Final = (
-    "LEMONFIBER_TLS_MODE is acme, which this version of the server does not serve yet. Choose files, "
-    "private-ca or pinned."
-)
-
-
-SOURCES: Final[Mapping[Mode, Callable[[Tls], Source]]] = {
-    Mode.FILES: Files,
-    Mode.PRIVATE_CA: PrivateCa,
-    Mode.PINNED: Pinned,
-}
-"""Where the certificate comes from, by each mode this version serves."""
-
-
-def source_of(tls: Tls) -> Source:
-    """Return where the certificate comes from in the mode the settings chose."""
-    made = SOURCES.get(tls.mode)
-    if made is None:
-        raise CertificateError(NOT_YET)
-    return made(tls)
