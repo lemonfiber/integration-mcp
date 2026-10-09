@@ -70,3 +70,8 @@ mutation-shard index total:
     set -f; uv run mutmut run $(uv run python scripts/mutation_shard.py {{index}} {{total}})
     uv run mutmut export-cicd-stats
     uv run python scripts/mutation_score.py
+
+# Pebble, the test authority the ACME tests ask, in containers; prints the
+# settings they read. `just pebble stop` removes it.
+pebble *args:
+    scripts/pebble.sh {{args}}
