@@ -1,6 +1,6 @@
-# The shared gates, defined once in lemonfiber/spec (Q-R56), and the server's
-# own: formatting, lint, strict types, the generated tools, the suite with full
-# coverage, and mutation.
+# The server's own gates: formatting, lint, strict types, the generated tools,
+# the suite with full coverage, and mutation. The shared gates are in
+# `gates.yml`.
 name: ci
 on: [pull_request]
 permissions:
@@ -231,33 +231,3 @@ jobs:
             echo "::error::a request without a key was answered ${status}, not 401"
             exit 1
           fi
-
-  # `pull-requests: write` is what lets the gate close a pull request whose
-  # citation is missing or names an identifier that does not exist, rather than
-  # only going red at it. A job-level block replaces the workflow-level default
-  # outright, so `contents: read` is restated here rather than inherited.
-  spec-check:
-    permissions:
-      contents: read
-      pull-requests: write
-    uses: lemonfiber/spec/.github/workflows/spec-check.yml@4562180c9f974bf03aa9be34610f83bb6eb06029 # v1.0.61
-  hygiene:
-    uses: lemonfiber/spec/.github/workflows/hygiene.yml@4562180c9f974bf03aa9be34610f83bb6eb06029 # v1.0.61
-  # Every pin this repository holds on a shared workflow, against what the spec's
-  # default branch holds now. It fails naming the commits a pin has not taken; a
-  # run that could not ask which they are says so rather than reporting clean.
-  workflow-pins:
-    uses: lemonfiber/spec/.github/workflows/workflow-pins.yml@4562180c9f974bf03aa9be34610f83bb6eb06029 # v1.0.61
-  security:
-    uses: lemonfiber/spec/.github/workflows/security.yml@4562180c9f974bf03aa9be34610f83bb6eb06029 # v1.0.61
-  dco:
-    uses: lemonfiber/spec/.github/workflows/dco.yml@4562180c9f974bf03aa9be34610f83bb6eb06029 # v1.0.61
-  attribution:
-    uses: lemonfiber/spec/.github/workflows/attribution.yml@4562180c9f974bf03aa9be34610f83bb6eb06029 # v1.0.61
-  commitlint:
-    uses: lemonfiber/spec/.github/workflows/commitlint.yml@4562180c9f974bf03aa9be34610f83bb6eb06029 # v1.0.61
-  labeler:
-    permissions:
-      contents: read
-      pull-requests: write
-    uses: lemonfiber/spec/.github/workflows/labeler.yml@4562180c9f974bf03aa9be34610f83bb6eb06029 # v1.0.61
