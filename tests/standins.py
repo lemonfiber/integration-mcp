@@ -185,9 +185,7 @@ class DnsStandIn:
                     return
                 self.wfile.write(len(answer).to_bytes(2) + answer)
 
-        udp = socketserver.ThreadingUDPServer((LOOPBACK, 0), Udp)
-        self.port = int(udp.server_address[1])
-        self._servers = [udp, socketserver.ThreadingTCPServer((LOOPBACK, self.port), Tcp)]
+        self._servers, self.port = paired(Udp, Tcp)
         for server in self._servers:
             threading.Thread(target=server.serve_forever, daemon=True).start()
         return self
@@ -197,6 +195,22 @@ class DnsStandIn:
         for server in self._servers:
             server.shutdown()
             server.server_close()
+
+
+def paired(
+    udp: type[socketserver.BaseRequestHandler],
+    tcp: type[socketserver.BaseRequestHandler],
+) -> tuple[list[socketserver.BaseServer], int]:
+    """Return a UDP and a TCP server on one free loopback port, and the port, trying another where it is taken."""
+    while True:
+        over_udp = socketserver.ThreadingUDPServer((LOOPBACK, 0), udp)
+        port = int(over_udp.server_address[1])
+        try:
+            over_tcp = socketserver.ThreadingTCPServer((LOOPBACK, port), tcp)
+        except OSError:
+            over_udp.server_close()
+            continue
+        return [over_udp, over_tcp], port
 
 
 def keyring_of(name: str, key: str, algorithm: str = "hmac-sha256.") -> dict[Name, dns.tsig.Key]:
