@@ -5,6 +5,8 @@ import base64
 import json
 import pathlib
 import time
+import urllib.parse
+from http import HTTPMethod
 from typing import TYPE_CHECKING, Final, cast
 
 from cryptography.hazmat.primitives import hashes, serialization
@@ -18,6 +20,8 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
 
 ENDPOINT: Final = "https://dns.googleapis.com/dns/v1"
+PROVIDER: Final = "Cloud DNS"
+SIGN_IN: Final = "Google"
 PROJECT: Final = "GCE_PROJECT"
 SERVICE_ACCOUNT_FILE: Final = "GCE_SERVICE_ACCOUNT_FILE"
 SCOPE: Final = "https://www.googleapis.com/auth/ndev.clouddns.readwrite"
@@ -67,7 +71,7 @@ class Gcloud:
         """Hold the project and the service account."""
         self._project = project
         self._account = dict(account)
-        self._leased = Leased("Cloud DNS", ENDPOINT, self._token)
+        self._leased = Leased(PROVIDER, ENDPOINT, self._token)
 
     @classmethod
     def from_environment(cls, environment: Mapping[str, str]) -> Gcloud:
@@ -79,7 +83,12 @@ class Gcloud:
 
     def _token(self) -> Document:
         form = {"grant_type": GRANT, "assertion": assertion(self._account, int(time.time()))}
-        return Api("Google", self._account["token_uri"]).document("POST", "", Asking(form=form))
+        where = urllib.parse.urlsplit(self._account["token_uri"])
+        return Api(SIGN_IN, f"{where.scheme}://{where.netloc}").document(
+            HTTPMethod.POST,
+            where.path,
+            Asking(form=form),
+        )
 
     def _asked(self) -> Api:
         return self._leased.api()
@@ -87,7 +96,7 @@ class Gcloud:
     def _zone(self, name: str) -> str:
         for candidate in candidates(name):
             asked = Asking(params={"dnsName": f"{candidate}."})
-            found = self._asked().document("GET", f"/projects/{self._project}/managedZones", asked)[
+            found = self._asked().document(HTTPMethod.GET, f"/projects/{self._project}/managedZones", asked)[
                 "managedZones"
             ]
             if found:
@@ -98,11 +107,14 @@ class Gcloud:
     def _replace(self, name: str, change: Changing) -> None:
         base = f"/projects/{self._project}/managedZones/{self._zone(name)}"
         asked = Asking(params={"name": name, "type": "TXT"})
-        held = cast("list[Document]", self._asked().document("GET", f"{base}/rrsets", asked)["rrsets"])
+        held = cast(
+            "list[Document]",
+            self._asked().document(HTTPMethod.GET, f"{base}/rrsets", asked)["rrsets"],
+        )
         after = change([value for record in held for value in cast("list[str]", record["rrdatas"])])
         additions = [{"name": name, "type": "TXT", "ttl": TTL, "rrdatas": after}] if after else []
         self._asked().document(
-            "POST",
+            HTTPMethod.POST,
             f"{base}/changes",
             Asking(body={"deletions": held, "additions": additions}),
         )

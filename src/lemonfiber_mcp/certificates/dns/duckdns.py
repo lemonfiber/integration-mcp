@@ -1,6 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Duck DNS, by the account's token; one TXT record a domain."""
 
+from http import HTTPMethod
 from typing import TYPE_CHECKING, Final
 
 from lemonfiber_mcp.certificates.dns.api import Api, Asking
@@ -10,6 +11,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
 ENDPOINT: Final = "https://www.duckdns.org"
+PROVIDER: Final = "Duck DNS"
 CREDENTIAL_FILE: Final = "DUCKDNS_TOKEN_FILE"
 ZONE: Final = ".duckdns.org"
 DONE: Final = "OK"
@@ -23,7 +25,7 @@ class DuckDns:
     def __init__(self, token: str) -> None:
         """Hold the token."""
         self._token = token
-        self._api = Api("Duck DNS", ENDPOINT)
+        self._api = Api(PROVIDER, ENDPOINT)
 
     @classmethod
     def from_environment(cls, environment: Mapping[str, str]) -> DuckDns:
@@ -37,7 +39,7 @@ class DuckDns:
             raise ProviderError(msg)
         domain = bare.removesuffix(ZONE).split(".")[-1]
         params = {"domains": domain, "token": self._token, **asked}
-        if self._api.text("GET", "/update", Asking(params=params)).strip() != DONE:
+        if self._api.text(HTTPMethod.GET, "/update", Asking(params=params)).strip() != DONE:
             msg = "Duck DNS refused the update."
             raise ProviderError(msg)
 

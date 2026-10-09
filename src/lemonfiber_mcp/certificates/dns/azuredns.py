@@ -1,6 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Azure DNS, by a service principal allowed to change the zone's records."""
 
+from http import HTTPMethod
 from typing import TYPE_CHECKING, Final, cast
 
 from lemonfiber_mcp.certificates.dns.api import Api, Asking, Document, Leased
@@ -17,6 +18,8 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
 LOGIN: Final = "https://login.microsoftonline.com"
+PROVIDER: Final = "Azure DNS"
+LOGIN_PROVIDER: Final = "Microsoft Entra"
 MANAGEMENT: Final = "https://management.azure.com"
 TENANT_ID: Final = "AZURE_TENANT_ID"
 CLIENT_ID: Final = "AZURE_CLIENT_ID"
@@ -39,7 +42,7 @@ class AzureDns:
         self._zones = (
             f"/subscriptions/{subscription}/resourceGroups/{group}/providers/Microsoft.Network/dnsZones"
         )
-        self._leased = Leased("Azure DNS", MANAGEMENT, self._token)
+        self._leased = Leased(PROVIDER, MANAGEMENT, self._token)
 
     @classmethod
     def from_environment(cls, environment: Mapping[str, str]) -> AzureDns:
@@ -60,8 +63,8 @@ class AzureDns:
             "client_secret": client_secret,
             "scope": SCOPE,
         }
-        return Api("Microsoft Entra", LOGIN).document(
-            "POST",
+        return Api(LOGIN_PROVIDER, LOGIN).document(
+            HTTPMethod.POST,
             f"/{tenant}/oauth2/v2.0/token",
             Asking(form=form),
         )
@@ -72,7 +75,7 @@ class AzureDns:
     def _record(self, name: str) -> str:
         held = cast(
             "list[Document]",
-            self._asked().document("GET", self._zones, Asking(params=VERSION))["value"],
+            self._asked().document(HTTPMethod.GET, self._zones, Asking(params=VERSION))["value"],
         )
         zones = {str(zone["name"]) for zone in held}
         for candidate in candidates(name):
@@ -82,16 +85,16 @@ class AzureDns:
         raise ProviderError(msg)
 
     def _values(self, record: str) -> list[list[str]]:
-        held = self._asked().found("GET", record, Asking(params=VERSION))
+        held = self._asked().found(HTTPMethod.GET, record, Asking(params=VERSION))
         entries = [] if held is None else cast("list[Document]", held["properties"]["TXTRecords"])
         return [cast("list[str]", entry["value"]) for entry in entries]
 
     def _set(self, record: str, values: list[list[str]]) -> None:
         if values:
             body = {"properties": {"TTL": TTL, "TXTRecords": [{"value": value} for value in values]}}
-            self._asked().document("PUT", record, Asking(params=VERSION, body=body))
+            self._asked().document(HTTPMethod.PUT, record, Asking(params=VERSION, body=body))
         else:
-            self._asked().send("DELETE", record, Asking(params=VERSION))
+            self._asked().send(HTTPMethod.DELETE, record, Asking(params=VERSION))
 
     def present(self, name: str, value: str) -> None:
         """Add the value to the name's TXT record set."""

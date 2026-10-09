@@ -1,6 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """DNS-01 apart from the providers' APIs: a server of the operator's own, a program of theirs, and waiting to be seen."""
 
+import os
 import stat
 from typing import TYPE_CHECKING, Final
 
@@ -8,6 +9,7 @@ import dns.rdatatype
 import dns.resolver
 import pytest
 
+from lemonfiber_mcp.certificates.dns import exec as exec_module
 from lemonfiber_mcp.certificates.dns import propagation, registry, rfc2136
 from lemonfiber_mcp.certificates.dns.challenge import Dns01
 from lemonfiber_mcp.certificates.dns.exec import Exec
@@ -54,7 +56,10 @@ def key_file(tmp_path: pathlib.Path, key: str = TSIG_KEY) -> str:
 def test_names_are_looked_up_in_every_zone_they_may_sit_in_and_written_relative_to_theirs() -> None:
     assert candidates(NAME) == ["_acme-challenge.mcp.home.example", "mcp.home.example", "home.example"]
     assert relative(NAME, "home.example") == "_acme-challenge.mcp"
+    assert relative(NAME, "home.example.") == "_acme-challenge.mcp"
     assert relative("home.example.", "home.example") == "@"
+    assert propagation.challenge_name("mcp.home.example") == NAME
+    assert propagation.challenge_name("mcp.home.example.") == NAME
 
 
 def test_rfc2136_adds_and_deletes_the_record_by_signed_update(
@@ -80,21 +85,56 @@ def test_rfc2136_refuses_a_name_its_server_holds_no_zone_for(
     server: DnsStandIn,
 ) -> None:
     provider = rfc2136.Rfc2136((LOOPBACK, server.port), TSIG_NAME, rfc2136.DEFAULT_ALGORITHM, TSIG_KEY)
-    with pytest.raises(ProviderError, match="holds no zone for"):
+    with pytest.raises(ProviderError) as refused:
         provider.present("_acme-challenge.elsewhere.example.", VALUE)
+    assert (
+        str(refused.value)
+        == "The DNS server at 127.0.0.1 holds no zone for _acme-challenge.elsewhere.example.."
+    )
 
 
 def test_rfc2136_says_when_its_server_refuses_the_update(server: DnsStandIn) -> None:
     server.refusing = True
     provider = rfc2136.Rfc2136((LOOPBACK, server.port), TSIG_NAME, rfc2136.DEFAULT_ALGORITHM, TSIG_KEY)
-    with pytest.raises(ProviderError, match="refused the update: REFUSED"):
+    with pytest.raises(ProviderError) as refused:
         provider.present(NAME, VALUE)
+    assert str(refused.value) == "The DNS server at 127.0.0.1 refused the update: REFUSED."
 
 
 def test_rfc2136_refuses_an_update_signed_with_another_key(server: DnsStandIn) -> None:
     provider = rfc2136.Rfc2136((LOOPBACK, server.port), TSIG_NAME, rfc2136.DEFAULT_ALGORITHM, "b3RoZXIta2V5")
+    with pytest.raises(ProviderError) as refused:
+        provider.present(NAME, VALUE)
+    assert str(refused.value) == "The DNS server at 127.0.0.1 could not be updated: EOFError."
+
+
+def test_rfc2136_signs_with_the_algorithm_its_setting_names(
+    tmp_path: pathlib.Path,
+    server: DnsStandIn,
+) -> None:
+    provider = rfc2136.Rfc2136.from_environment(
+        {
+            rfc2136.NAMESERVER: f"{LOOPBACK}:{server.port}",
+            rfc2136.TSIG_KEY: TSIG_NAME,
+            rfc2136.TSIG_ALGORITHM: "hmac-sha512.",
+            rfc2136.TSIG_CREDENTIAL_FILE: key_file(tmp_path),
+        },
+    )
     with pytest.raises(ProviderError, match="could not be updated"):
         provider.present(NAME, VALUE)
+    assert server.records.get((NAME, dns.rdatatype.TXT)) is None
+
+
+def test_rfc2136_whose_server_takes_the_update_and_never_answers_is_refused_in_time(
+    server: DnsStandIn,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server.silent = True
+    monkeypatch.setattr(rfc2136, "TIMEOUT_SECONDS", 0.2)
+    provider = rfc2136.Rfc2136((LOOPBACK, server.port), TSIG_NAME, rfc2136.DEFAULT_ALGORITHM, TSIG_KEY)
+    with pytest.raises(ProviderError) as refused:
+        provider.present(NAME, VALUE)
+    assert str(refused.value) == "The DNS server at 127.0.0.1 could not be updated: Timeout."
 
 
 def test_rfc2136_that_cannot_reach_its_server_finds_no_zone_there(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -151,6 +191,33 @@ def test_exec_runs_the_operators_program_with_the_name_and_the_value_and_nothing
     ]
 
 
+def test_exec_gives_the_program_the_systems_search_path_where_this_process_has_none(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("PATH")
+    told = tmp_path / "told"
+    Exec(program(tmp_path, f'printf "%s" "$PATH" > {told}')).present(NAME, VALUE)
+    assert told.read_text(encoding="utf-8") == os.defpath
+
+
+def test_exec_keeps_what_the_program_prints_to_itself(
+    tmp_path: pathlib.Path,
+    capfd: pytest.CaptureFixture[str],
+) -> None:
+    Exec(program(tmp_path, "echo printed; echo complained >&2")).present(NAME, VALUE)
+    assert capfd.readouterr() == ("", "")
+
+
+def test_exec_whose_program_does_not_end_in_time_is_refused(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(exec_module, "TIMEOUT_SECONDS", 0.2)
+    with pytest.raises(ProviderError, match="present failed: TimeoutExpired"):
+        Exec(program(tmp_path, "sleep 5")).present(NAME, VALUE)
+
+
 def test_exec_says_when_the_program_fails(tmp_path: pathlib.Path) -> None:
     provider = Exec(program(tmp_path, "exit 3"))
     with pytest.raises(ProviderError, match="present failed: CalledProcessError"):
@@ -181,8 +248,12 @@ def test_every_provider_is_named_as_lego_names_it() -> None:
 
 @pytest.mark.parametrize("name", [None, "bind9"])
 def test_a_provider_that_is_none_of_them_is_refused_by_name(name: str | None) -> None:
-    with pytest.raises(TlsSettingsError, match="LEMONFIBER_ACME_DNS_PROVIDER is"):
+    with pytest.raises(TlsSettingsError) as refused:
         registry.provider_of(name, {})
+    assert str(refused.value) == (
+        f"LEMONFIBER_ACME_DNS_PROVIDER is {name!r}; for dns-01 it is one of rfc2136, cloudflare, route53, "
+        "gcloud, azuredns, digitalocean, hetzner, desec, duckdns, exec."
+    )
 
 
 def test_a_named_provider_is_made_from_its_settings(tmp_path: pathlib.Path) -> None:
@@ -221,16 +292,16 @@ class Ticking:
     def __init__(self) -> None:
         """Start at nothing."""
         self.now = 0.0
-        self.slept = 0
+        self.slept: list[float] = []
 
     def clock(self) -> float:
         """Return the time, then move it on."""
         self.now += 1.0
         return self.now
 
-    def sleep(self, _: float) -> None:
-        """Count a sleep."""
-        self.slept += 1
+    def sleep(self, seconds: float) -> None:
+        """Keep how long it was asked to sleep."""
+        self.slept.append(seconds)
 
 
 def test_a_record_is_waited_for_until_every_server_answers_with_it(server: DnsStandIn) -> None:
@@ -241,10 +312,10 @@ def test_a_record_is_waited_for_until_every_server_answers_with_it(server: DnsSt
         NAME,
         VALUE,
         servers,
-        Timing(propagation=3.0, interval=1.0),
+        Timing(propagation=3.0, interval=1.5),
         waiting,
     )
-    assert ticking.slept == 2
+    assert ticking.slept == [1.5, 1.5]
     server.add(NAME, "TXT", f'"{VALUE}"')
     assert propagation.seen_everywhere(NAME, VALUE, servers, Timing(), waiting)
 
@@ -252,6 +323,21 @@ def test_a_record_is_waited_for_until_every_server_answers_with_it(server: DnsSt
 def test_a_server_answering_with_another_name_has_not_seen_the_record(server: DnsStandIn) -> None:
     server.add(NAME, "CNAME", "elsewhere.home.example.")
     assert not propagation.answers_with((LOOPBACK, server.port), NAME, VALUE)
+
+
+def test_a_value_split_across_strings_is_read_whole(server: DnsStandIn) -> None:
+    server.add(NAME, "TXT", '"digest-of-the-" "key-authorization"')
+    assert propagation.answers_with((LOOPBACK, server.port), NAME, VALUE)
+
+
+def test_a_name_server_with_an_ipv6_address_alone_is_asked(
+    server: DnsStandIn,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    server.records[("home.example.", dns.rdatatype.NS)] = ["ns6.home.example."]
+    server.add("ns6.home.example.", "AAAA", "::1")
+    monkeypatch.setattr(propagation, "PORT", server.port)
+    assert propagation.authoritative(NAME, resolver_of(server)) == [("::1", server.port)]
 
 
 def test_a_server_that_does_not_answer_has_not_seen_the_record(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -297,8 +383,11 @@ def test_names_that_cannot_be_looked_up_are_refused() -> None:
     def unconfigured() -> dns.resolver.Resolver:
         raise dns.resolver.NoResolverConfiguration
 
-    with pytest.raises(CertificateError, match="could not be looked up to answer DNS-01 for"):
+    with pytest.raises(CertificateError) as refused:
         Dns01(Recording(), resolver=unconfigured).where("mcp.home.example")
+    assert str(refused.value) == (
+        "Names could not be looked up to answer DNS-01 for mcp.home.example: NoResolverConfiguration."
+    )
 
 
 def test_a_record_that_is_not_text_is_not_the_value(server: DnsStandIn) -> None:
@@ -308,8 +397,8 @@ def test_a_record_that_is_not_text_is_not_the_value(server: DnsStandIn) -> None:
 
 def test_a_dns_01_answer_whose_zone_cannot_be_found_is_refused(server: DnsStandIn) -> None:
     answering = Dns01(Recording(), resolver=lambda: resolver_of(server))
-    with pytest.raises(
-        CertificateError,
-        match=r"authoritative servers of _acme-challenge\.elsewhere\.test\. could not be found",
-    ):
+    with pytest.raises(CertificateError) as refused:
         answering.wait_for("_acme-challenge.elsewhere.test.", VALUE)
+    assert str(refused.value) == (
+        "The authoritative servers of _acme-challenge.elsewhere.test. could not be found: NoRootSOA."
+    )

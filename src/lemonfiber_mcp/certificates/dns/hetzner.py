@@ -2,15 +2,17 @@
 """Hetzner DNS, through the Hetzner Cloud API, by an API token."""
 
 import time
+from http import HTTPMethod
 from typing import TYPE_CHECKING, Final, cast
 
-from lemonfiber_mcp.certificates.dns.api import Api, Asking, Document
+from lemonfiber_mcp.certificates.dns.api import Api, Asking, Document, bearer
 from lemonfiber_mcp.certificates.dns.provider import ProviderError, Timing, candidates, relative, secret
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
 ENDPOINT: Final = "https://api.hetzner.cloud/v1"
+PROVIDER: Final = "Hetzner"
 CREDENTIAL_FILE: Final = "HETZNER_API_TOKEN_FILE"
 TTL: Final = 60
 RUNNING: Final = "running"
@@ -27,7 +29,7 @@ class Hetzner:
 
     def __init__(self, token: str) -> None:
         """Hold the API token."""
-        self._api = Api("Hetzner", ENDPOINT, {"Authorization": f"Bearer {token}"})
+        self._api = Api(PROVIDER, ENDPOINT, bearer(token))
 
     @classmethod
     def from_environment(cls, environment: Mapping[str, str]) -> Hetzner:
@@ -38,7 +40,7 @@ class Hetzner:
         for candidate in candidates(name):
             found = cast(
                 "list[Document]",
-                self._api.document("GET", "/zones", Asking(params={"name": candidate}))["zones"],
+                self._api.document(HTTPMethod.GET, "/zones", Asking(params={"name": candidate}))["zones"],
             )
             if found:
                 return candidate
@@ -51,7 +53,7 @@ class Hetzner:
         if ttl is not None:
             body["ttl"] = ttl
         path = f"/zones/{zone}/rrsets/{relative(name, zone)}/TXT/actions/{action}"
-        started = cast("Document", self._api.document("POST", path, Asking(body=body))["action"])
+        started = cast("Document", self._api.document(HTTPMethod.POST, path, Asking(body=body))["action"])
         self._ended(int(started["id"]), str(started["status"]))
 
     def _ended(self, action: int, status: str) -> None:
@@ -60,7 +62,7 @@ class Hetzner:
             if status != RUNNING:
                 break
             time.sleep(ACTION_INTERVAL)
-            status = str(self._api.document("GET", f"/actions/{action}")["action"]["status"])
+            status = str(self._api.document(HTTPMethod.GET, f"/actions/{action}")["action"]["status"])
         if status != SUCCEEDED:
             msg = f"The Hetzner action {action} ended as {status}."
             raise ProviderError(msg)

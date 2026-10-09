@@ -4,6 +4,7 @@
 import json
 import socketserver
 import threading
+import time
 import urllib.parse
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Final, Self, cast, override
@@ -15,7 +16,6 @@ import dns.rcode
 import dns.rdatatype
 import dns.rrset
 import dns.tsig
-import dns.tsigkeyring
 import dns.update
 
 if TYPE_CHECKING:
@@ -28,6 +28,8 @@ if TYPE_CHECKING:
 LOOPBACK: Final = "127.0.0.1"
 JSON: Final = {"Content-Type": "application/json"}
 LONGEST: Final = 65535
+SILENCE: Final = 1.0
+"""How long a silent stand-in holds a connection without answering."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -121,6 +123,8 @@ class DnsStandIn:
     port: int = 0
     refusing: bool = False
     """Whether updates are answered `REFUSED` rather than applied."""
+    silent: bool = False
+    """Whether what comes over TCP is taken and never answered."""
     _servers: list[socketserver.BaseServer] = field(default_factory=list[socketserver.BaseServer])
 
     def add(self, name: str, kind: str, *values: str) -> None:
@@ -171,6 +175,9 @@ class DnsStandIn:
         class Tcp(socketserver.StreamRequestHandler):
             @override
             def handle(self) -> None:
+                if stand_in.silent:
+                    time.sleep(SILENCE)
+                    return
                 length = int.from_bytes(self.rfile.read(2))
                 try:
                     answer = stand_in.answer(self.rfile.read(length))
@@ -192,6 +199,7 @@ class DnsStandIn:
             server.server_close()
 
 
-def keyring_of(name: str, key: str) -> dict[Name, dns.tsig.Key]:
-    """Return a keyring holding one TSIG key."""
-    return cast("dict[Name, dns.tsig.Key]", dns.tsigkeyring.from_text({name: key}))
+def keyring_of(name: str, key: str, algorithm: str = "hmac-sha256.") -> dict[Name, dns.tsig.Key]:
+    """Return a keyring holding one TSIG key, which signs with one algorithm alone."""
+    held = dns.tsig.Key(name, key, algorithm)
+    return {held.name: held}

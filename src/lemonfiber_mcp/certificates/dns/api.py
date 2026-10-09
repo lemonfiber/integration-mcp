@@ -11,9 +11,11 @@ from lemonfiber_mcp.certificates.dns.provider import TIMEOUT_SECONDS, ProviderEr
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
+    from http import HTTPMethod
 
 NOT_FOUND: Final = 404
 REFUSED_FROM: Final = 400
+AUTHORIZATION: Final = "Authorization"
 LIFETIME: Final = 3600.0
 """How long an access token lasts where its answer does not say."""
 EARLY: Final = 300.0
@@ -37,6 +39,11 @@ class Asking:
 NOTHING: Final = Asking()
 
 
+def bearer(token: str) -> dict[str, str]:
+    """Return the header a bearer token is sent in."""
+    return {AUTHORIZATION: f"Bearer {token}"}
+
+
 class Api:
     """One provider's API, at its address, with the headers that carry its credential."""
 
@@ -47,10 +54,10 @@ class Api:
         self._session = requests.Session()
         self._session.headers.update(headers or {})
 
-    def _refused(self, method: str, path: str, status: int) -> ProviderError:
+    def _refused(self, method: HTTPMethod, path: str, status: int) -> ProviderError:
         return ProviderError(f"The {self._provider} API answered {status} to {method} {path}.")
 
-    def send(self, method: str, path: str, asking: Asking = NOTHING) -> requests.Response:
+    def send(self, method: HTTPMethod, path: str, asking: Asking = NOTHING) -> requests.Response:
         """Return what a request answers, refusing a refusal by its status and the path, never what was sent."""
         try:
             response = self._session.request(
@@ -69,28 +76,28 @@ class Api:
             raise self._refused(method, path, response.status_code)
         return response
 
-    def found(self, method: str, path: str, asking: Asking = NOTHING) -> Document | None:
+    def found(self, method: HTTPMethod, path: str, asking: Asking = NOTHING) -> Document | None:
         """Return the JSON object a request answers with, or None where it answered `404`."""
         response = self.send(method, path, asking)
         if response.status_code == NOT_FOUND:
             return None
         return cast("Document", response.json()) if response.content else {}
 
-    def document(self, method: str, path: str, asking: Asking = NOTHING) -> Document:
+    def document(self, method: HTTPMethod, path: str, asking: Asking = NOTHING) -> Document:
         """Return the JSON object a request answers with, refusing a `404`."""
         answered = self.found(method, path, asking)
         if answered is None:
             raise self._refused(method, path, NOT_FOUND)
         return answered
 
-    def listing(self, method: str, path: str, asking: Asking = NOTHING) -> list[Document]:
+    def listing(self, method: HTTPMethod, path: str, asking: Asking = NOTHING) -> list[Document]:
         """Return the JSON list a request answers with, refusing a `404`."""
         response = self.send(method, path, asking)
         if response.status_code == NOT_FOUND:
             raise self._refused(method, path, NOT_FOUND)
         return cast("list[Document]", response.json())
 
-    def text(self, method: str, path: str, asking: Asking = NOTHING) -> str:
+    def text(self, method: HTTPMethod, path: str, asking: Asking = NOTHING) -> str:
         """Return the text a request answers with, refusing a `404`."""
         response = self.send(method, path, asking)
         if response.status_code == NOT_FOUND:
@@ -111,15 +118,14 @@ class Leased:
         self._provider = provider
         self._base = base
         self._ask = ask
-        self._api: Api | None = None
-        self._until = 0.0
+        self._held: tuple[Api, float] | None = None
+        """The API with the token held, and when it is asked for again."""
 
     def api(self) -> Api:
         """Return the API with a token that has not ended, asking for one where none is held or it is ending."""
         now = monotonic()
-        if self._api is None or now >= self._until:
+        if self._held is None or now >= self._held[1]:
             answered = self._ask()
-            bearer = {"Authorization": f"Bearer {answered['access_token']}"}
-            self._api = Api(self._provider, self._base, bearer)
-            self._until = now + float(answered.get("expires_in", LIFETIME)) - EARLY
-        return self._api
+            until = now + float(answered.get("expires_in", LIFETIME)) - EARLY
+            self._held = (Api(self._provider, self._base, bearer(str(answered["access_token"]))), until)
+        return self._held[0]

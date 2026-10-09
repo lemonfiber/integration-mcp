@@ -6,6 +6,7 @@ import hashlib
 import hmac
 import urllib.parse
 from dataclasses import dataclass, field
+from http import HTTPMethod
 from typing import TYPE_CHECKING, Final
 from xml.sax.saxutils import escape
 
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
 
 ENDPOINT: Final = "https://route53.amazonaws.com"
+PROVIDER: Final = "Route 53"
 SIGNING_REGION: Final = "us-east-1"
 """Where Route 53, a global service, is reached and the region it is signed for, in AWS's commercial regions."""
 ACCESS_KEY_ID: Final = "AWS_ACCESS_KEY_ID"
@@ -140,7 +142,7 @@ class Route53:
         self._zone = zone
         self._partition = partition_of(region)
         self._clock = clock
-        self._api = Api("Route 53", self._partition.endpoint)
+        self._api = Api(PROVIDER, self._partition.endpoint)
 
     @classmethod
     def from_environment(cls, environment: Mapping[str, str]) -> Route53:
@@ -161,7 +163,11 @@ class Route53:
             self._clock(),
             self._partition.region,
         )
-        self._api.text("POST", path, Asking(raw=body, headers={**headers, "Content-Type": "text/xml"}))
+        self._api.text(
+            HTTPMethod.POST,
+            path,
+            Asking(raw=body, headers={**headers, "Content-Type": "text/xml"}),
+        )
 
     def present(self, name: str, value: str) -> None:
         """Write the TXT record."""

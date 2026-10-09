@@ -53,12 +53,12 @@ def needed(environment: Mapping[str, str], setting: str) -> str:
 def secret(environment: Mapping[str, str], setting: str) -> str:
     """Return the secret held by the file a `_FILE` setting names, refusing one that cannot be read."""
     path = pathlib.Path(needed(environment, setting))
+    msg = f"{setting} names a file that could not be read, or holds nothing."
     try:
         held = path.read_bytes().decode().strip()
     except OSError, UnicodeDecodeError:
-        held = ""
+        raise TlsSettingsError(msg) from None
     if not held:
-        msg = f"{setting} names a file that could not be read, or holds nothing."
         raise TlsSettingsError(msg)
     return held
 

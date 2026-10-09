@@ -47,7 +47,6 @@ class Rfc2136:
     def __init__(self, server: tuple[str, int], key: str, algorithm: str, key_secret: str) -> None:
         """Hold the server and the TSIG key updates are signed with."""
         self._server = server
-        self._key = dns.name.from_text(key)
         self._algorithm = dns.name.from_text(algorithm)
         try:
             self._keyring = dns.tsigkeyring.from_text({key: key_secret})
@@ -82,17 +81,11 @@ class Rfc2136:
         msg = f"The DNS server at {self._server[0]} holds no zone for {name}."
         raise ProviderError(msg)
 
-    def _send(self, name: str, value: str, *, adding: bool) -> None:
-        update = dns.update.UpdateMessage(
-            self._zone(name),
-            keyring=self._keyring,
-            keyname=self._key,
-            keyalgorithm=self._algorithm,
-        )
-        if adding:
-            update.add(name, TTL, dns.rdatatype.TXT, f'"{value}"')
-        else:
-            update.delete(name, dns.rdatatype.TXT, f'"{value}"')
+    def _update(self, name: str) -> dns.update.UpdateMessage:
+        """Return an update to the zone a name sits in, signed with the key."""
+        return dns.update.UpdateMessage(self._zone(name), keyring=self._keyring, keyalgorithm=self._algorithm)
+
+    def _sent(self, update: dns.update.UpdateMessage) -> None:
         try:
             response = dns.query.tcp(update, self._server[0], timeout=TIMEOUT_SECONDS, port=self._server[1])
         except (dns.exception.DNSException, OSError, EOFError) as failed:
@@ -104,8 +97,12 @@ class Rfc2136:
 
     def present(self, name: str, value: str) -> None:
         """Add the TXT record."""
-        self._send(name, value, adding=True)
+        update = self._update(name)
+        update.add(name, TTL, dns.rdatatype.TXT, f'"{value}"')
+        self._sent(update)
 
     def cleanup(self, name: str, value: str) -> None:
         """Delete the TXT record."""
-        self._send(name, value, adding=False)
+        update = self._update(name)
+        update.delete(name, dns.rdatatype.TXT, f'"{value}"')
+        self._sent(update)

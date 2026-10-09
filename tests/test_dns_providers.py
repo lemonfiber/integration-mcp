@@ -4,6 +4,8 @@
 import base64
 import datetime
 import json
+import time
+from http import HTTPMethod
 from typing import TYPE_CHECKING, Final, cast
 
 import pytest
@@ -45,9 +47,29 @@ def credential_file(tmp_path: pathlib.Path) -> str:
     return str(path)
 
 
-def said(asked: list[Asked]) -> list[tuple[str, str]]:
-    """Return each request's method and path, in order."""
-    return [(one.method, one.path) for one in asked]
+type Exchange = tuple[str, str, dict[str, list[str]], object]
+"""One request as the stand-in saw it: its method, path, query, and body."""
+
+ZONES: Final = ["_acme-challenge.mcp.home.example", "mcp.home.example", "home.example"]
+"""The zones a name is looked for in, longest first."""
+BARE: Final = NAME.rstrip(".")
+
+
+def body_of(one: Asked) -> object:
+    """Return a request's body read as JSON or as a form, its bytes where neither, or None where it has none."""
+    kind = one.headers.get("content-type", "")
+    if not one.body:
+        return None
+    if kind.startswith("application/json"):
+        return one.json()
+    if kind.startswith("application/x-www-form-urlencoded"):
+        return one.form()
+    return one.body
+
+
+def exchanges(asked: list[Asked]) -> list[Exchange]:
+    """Return every request the stand-in saw, in order."""
+    return [(one.method, one.path, one.query, body_of(one)) for one in asked]
 
 
 def test_cloudflare_writes_into_the_zone_it_finds_and_removes_what_it_wrote(
@@ -71,25 +93,19 @@ def test_cloudflare_writes_into_the_zone_it_finds_and_removes_what_it_wrote(
         )
         provider.present(NAME, VALUE)
         provider.cleanup(NAME, VALUE)
-    looked_up = [("GET", "/zones")] * 3
-    assert said(api.asked) == [
-        *looked_up,
-        ("POST", "/zones/z1/dns_records"),
-        *looked_up,
-        ("GET", "/zones/z1/dns_records"),
-        ("DELETE", "/zones/z1/dns_records/r1"),
+    zones: list[Exchange] = [("GET", "/zones", {"name": [zone]}, None) for zone in ZONES]
+    assert exchanges(api.asked) == [
+        *zones,
+        (
+            "POST",
+            "/zones/z1/dns_records",
+            {},
+            {"type": "TXT", "name": BARE, "content": VALUE, "ttl": cloudflare.TTL},
+        ),
+        *zones,
+        ("GET", "/zones/z1/dns_records", {"type": ["TXT"], "name": [BARE], "content": [VALUE]}, None),
+        ("DELETE", "/zones/z1/dns_records/r1", {}, None),
     ]
-    assert [query["name"] for query in (one.query for one in api.asked[:3])] == [
-        ["_acme-challenge.mcp.home.example"],
-        ["mcp.home.example"],
-        ["home.example"],
-    ]
-    assert api.asked[3].json() == {
-        "type": "TXT",
-        "name": NAME.rstrip("."),
-        "content": VALUE,
-        "ttl": cloudflare.TTL,
-    }
     assert {one.headers["authorization"] for one in api.asked} == {f"Bearer {CREDENTIAL}"}
 
 
@@ -111,29 +127,27 @@ def test_digitalocean_writes_relative_to_its_domain_and_removes_the_record_holdi
         )
         provider.present(NAME, VALUE)
         provider.cleanup(NAME, VALUE)
-    posted = next(one for one in api.asked if one.method == "POST")
-    assert posted.json() == {
-        "type": "TXT",
-        "name": "_acme-challenge.mcp",
-        "data": VALUE,
-        "ttl": digitalocean.TTL,
-    }
-    assert ("DELETE", "/domains/home.example/records/7") in said(api.asked)
-    assert ("DELETE", "/domains/home.example/records/8") not in said(api.asked)
+    domains: list[Exchange] = [("GET", f"/domains/{zone}", {}, None) for zone in ZONES]
+    record = {"type": "TXT", "name": "_acme-challenge.mcp", "data": VALUE, "ttl": digitalocean.TTL}
+    assert exchanges(api.asked) == [
+        *domains,
+        ("POST", "/domains/home.example/records", {}, record),
+        *domains,
+        ("GET", "/domains/home.example/records", {"type": ["TXT"], "name": [BARE]}, None),
+        ("DELETE", "/domains/home.example/records/7", {}, None),
+    ]
+    assert {one.headers["authorization"] for one in api.asked} == {f"Bearer {CREDENTIAL}"}
 
 
 def test_hetzner_adds_the_value_to_the_record_set_and_removes_it_again(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    looked: list[str] = []
-
     def answer(asked: Asked) -> tuple[int, dict[str, str], bytes]:
         if asked.path == "/zones":
             found = [{"id": 7, "name": "home.example"}] if asked.query["name"] == ["home.example"] else []
             return answered(200, {"zones": found})
         if asked.method == "GET":
-            looked.append(asked.path)
             return answered(200, {"action": {"id": 9, "status": "success"}})
         return answered(201, {"action": {"id": 9, "status": "running"}})
 
@@ -143,18 +157,22 @@ def test_hetzner_adds_the_value_to_the_record_set_and_removes_it_again(
         provider = hetzner.Hetzner.from_environment({hetzner.CREDENTIAL_FILE: credential_file(tmp_path)})
         provider.present(NAME, VALUE)
         provider.cleanup(NAME, VALUE)
-    posted = [one for one in api.asked if one.method == "POST"]
+    zones: list[Exchange] = [("GET", "/zones", {"name": [zone]}, None) for zone in ZONES]
     rrset = "/zones/home.example/rrsets/_acme-challenge.mcp/TXT/actions"
-    assert [one.path for one in posted] == [f"{rrset}/add_records", f"{rrset}/remove_records"]
-    assert posted[0].json() == {"records": [{"value": f'"{VALUE}"'}], "ttl": hetzner.TTL}
-    assert posted[1].json() == {"records": [{"value": f'"{VALUE}"'}]}
-    assert looked == ["/actions/9", "/actions/9"]
+    records = [{"value": f'"{VALUE}"'}]
+    assert exchanges(api.asked) == [
+        *zones,
+        ("POST", f"{rrset}/add_records", {}, {"records": records, "ttl": hetzner.TTL}),
+        ("GET", "/actions/9", {}, None),
+        *zones,
+        ("POST", f"{rrset}/remove_records", {}, {"records": records}),
+        ("GET", "/actions/9", {}, None),
+    ]
     assert {one.headers["authorization"] for one in api.asked} == {f"Bearer {CREDENTIAL}"}
 
 
 @pytest.mark.parametrize(("status", "checks"), [("error", 30), ("running", 3)])
 def test_a_hetzner_action_that_fails_or_does_not_end_is_refused(
-    tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
     status: str,
     checks: int,
@@ -194,18 +212,29 @@ def test_desec_adds_the_value_to_the_record_set_and_takes_it_out_again(
         monkeypatch.setattr(desec, "ENDPOINT", api.url)
         provider = desec.Desec.from_environment({desec.CREDENTIAL_FILE: credential_file(tmp_path)})
         provider.present(NAME, VALUE)
-        assert held == ['"another"', f'"{VALUE}"']
         provider.cleanup(NAME, VALUE)
-        assert held == ['"another"']
         provider.present("home.example.", VALUE)
-    patched = [
-        cast("list[dict[str, str]]", one.json())[0]["subname"] for one in api.asked if one.method == "PATCH"
-    ]
-    assert patched == ["_acme-challenge.mcp", "_acme-challenge.mcp", ""]
-    assert [one.path for one in api.asked if one.method == "GET" and one.path != "/domains/"] == [
-        "/domains/home.example/rrsets/_acme-challenge.mcp/TXT/",
-        "/domains/home.example/rrsets/_acme-challenge.mcp/TXT/",
-        "/domains/home.example/rrsets/@/TXT/",
+
+    def rrset(subname: str, *records: str) -> list[dict[str, object]]:
+        return [{"subname": subname, "type": "TXT", "ttl": desec.TTL, "records": list(records)}]
+
+    owner: Exchange = ("GET", "/domains/", {"owns_qname": [BARE]}, None)
+    held_at: Exchange = ("GET", "/domains/home.example/rrsets/_acme-challenge.mcp/TXT/", {}, None)
+    assert exchanges(api.asked) == [
+        owner,
+        held_at,
+        (
+            "PATCH",
+            "/domains/home.example/rrsets/",
+            {},
+            rrset("_acme-challenge.mcp", '"another"', f'"{VALUE}"'),
+        ),
+        owner,
+        held_at,
+        ("PATCH", "/domains/home.example/rrsets/", {}, rrset("_acme-challenge.mcp", '"another"')),
+        ("GET", "/domains/", {"owns_qname": ["home.example"]}, None),
+        ("GET", "/domains/home.example/rrsets/@/TXT/", {}, None),
+        ("PATCH", "/domains/home.example/rrsets/", {}, rrset("", '"another"', f'"{VALUE}"')),
     ]
     assert {one.headers["authorization"] for one in api.asked} == {f"Token {CREDENTIAL}"}
 
@@ -219,9 +248,14 @@ def test_duckdns_sets_and_clears_its_domains_one_record(
         provider = duckdns.DuckDns.from_environment({duckdns.CREDENTIAL_FILE: credential_file(tmp_path)})
         provider.present("_acme-challenge.myhome.duckdns.org.", VALUE)
         provider.cleanup("_acme-challenge.myhome.duckdns.org.", VALUE)
-    assert [one.query for one in api.asked] == [
-        {"domains": ["myhome"], "token": [CREDENTIAL], "txt": [VALUE]},
-        {"domains": ["myhome"], "token": [CREDENTIAL], "txt": [VALUE], "clear": ["true"]},
+    assert exchanges(api.asked) == [
+        ("GET", "/update", {"domains": ["myhome"], "token": [CREDENTIAL], "txt": [VALUE]}, None),
+        (
+            "GET",
+            "/update",
+            {"domains": ["myhome"], "token": [CREDENTIAL], "txt": [VALUE], "clear": ["true"]},
+            None,
+        ),
     ]
 
 
@@ -250,12 +284,24 @@ def test_route53_upserts_and_deletes_each_change_signed_with_version_4(
         provider = route53.Route53(KEY, "Z123", "eu-west-1", clock=lambda: MOMENT)
         provider.present(NAME, VALUE)
         provider.cleanup(NAME, VALUE)
-    upsert, delete = api.asked
-    assert (upsert.method, upsert.path) == ("POST", "/2013-04-01/hostedzone/Z123/rrset/")
-    assert b"<Action>UPSERT</Action>" in upsert.body
-    assert b"<Action>DELETE</Action>" in delete.body
-    assert f"<Name>{NAME}</Name><Type>TXT</Type><TTL>10</TTL>".encode() in upsert.body
-    assert f'<Value>"{VALUE}"</Value>'.encode() in upsert.body
+    upsert = api.asked[0]
+
+    def change(action: str) -> bytes:
+        return (
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            '<ChangeResourceRecordSetsRequest xmlns="https://route53.amazonaws.com/doc/2013-04-01/">'
+            f"<ChangeBatch><Changes><Change><Action>{action}</Action><ResourceRecordSet>"
+            f"<Name>{NAME}</Name><Type>TXT</Type><TTL>10</TTL><ResourceRecords><ResourceRecord>"
+            f'<Value>"{VALUE}"</Value></ResourceRecord></ResourceRecords></ResourceRecordSet>'
+            "</Change></Changes></ChangeBatch></ChangeResourceRecordSetsRequest>"
+        ).encode()
+
+    rrset = "/2013-04-01/hostedzone/Z123/rrset/"
+    assert exchanges(api.asked) == [
+        ("POST", rrset, {}, change("UPSERT")),
+        ("POST", rrset, {}, change("DELETE")),
+    ]
+    assert upsert.headers["content-type"] == "text/xml"
     expected = route53.signed_headers(KEY, api.url + upsert.path, upsert.body, MOMENT)
     assert upsert.headers["authorization"] == expected["Authorization"]
     assert upsert.headers["authorization"].startswith(
@@ -308,6 +354,18 @@ def test_route53_is_reached_and_signed_for_in_the_partition_its_region_sits_in(
     assert f"/{signed_for}/route53/aws4_request" in signed["Authorization"]
 
 
+PEM: Final = (
+    rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    .private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.PKCS8,
+        serialization.NoEncryption(),
+    )
+    .decode()
+)
+"""A service account's private key."""
+
+
 def service_account(tmp_path: pathlib.Path, token_uri: str) -> str:
     """Write a service account's key file, and return its path."""
     key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
@@ -326,7 +384,8 @@ def test_gcloud_asks_for_a_token_and_replaces_the_record_set(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    held: list[dict[str, object]] = [{"name": NAME, "type": "TXT", "ttl": 60, "rrdatas": ['"another"']}]
+    another: dict[str, object] = {"name": NAME, "type": "TXT", "ttl": 60, "rrdatas": ['"another"']}
+    held: list[dict[str, object]] = [another]
 
     def answer(asked: Asked) -> tuple[int, dict[str, str], bytes]:
         if asked.path == "/token":
@@ -348,23 +407,71 @@ def test_gcloud_asks_for_a_token_and_replaces_the_record_set(
         }
         provider = gcloud.Gcloud.from_environment(environment)
         provider.present(NAME, VALUE)
-        assert held[0]["rrdatas"] == ['"another"', f'"{VALUE}"']
         provider.cleanup(NAME, VALUE)
-        assert held[0]["rrdatas"] == ['"another"']
-        held[0]["rrdatas"] = [f'"{VALUE}"']
-        provider.cleanup(NAME, VALUE)
-        assert held == []
-        with pytest.raises(
-            ProviderError,
-            match="Cloud DNS holds no managed zone for",
-        ):
+        with pytest.raises(ProviderError, match="Cloud DNS holds no managed zone for"):
             provider.present("_acme-challenge.elsewhere.test.", VALUE)
-    token = api.asked[0]
-    assert token.form()["grant_type"] == [gcloud.GRANT]
-    header, payload, _ = token.form()["assertion"][0].split(".")
+
+    def with_values(*values: str) -> dict[str, object]:
+        return {"name": NAME, "type": "TXT", "ttl": gcloud.TTL, "rrdatas": list(values)}
+
+    zones: list[Exchange] = [
+        ("GET", "/projects/project/managedZones", {"dnsName": [f"{zone}."]}, None) for zone in ZONES
+    ]
+    rrsets = ("GET", "/projects/project/managedZones/home/rrsets", {"name": [NAME], "type": ["TXT"]}, None)
+    changes = "/projects/project/managedZones/home/changes"
+    both = with_values('"another"', f'"{VALUE}"')
+    token, *rest = exchanges(api.asked)
+    assert rest[:10] == [
+        *zones,
+        rrsets,
+        ("POST", changes, {}, {"deletions": [another], "additions": [both]}),
+        *zones,
+        rrsets,
+        ("POST", changes, {}, {"deletions": [both], "additions": [with_values('"another"')]}),
+    ]
+    assert (token[0], token[1], token[2]) == ("POST", "/token", {})
+    form = cast("dict[str, list[str]]", token[3])
+    assert set(form) == {"grant_type", "assertion"}
+    assert form["grant_type"] == [gcloud.GRANT]
+    signed = form["assertion"][0]
+    assert "=" not in signed
+    header, payload, _ = signed.split(".")
     assert json.loads(gcloud_decoded(header)) == {"alg": "RS256", "typ": "JWT"}
-    assert json.loads(gcloud_decoded(payload))["scope"] == gcloud.SCOPE
+    claims = json.loads(gcloud_decoded(payload))
+    assert claims == {
+        "iss": "dns@project.iam.example",
+        "scope": gcloud.SCOPE,
+        "aud": f"{api.url}/token",
+        "iat": claims["iat"],
+        "exp": claims["iat"] + gcloud.TOKEN_LIFETIME,
+    }
     assert {one.headers.get("authorization") for one in api.asked[1:]} == {"Bearer short-lived"}
+
+
+def test_a_record_set_left_with_no_value_is_deleted_whole_from_cloud_dns(
+    tmp_path: pathlib.Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    only: dict[str, object] = {"name": NAME, "type": "TXT", "ttl": 60, "rrdatas": [f'"{VALUE}"']}
+
+    def answer(asked: Asked) -> tuple[int, dict[str, str], bytes]:
+        if asked.path == "/token":
+            return answered(200, {"access_token": "short-lived"})
+        if asked.path.endswith("/managedZones"):
+            return answered(200, {"managedZones": [{"name": "home"}]})
+        return answered(200, {"rrsets": [only]} if asked.path.endswith("/rrsets") else {})
+
+    with HttpStandIn(answer) as api:
+        monkeypatch.setattr(gcloud, "ENDPOINT", api.url)
+        service_account(tmp_path, f"{api.url}/token")
+        account = gcloud.account_of(tmp_path / "account.json")
+        gcloud.Gcloud("project", account).cleanup(NAME, VALUE)
+    assert exchanges(api.asked)[-1] == (
+        "POST",
+        "/projects/project/managedZones/home/changes",
+        {},
+        {"deletions": [only], "additions": []},
+    )
 
 
 def gcloud_decoded(part: str) -> bytes:
@@ -383,12 +490,24 @@ def test_gcloud_refuses_a_file_that_is_not_a_service_accounts_key(
         gcloud.account_of(path)
 
 
+def azure_environment(tmp_path: pathlib.Path) -> dict[str, str]:
+    """Return the settings of an Azure DNS provider."""
+    return {
+        azuredns.TENANT_ID: "tenant",
+        azuredns.CLIENT_ID: "client",
+        azuredns.CLIENT_CREDENTIAL_FILE: credential_file(tmp_path),
+        azuredns.SUBSCRIPTION_ID: "sub",
+        azuredns.RESOURCE_GROUP: "group",
+    }
+
+
 def test_azuredns_asks_for_a_token_and_sets_the_record_set(
     tmp_path: pathlib.Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    record = "/subscriptions/sub/resourceGroups/group/providers/Microsoft.Network/dnsZones/home.example/TXT/_acme-challenge.mcp"
-    held: list[list[str]] = []
+    zones = "/subscriptions/sub/resourceGroups/group/providers/Microsoft.Network/dnsZones"
+    record = f"{zones}/home.example/TXT/_acme-challenge.mcp"
+    held: list[list[str]] = [["another"]]
 
     def answer(asked: Asked) -> tuple[int, dict[str, str], bytes]:
         if asked.path.endswith("/token"):
@@ -408,26 +527,42 @@ def test_azuredns_asks_for_a_token_and_sets_the_record_set(
     with HttpStandIn(answer) as api:
         monkeypatch.setattr(azuredns, "LOGIN", api.url)
         monkeypatch.setattr(azuredns, "MANAGEMENT", api.url)
-        environment = {
-            azuredns.TENANT_ID: "tenant",
-            azuredns.CLIENT_ID: "client",
-            azuredns.CLIENT_CREDENTIAL_FILE: credential_file(tmp_path),
-            azuredns.SUBSCRIPTION_ID: "sub",
-            azuredns.RESOURCE_GROUP: "group",
-        }
-        provider = azuredns.AzureDns.from_environment(environment)
+        provider = azuredns.AzureDns.from_environment(azure_environment(tmp_path))
         provider.present(NAME, VALUE)
-        assert held == [[VALUE]]
         provider.cleanup(NAME, VALUE)
-        assert held == []
-        with pytest.raises(
-            ProviderError,
-            match="Azure DNS holds no zone for",
-        ):
+        held.clear()
+        provider.present(NAME, VALUE)
+        provider.cleanup(NAME, VALUE)
+        with pytest.raises(ProviderError, match="Azure DNS holds no zone for"):
             provider.present("_acme-challenge.elsewhere.test.", VALUE)
-    assert api.asked[0].form()["client_secret"] == [CREDENTIAL]
-    assert ("PUT", record) in said(api.asked)
-    assert ("DELETE", record) in said(api.asked)
+
+    def records(*values: str) -> dict[str, object]:
+        return {"properties": {"TTL": azuredns.TTL, "TXTRecords": [{"value": [value]} for value in values]}}
+
+    version = {"api-version": ["2018-05-01"]}
+    listed = ("GET", zones, version, None)
+    looked = ("GET", record, version, None)
+    token = {
+        "grant_type": ["client_credentials"],
+        "client_id": ["client"],
+        "client_secret": [CREDENTIAL],
+        "scope": [azuredns.SCOPE],
+    }
+    assert exchanges(api.asked)[:13] == [
+        ("POST", "/tenant/oauth2/v2.0/token", {}, token),
+        listed,
+        looked,
+        ("PUT", record, version, records("another", VALUE)),
+        listed,
+        looked,
+        ("PUT", record, version, records("another")),
+        listed,
+        looked,
+        ("PUT", record, version, records(VALUE)),
+        listed,
+        looked,
+        ("DELETE", record, version, None),
+    ]
 
 
 @pytest.mark.parametrize(
@@ -456,14 +591,91 @@ def test_a_name_in_no_zone_the_provider_holds_is_refused(
             made().present(NAME, VALUE)
 
 
-def test_a_refusal_names_the_status_and_the_path_and_never_the_credential(
+SIGN_IN: Final = "sign-in"
+"""Where the refusal comes: at the sign-in, or at the API once signed in."""
+API: Final = "api"
+
+
+def refusing(at: str) -> Callable[[Asked], Answer]:
+    """Return an API that refuses, quoting the credential, at the sign-in or at the API once signed in."""
+
+    def answer(asked: Asked) -> Answer:
+        if at == API and asked.path.endswith("/token"):
+            return answered(200, {"access_token": "short-lived"})
+        return answered(403, {"errors": [CREDENTIAL]})
+
+    return answer
+
+
+def google(url: str) -> Provider:
+    """Return Cloud DNS signing in at the stand-in."""
+    return gcloud.Gcloud("project", {"client_email": "x", "private_key": PEM, "token_uri": f"{url}/token"})
+
+
+def azure(_: str) -> Provider:
+    """Return Azure DNS, its sign-in and its API set to the stand-in."""
+    return azuredns.AzureDns("tenant", "client", CREDENTIAL, "sub", "group")
+
+
+REFUSALS: Final[list[tuple[Callable[[str], Provider], str, str, str]]] = [
+    (
+        lambda _: cloudflare.Cloudflare(CREDENTIAL),
+        NAME,
+        API,
+        "The Cloudflare API answered 403 to GET /zones.",
+    ),
+    (
+        lambda _: digitalocean.DigitalOcean(CREDENTIAL),
+        NAME,
+        API,
+        f"The DigitalOcean API answered 403 to GET /domains/{BARE}.",
+    ),
+    (lambda _: hetzner.Hetzner(CREDENTIAL), NAME, API, "The Hetzner API answered 403 to GET /zones."),
+    (lambda _: desec.Desec(CREDENTIAL), NAME, API, "The deSEC API answered 403 to GET /domains/."),
+    (
+        lambda _: duckdns.DuckDns(CREDENTIAL),
+        "_acme-challenge.myhome.duckdns.org.",
+        API,
+        "The Duck DNS API answered 403 to GET /update.",
+    ),
+    (
+        lambda _: route53.Route53(KEY, "Z123"),
+        NAME,
+        API,
+        "The Route 53 API answered 403 to POST /2013-04-01/hostedzone/Z123/rrset/.",
+    ),
+    (google, NAME, SIGN_IN, "The Google API answered 403 to POST /token."),
+    (google, NAME, API, "The Cloud DNS API answered 403 to GET /projects/project/managedZones."),
+    (azure, NAME, SIGN_IN, "The Microsoft Entra API answered 403 to POST /tenant/oauth2/v2.0/token."),
+    (
+        azure,
+        NAME,
+        API,
+        (
+            "The Azure DNS API answered 403 to GET "
+            "/subscriptions/sub/resourceGroups/group/providers/Microsoft.Network/dnsZones."
+        ),
+    ),
+]
+"""Each provider, the name it is asked to write, where the stand-in refuses, and what the refusal says."""
+
+
+@pytest.mark.parametrize(("made", "name", "at", "said"), REFUSALS)
+def test_a_refusal_names_the_api_the_status_and_the_path_and_never_the_credential(
     monkeypatch: pytest.MonkeyPatch,
+    made: Callable[[str], Provider],
+    name: str,
+    at: str,
+    said: str,
 ) -> None:
-    with HttpStandIn(lambda _: answered(403, {"errors": [CREDENTIAL]})) as api:
-        monkeypatch.setattr(cloudflare, "ENDPOINT", api.url)
+    with HttpStandIn(refusing(at)) as api:
+        for module in (cloudflare, digitalocean, hetzner, desec, duckdns, route53, gcloud):
+            monkeypatch.setattr(module, "ENDPOINT", api.url)
+        monkeypatch.setattr(azuredns, "LOGIN", api.url)
+        monkeypatch.setattr(azuredns, "MANAGEMENT", api.url)
         with pytest.raises(ProviderError) as refused:
-            cloudflare.Cloudflare(CREDENTIAL).present(NAME, VALUE)
-    assert str(refused.value) == "The Cloudflare API answered 403 to GET /zones."
+            made(api.url).present(name, VALUE)
+    assert str(refused.value) == said
 
 
 def test_an_api_that_cannot_be_reached_says_so(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -492,15 +704,41 @@ def test_an_access_token_is_asked_for_again_five_minutes_before_it_ends(
         leased.api()
 
 
-def test_a_404_where_a_document_or_a_listing_is_needed_is_refused(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_a_404_where_a_document_a_listing_or_text_is_needed_is_refused_naming_what_was_asked() -> None:
     with HttpStandIn(lambda _: answered(404, {})) as api:
-        reached = Api("Stand-in", api.url)
+        reached = Api("Stand-in", f"{api.url}/")
         for asking in (reached.document, reached.listing, reached.text):
-            with pytest.raises(ProviderError, match="answered 404"):
-                asking("GET", "/anything")
-        assert reached.found("GET", "/anything") is None
+            with pytest.raises(ProviderError) as refused:
+                asking(HTTPMethod.GET, "/anything")
+            assert str(refused.value) == "The Stand-in API answered 404 to GET /anything."
+        assert reached.found(HTTPMethod.GET, "/anything") is None
+    assert {one.path for one in api.asked} == {"/anything"}
     with HttpStandIn(lambda _: (204, {}, b"")) as api:
-        assert Api("Stand-in", api.url).found("DELETE", "/anything") == {}
+        assert Api("Stand-in", api.url).found(HTTPMethod.DELETE, "/anything") == {}
+
+
+@pytest.mark.parametrize("status", [400, 500])
+def test_a_status_of_400_or_more_is_refused(status: int) -> None:
+    with HttpStandIn(lambda _: (status, JSON, b"{}")) as api:
+        reached = Api("Stand-in", api.url)
+        with pytest.raises(ProviderError, match=f"answered {status} to GET /anything"):
+            reached.send(HTTPMethod.GET, "/anything")
+
+
+@pytest.mark.parametrize("status", [399, 404])
+def test_a_status_below_400_and_a_404_are_answered(status: int) -> None:
+    with HttpStandIn(lambda _: (status, JSON, b"{}")) as api:
+        assert Api("Stand-in", api.url).send(HTTPMethod.GET, "/anything").status_code == status
+
+
+def test_an_api_that_does_not_answer_in_time_is_refused(monkeypatch: pytest.MonkeyPatch) -> None:
+    def slow(_: Asked) -> Answer:
+        time.sleep(1)
+        return answered(200, {})
+
+    monkeypatch.setattr(api_module, "TIMEOUT_SECONDS", 0.1)
+    with HttpStandIn(slow) as api, pytest.raises(ProviderError, match="could not be reached: ReadTimeout"):
+        Api("Stand-in", api.url).send(HTTPMethod.GET, "/anything")
 
 
 @pytest.mark.parametrize(
