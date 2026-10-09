@@ -9,6 +9,7 @@ is pending, and withdrawn after.
 """
 
 import datetime
+import logging
 from typing import TYPE_CHECKING, Any, Final, cast, override
 
 import requests
@@ -26,8 +27,10 @@ if TYPE_CHECKING:
     from josepy.jwk import JWK
 
     from lemonfiber_mcp.certificates.alpn import Challenges
+    from lemonfiber_mcp.certificates.dns.challenge import Dns01
 
 USER_AGENT: Final = "lemonfiber-mcp"
+logger = logging.getLogger(__name__)
 REFUSED_FROM: Final = 400
 """The lowest status an authority refuses with."""
 HTTP_DATE: Final = "%a, %d %b %Y %H:%M:%S GMT"
@@ -139,10 +142,12 @@ class Presenting:
         pending: Challenges,
         acme: client.ClientV2,
         order: messages.OrderResource,
+        dns: Dns01 | None = None,
     ) -> None:
-        """Hold the challenge kind, where TLS-ALPN-01 answers are kept, the client and the order."""
+        """Hold the challenge kind, where TLS-ALPN-01 answers are kept, how DNS-01 is answered, the client and the order."""
         self._chosen = chosen
         self._pending = pending
+        self._dns = dns
         self._acme = acme
         self._order = order
         self._withdrawn: list[Callable[[], None]] = []
@@ -159,6 +164,7 @@ class Presenting:
         key = cast("JWK", self._acme.net.key)
         answers: list[tuple[messages.ChallengeBody, challenges.ChallengeResponse]] = []
         tokens: dict[str, str] = {}
+        records: list[tuple[str, str]] = []
         for authorization in authorizations_of(self._order):
             if valid(authorization):
                 continue
@@ -175,18 +181,33 @@ class Presenting:
             if self._chosen is Challenge.TLS_ALPN_01:
                 self._pending.present(name, validation)
                 self._withdrawn.append(lambda withdrawn=name: self._pending.withdraw(withdrawn))
-            else:
+            elif self._chosen is Challenge.HTTP_01:
                 tokens[cast("challenges.HTTP01", chall).path] = validation
+            else:
+                records.append(self._written(name, validation))
             answers.append((offered[0], response))
         if tokens:
             port = http01.Responder(tokens)
             port.open()
             self._withdrawn.append(port.close)
+        for written in records:
+            cast("Dns01", self._dns).wait_for(*written)
         for body, response in answers:
             self._acme.answer_challenge(body, response)
 
+    def _written(self, name: str, value: str) -> tuple[str, str]:
+        """Write a DNS-01 record through the provider, and return where it was written and its value."""
+        dns = cast("Dns01", self._dns)
+        where = dns.where(name)
+        dns.provider.present(where, value)
+        self._withdrawn.append(lambda: dns.provider.cleanup(where, value))
+        return where, value
+
     def __exit__(self, *_: object) -> None:
-        """Withdraw every answer, and close port 80 where it was opened."""
+        """Withdraw every answer and close port 80 where it was opened, logging a withdrawal that fails."""
         for withdrawn in reversed(self._withdrawn):
-            withdrawn()
+            try:
+                withdrawn()
+            except CertificateError as failed:
+                logger.warning("An answer could not be withdrawn: %s", failed)
         self._withdrawn.clear()

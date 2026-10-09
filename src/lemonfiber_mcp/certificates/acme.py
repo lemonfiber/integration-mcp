@@ -42,6 +42,7 @@ if TYPE_CHECKING:
 
     from lemonfiber_mcp.certificates.acme_settings import Acme
     from lemonfiber_mcp.certificates.alpn import Challenges
+    from lemonfiber_mcp.certificates.dns.challenge import Dns01
     from lemonfiber_mcp.certificates.settings import Tls
 
 ACCOUNT: Final = "account"
@@ -101,11 +102,13 @@ class AcmeSource:
         settings: Acme,
         pending: Challenges,
         rng: random.Random | None = None,
+        dns: Dns01 | None = None,
     ) -> None:
         """Hold the settings, where the account and the certificate are kept, and the pending TLS-ALPN-01 answers."""
         self._tls = tls
         self._settings = settings
         self._pending = pending
+        self._dns = dns
         self._names = tuple(str(name) for name in tls.names)
         self._leaf_dir = leaf_dir(tls)
         self._account_dir = tls.state / ACCOUNT / hashlib.sha256(settings.directory.encode()).hexdigest()
@@ -253,7 +256,7 @@ class AcmeSource:
             acme = self._client()
             self._registered(acme)
             order = acme.new_order(csr_of(self._names, key))
-            with Presenting(self._settings.challenge, self._pending, acme, order):
+            with Presenting(self._settings.challenge, self._pending, acme, order, self._dns):
                 finished = acme.poll_and_finalize(order, deadline=local_deadline(now))
         except FAILURES as failed:
             self._asked = None if acme is None else cast("Network", acme.net).retry_after

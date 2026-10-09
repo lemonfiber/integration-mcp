@@ -27,14 +27,19 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Final, cast, override
 
 import anyio
+import dns.exception
+import dns.resolver
 import pytest
 import requests
-from acme import client, errors, messages
+from acme import challenges, client, errors, messages
 from cryptography.hazmat.primitives.asymmetric import ec
 from josepy.jwk import JWKEC
 
 from lemonfiber_mcp.certificates import acme, acme_protocol, alpn, hello, http01, making, state
 from lemonfiber_mcp.certificates.acme_settings import Acme, Binding, Challenge
+from lemonfiber_mcp.certificates.dns.challenge import Dns01
+from lemonfiber_mcp.certificates.dns.exec import Exec
+from lemonfiber_mcp.certificates.dns.provider import ProviderError, Timing
 from lemonfiber_mcp.certificates.manager import server_context
 from lemonfiber_mcp.certificates.modes import CertificateError, Served
 from lemonfiber_mcp.certificates.settings import KeyType, Mode, Tls
@@ -55,6 +60,8 @@ CHALLTESTSRV: Final = os.environ.get("PEBBLE_CHALLTESTSRV", "")
 """Where the challenge test server takes the records it answers Pebble's lookups with."""
 OWN_ADDRESSES: Final = os.environ.get("PEBBLE_ADDRESSES") == "own"
 """Whether each test answers on a loopback address of its own, where Pebble reaches this machine's loopback."""
+PEBBLE_DNS: Final = os.environ.get("PEBBLE_DNS", "127.0.0.1:8053")
+"""Where the challenge test server answers DNS lookups, being the one server Pebble asks."""
 needs_pebble = pytest.mark.skipif(not PEBBLE, reason="Pebble is not running: start it with scripts/pebble.sh")
 
 
@@ -362,6 +369,66 @@ async def test_an_account_whose_record_is_lost_is_found_again_by_its_key(
     assert json.loads(record.read_text(encoding="utf-8"))["url"] == known["url"]
 
 
+HOOK: Final = r"""#!/bin/sh
+case "$1" in
+  present) body="{\"host\":\"$2\",\"value\":\"$3\"}"; path=set-txt ;;
+  *) body="{\"host\":\"$2\"}"; path=clear-txt ;;
+esac
+exec curl -fsS -d "$body" "CHALLTESTSRV/$path"
+"""
+"""A program for the `exec` provider, writing TXT records into the challenge test server and clearing them."""
+
+
+def challtestsrv_hook(root: pathlib.Path) -> Exec:
+    """Return the `exec` provider running the program that writes into the challenge test server."""
+    program = root / "dns-hook"
+    program.write_text(HOOK.replace("CHALLTESTSRV", CHALLTESTSRV), encoding="utf-8")
+    program.chmod(stat.S_IRWXU)
+    return Exec(program)
+
+
+def challtestsrv_dns() -> tuple[str, int]:
+    """Return where the challenge test server answers DNS lookups."""
+    host, _, port = PEBBLE_DNS.rpartition(":")
+    return host, int(port)
+
+
+def challtestsrv_resolver() -> dns.resolver.Resolver:
+    """Return a resolver asking only the challenge test server."""
+    host, port = challtestsrv_dns()
+    asking = dns.resolver.Resolver(configure=False)
+    asking.nameservers = [host]
+    asking.port = port
+    return asking
+
+
+@needs_pebble
+@pytest.mark.anyio
+async def test_a_certificate_is_issued_by_dns_01_through_the_operators_program(
+    tmp_path: pathlib.Path,
+    place: Place,
+) -> None:
+    names = (place.name, f"www.{place.name}")
+    answering = Dns01(
+        challtestsrv_hook(tmp_path),
+        resolver=challtestsrv_resolver,
+        servers=lambda _, __: [challtestsrv_dns()],
+    )
+    tls = Tls(Mode.ACME, names, None, None, KeyType.EC_P256, state.kept(tmp_path / "state"))
+    source = acme.AcmeSource(
+        tls,
+        settings_of(Challenge.DNS_01),
+        alpn.Challenges(tmp_path),
+        random.Random(0),
+        dns=answering,
+    )
+    served = await obtained(source, datetime.datetime.now(datetime.UTC))
+    assert making_covered(served) == set(names)
+    for name in names:
+        with pytest.raises(dns.exception.DNSException):
+            challtestsrv_resolver().resolve(f"_acme-challenge.{name}.", "TXT")
+
+
 def test_a_directory_that_cannot_be_reached_at_start_leaves_a_certificate_standing_in(
     tmp_path: pathlib.Path,
     caplog: pytest.LogCaptureFixture,
@@ -478,8 +545,11 @@ def test_a_kept_certificate_serves_until_a_third_is_left_where_the_authority_can
 
 
 def body_of(kind: str, *, valid: bool = False) -> types.SimpleNamespace:
-    """Return a challenge as an authorization offers it."""
-    return types.SimpleNamespace(chall=types.SimpleNamespace(typ=kind), error=None, valid=valid)
+    """Return a challenge as an authorization offers it, a DNS-01 one able to make its answer."""
+    chall = (
+        challenges.DNS01(token=b"t" * 32) if kind == challenges.DNS01.typ else types.SimpleNamespace(typ=kind)
+    )
+    return types.SimpleNamespace(chall=chall, error=None, valid=valid)
 
 
 def order_of(*offered: tuple[str, str, bool]) -> messages.OrderResource:
@@ -507,6 +577,41 @@ def test_an_authority_offering_no_challenge_of_the_chosen_kind_is_refused_by_nam
         presenting,
     ):
         pass
+
+
+class Unremovable:
+    """A provider that writes records but cannot remove them."""
+
+    timing = Timing()
+
+    def present(self, name: str, value: str) -> None:
+        """Write nothing, successfully."""
+
+    def cleanup(self, name: str, value: str) -> None:
+        """Refuse the removal."""
+        msg = f"The record at {name} holding {value} could not be removed."
+        raise ProviderError(msg)
+
+
+def test_an_answer_that_cannot_be_withdrawn_is_logged_and_what_failed_is_raised(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    acme_client = cast("client.ClientV2", types.SimpleNamespace(net=types.SimpleNamespace(key=account_key())))
+    answering = Dns01(Unremovable(), resolver=challtestsrv_resolver, servers=lambda _, __: [])
+    order = order_of(("mcp.acme.test", "dns-01", False))
+    presenting = acme_protocol.Presenting(
+        Challenge.DNS_01,
+        alpn.Challenges(pathlib.Path()),
+        acme_client,
+        order,
+        answering,
+    )
+    with pytest.raises(CertificateError, match="No authoritative server of _acme-challenge"), presenting:
+        pass
+    assert (
+        "An answer could not be withdrawn: The record at _acme-challenge.mcp.acme.test. holding "
+        in caplog.text
+    )
 
 
 @pytest.mark.parametrize(

@@ -5,7 +5,9 @@ from typing import TYPE_CHECKING, Final
 
 from lemonfiber_mcp.certificates.acme import AcmeSource
 from lemonfiber_mcp.certificates.acme_settings import Challenge, acme_from
-from lemonfiber_mcp.certificates.modes import CertificateError, Files, Pinned, PrivateCa
+from lemonfiber_mcp.certificates.dns.challenge import Dns01
+from lemonfiber_mcp.certificates.dns.registry import provider_of
+from lemonfiber_mcp.certificates.modes import Files, Pinned, PrivateCa
 from lemonfiber_mcp.certificates.settings import Mode
 
 if TYPE_CHECKING:
@@ -15,10 +17,6 @@ if TYPE_CHECKING:
     from lemonfiber_mcp.certificates.modes import Source
     from lemonfiber_mcp.certificates.settings import Tls
 
-NOT_YET: Final = (
-    "LEMONFIBER_ACME_CHALLENGE is dns-01, which this version of the server does not answer yet. Choose "
-    "tls-alpn-01 or http-01."
-)
 OWN: Final[Mapping[Mode, Callable[[Tls], Source]]] = {
     Mode.FILES: Files,
     Mode.PRIVATE_CA: PrivateCa,
@@ -28,10 +26,10 @@ OWN: Final[Mapping[Mode, Callable[[Tls], Source]]] = {
 
 
 def source_of(tls: Tls, environment: Mapping[str, str], pending: Challenges) -> Source:
-    """Return where the certificate comes from, refusing a challenge this version does not answer."""
+    """Return where the certificate comes from, with the DNS provider DNS-01 is answered through."""
     if tls.mode is not Mode.ACME:
         return OWN[tls.mode](tls)
     settings = acme_from(environment)
-    if settings.challenge is Challenge.DNS_01:
-        raise CertificateError(NOT_YET)
-    return AcmeSource(tls, settings, pending)
+    if settings.challenge is not Challenge.DNS_01:
+        return AcmeSource(tls, settings, pending)
+    return AcmeSource(tls, settings, pending, dns=Dns01(provider_of(settings.dns_provider, environment)))

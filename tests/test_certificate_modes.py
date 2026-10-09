@@ -3,6 +3,7 @@
 
 import datetime
 import ipaddress
+import stat
 from typing import TYPE_CHECKING, Final
 
 import pytest
@@ -13,9 +14,10 @@ from cryptography.hazmat.primitives.asymmetric import ed25519
 from lemonfiber_mcp.certificates import making, modes, sources, state
 from lemonfiber_mcp.certificates.acme import AcmeSource
 from lemonfiber_mcp.certificates.acme_settings import CHALLENGE as LEMONFIBER_ACME_CHALLENGE
+from lemonfiber_mcp.certificates.acme_settings import DNS_PROVIDER as LEMONFIBER_ACME_DNS_PROVIDER
 from lemonfiber_mcp.certificates.alpn import Challenges
 from lemonfiber_mcp.certificates.modes import CertificateError
-from lemonfiber_mcp.certificates.settings import KeyType, Mode, Name, Tls
+from lemonfiber_mcp.certificates.settings import KeyType, Mode, Name, Tls, TlsSettingsError
 
 if TYPE_CHECKING:
     import pathlib
@@ -261,7 +263,20 @@ def test_an_authority_has_its_source(tmp_path: pathlib.Path) -> None:
     assert isinstance(sources.source_of(tls, {}, Challenges(tmp_path)), AcmeSource)
 
 
-def test_dns_01_is_refused_by_this_version(tmp_path: pathlib.Path) -> None:
+def test_dns_01_is_answered_through_the_provider_named(tmp_path: pathlib.Path) -> None:
     tls = tls_of(tmp_path, Mode.ACME, ("mcp.example.org",))
-    with pytest.raises(CertificateError, match="does not answer yet"):
+    program = tmp_path / "dns-hook"
+    program.write_text("#!/bin/sh\n", encoding="utf-8")
+    program.chmod(stat.S_IRWXU)
+    environment = {
+        LEMONFIBER_ACME_CHALLENGE: "dns-01",
+        LEMONFIBER_ACME_DNS_PROVIDER: "exec",
+        "EXEC_PATH": str(program),
+    }
+    assert isinstance(sources.source_of(tls, environment, Challenges(tmp_path)), AcmeSource)
+
+
+def test_dns_01_without_a_provider_is_refused(tmp_path: pathlib.Path) -> None:
+    tls = tls_of(tmp_path, Mode.ACME, ("mcp.example.org",))
+    with pytest.raises(TlsSettingsError, match="LEMONFIBER_ACME_DNS_PROVIDER"):
         sources.source_of(tls, {LEMONFIBER_ACME_CHALLENGE: "dns-01"}, Challenges(tmp_path))
