@@ -110,11 +110,37 @@ address to its log when it registers its account.
 | `LEMONFIBER_ACME_ROOTS` | A PEM file of the roots your own authority's directory is checked against |
 | `LEMONFIBER_ACME_CONTACT` | A `mailto:` address the authority may write to |
 | `LEMONFIBER_ACME_EAB_KID`, `LEMONFIBER_ACME_EAB_HMAC_FILE` | An External Account Binding, for an authority that requires one: its key identifier, and a file holding its HMAC key |
-| `LEMONFIBER_ACME_CHALLENGE` | `tls-alpn-01` by default, answered on the port the server serves on, or `http-01`, which needs port 80 |
+| `LEMONFIBER_ACME_CHALLENGE` | `tls-alpn-01` by default, answered on the port the server serves on; `http-01`, which needs port 80; or `dns-01`, which needs no inbound connection |
+| `LEMONFIBER_ACME_DNS_PROVIDER` | With `dns-01`, the DNS provider the record is written through, from the table below |
 
 With `http-01` the server opens port 80 while an order is pending, answers the challenge and
-nothing else, and closes it again; publish it with `-p 80:80`. `dns-01` is refused by this
-version. Until the first certificate is issued the server serves one standing in, which no
+nothing else, and closes it again; publish it with `-p 80:80`.
+
+With `dns-01` the server writes the challenge's TXT record through your DNS provider, follows a
+`_acme-challenge` name you delegated by CNAME to where it points, and asks the authority to look
+only once every authoritative server of the zone answers with the record. It is the challenge
+for a host nothing on the internet reaches. Providers are named, and their settings spelled, as
+[lego](https://go-acme.github.io/lego/dns/) names them:
+
+| Provider | Settings |
+|---|---|
+| `rfc2136` | `RFC2136_NAMESERVER` (`host`, `host:port` or `[address]:port`), `RFC2136_TSIG_KEY`, `RFC2136_TSIG_ALGORITHM` (`hmac-sha256.` by default), `RFC2136_TSIG_SECRET_FILE` |
+| `cloudflare` | `CLOUDFLARE_DNS_API_TOKEN_FILE` |
+| `route53` | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY_FILE`, `AWS_HOSTED_ZONE_ID`, and `AWS_REGION` where your account is in AWS China or GovCloud |
+| `gcloud` | `GCE_PROJECT`, `GCE_SERVICE_ACCOUNT_FILE` |
+| `azuredns` | `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET_FILE`, `AZURE_SUBSCRIPTION_ID`, `AZURE_RESOURCE_GROUP` |
+| `digitalocean` | `DO_AUTH_TOKEN_FILE` |
+| `hetzner` | `HETZNER_API_TOKEN_FILE`, a Hetzner Console API token |
+| `desec` | `DESEC_TOKEN_FILE` |
+| `duckdns` | `DUCKDNS_TOKEN_FILE` |
+| `exec` | `EXEC_PATH`: your program, run as `<program> present <name> <value>` and `<program> cleanup <name> <value>` |
+
+Every secret is read from the file its `_FILE` setting names, never from a setting itself, so it
+never sits in an environment that a process listing or a crash report shows; mount it as a Docker
+secret. No credential is written to the log, an error or the health answer. The `exec` program is
+given the record's name and value and `PATH`, and nothing else.
+
+Until the first certificate is issued the server serves one standing in, which no
 client trusts, and its health answer is `503`. A certificate is renewed when the authority's
 renewal information says, or once a third of its lifetime is left; a failed attempt is tried
 again after a minute, doubling to six hours, never sooner than the authority asks.

@@ -40,6 +40,9 @@ ignore = [
 # The schema's vendoring script fetches the one https address it builds from a
 # pinned revision.
 "scripts/vendor_mcp_schema.py" = ["S310"]
+# The `exec` DNS provider runs the operator's own program, by the path they set,
+# with no shell and arguments it writes itself.
+"src/lemonfiber_mcp/certificates/dns/exec.py" = ["S603"]
 
 [lint.pydocstyle]
 convention = "pep257"

@@ -69,7 +69,7 @@ bound.update(
 (held / "pebble-eab.json").write_text(json.dumps(config), encoding="utf-8")
 PY
 
-docker run -d --name lemonfiber-mcp-challtestsrv "${placed[@]}" -p 8055:8055 "${CHALLTESTSRV}" \
+docker run -d --name lemonfiber-mcp-challtestsrv "${placed[@]}" -p 8055:8055 -p 8053:8053/udp -p 8053:8053/tcp "${CHALLTESTSRV}" \
 	-defaultIPv4 "${host_ip}" -defaultIPv6 "" -http01 "" -https01 "" -tlsalpn01 "" >/dev/null
 for name in pebble pebble-eab; do
 	port=14000
@@ -96,3 +96,4 @@ echo "PEBBLE_EAB_KID=${kid}"
 echo "PEBBLE_EAB_HMAC_FILE=${HELD}/eab-hmac"
 echo "PEBBLE_CHALLTESTSRV=http://localhost:8055"
 echo "PEBBLE_ADDRESSES=${addresses}"
+echo "PEBBLE_DNS=127.0.0.1:8053"
