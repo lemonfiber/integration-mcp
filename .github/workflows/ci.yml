@@ -117,13 +117,18 @@ jobs:
 
   # The most expensive gate, so the most guarded: only on a pull request, and
   # only once the tests have passed. Mutating code whose tests already fail
-  # measures nothing.
-  mutation:
-    name: mutation testing
+  # measures nothing. The modules are split across shards that run at once, each
+  # held to the minimum score.
+  mutation-shards:
+    name: mutation (${{ matrix.shard }})
     needs: [scope, tests]
     if: ${{ !cancelled() && (needs.scope.result != 'success' || needs.scope.outputs.code == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5]
     steps:
       - name: The tests passed, so there is something to measure
         env:
@@ -139,8 +144,11 @@ jobs:
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
       - name: Install exactly what the lockfile says
         run: uv sync --locked --no-build
-      - name: Mutate, and hold the score to its minimum
-        run: uv run --locked --no-build --no-sync just mutation
+      - name: Mutate this shard, and hold its score to the minimum
+        env:
+          INDEX: ${{ strategy.job-index }}
+          TOTAL: ${{ strategy.job-total }}
+        run: uv run --locked --no-build --no-sync just mutation-shard "${INDEX}" "${TOTAL}"
       - name: The mutants that survived, each as the change it made
         if: ${{ !cancelled() }}
         run: |
@@ -149,6 +157,23 @@ jobs:
           for mutant in ${survived}; do
             uv run --locked --no-build --no-sync mutmut show "${mutant}"
           done
+
+  # One answer for the whole mutation run: every shard met the minimum.
+  mutation:
+    name: mutation testing
+    needs: mutation-shards
+    if: ${{ !cancelled() && needs.mutation-shards.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every shard met the minimum
+        env:
+          SHARDS: ${{ needs.mutation-shards.result }}
+        run: |
+          if [ "${SHARDS}" != success ]; then
+            echo "::error::A mutation shard did not meet the minimum or did not finish (${SHARDS})."
+            exit 1
+          fi
 
   # The image builds for both platforms the release publishes, runs locked
   # down, read-only, as its own user and with no capability, and answers its

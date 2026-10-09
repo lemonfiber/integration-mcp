@@ -63,3 +63,10 @@ mutation:
     uv run mutmut run
     uv run mutmut export-cicd-stats
     uv run python scripts/mutation_score.py
+
+# One shard of the mutation run, by its index from 0 and the number of shards,
+# held to the minimum score on its own. CI runs each shard as a job of its own.
+mutation-shard index total:
+    set -f; uv run mutmut run $(uv run python scripts/mutation_shard.py {{index}} {{total}})
+    uv run mutmut export-cicd-stats
+    uv run python scripts/mutation_score.py

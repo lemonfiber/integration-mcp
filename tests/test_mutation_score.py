@@ -34,6 +34,20 @@ def test_a_score_below_the_minimum_fails(tmp_path: pathlib.Path, capsys: pytest.
     assert "80.00%" in capsys.readouterr().err
 
 
+def test_a_mutant_another_shard_tries_is_not_judged(
+    tmp_path: pathlib.Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    write_score(tmp_path, {"total": 40, "killed": 9, "survived": 1})
+    assert mutation_score.run(tmp_path) == 0
+    assert "(9 of 10 mutants" in capsys.readouterr().out
+
+
+def test_a_suspicious_or_crashing_mutant_counts_against_the_score(tmp_path: pathlib.Path) -> None:
+    write_score(tmp_path, {"total": 10, "killed": 8, "suspicious": 1, "segfault": 1})
+    assert mutation_score.run(tmp_path) == 1
+
+
 def test_a_run_judging_no_mutants_fails(tmp_path: pathlib.Path) -> None:
     write_score(tmp_path, {"total": 3, "skipped": 3})
     assert mutation_score.run(tmp_path) == 1
