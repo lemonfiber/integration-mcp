@@ -175,13 +175,105 @@ def test_before_the_stack_answers_the_one_tool_is_connection(audience: Audience)
     assert list(catalogue.connection_only(audience)) == [catalogue.CONNECTION]
 
 
+def test_the_words_are_read_as_written() -> None:
+    written = catalogue.read_words(
+        "[a]\n"
+        'operator = "For the operator."\n'
+        "[a.parameters]\n"
+        'p = "A parameter."\n'
+        "[a.household]\n"
+        'description = "For the household."\n'
+        "[a.household.parameters]\n"
+        'q = "Theirs."\n'
+        "[b]\n"
+        'operator = "Only the operator."\n',
+    )
+    assert written == {
+        "a": catalogue.Words(
+            "For the operator.",
+            {"p": "A parameter."},
+            "For the household.",
+            {"q": "Theirs."},
+        ),
+        "b": catalogue.Words("Only the operator.", {}, None, {}),
+    }
+
+
 @pytest.mark.parametrize(
-    "written",
+    ("written", "said"),
     [
-        '[a]\noperator = "x"\nparameters = "not a table"\n',
-        '[a]\noperator = "x"\n[a.parameters]\nb = 1\n',
+        ('[a]\noperator = "x"\nparameters = "not a table"\n', "a parameters table is not a table"),
+        ('[a]\noperator = "x"\n[a.parameters]\nb = 1\n', "a parameter's description is not text"),
     ],
 )
-def test_words_that_are_not_text_are_refused(written: str) -> None:
-    with pytest.raises(TypeError):
+def test_words_that_are_not_text_are_refused(written: str, said: str) -> None:
+    with pytest.raises(TypeError) as refused:
         catalogue.read_words(written)
+    assert str(refused.value) == said
+
+
+SHAPE: Final = ToolShape(
+    name="read_a",
+    reach=Reach.READ,
+    target="a",
+    capability="/api/a",
+    parameters=("p", "q", "r"),
+    input_schema={
+        "type": "object",
+        "properties": {
+            "p": {"type": "string", "description": "The contract's."},
+            "q": {"type": "string"},
+            "r": {},
+        },
+        "required": ["p", "q"],
+        "additionalProperties": False,
+    },
+    resource=None,
+    read_only=True,
+    destructive=False,
+    idempotent=True,
+)
+
+
+def test_a_schema_holds_the_offered_parameters_each_described_once() -> None:
+    before = json.dumps(SHAPE.input_schema)
+    schema = catalogue.described_schema(SHAPE, {"q": "Written."}, ["p", "q"])
+    assert schema == {
+        "type": "object",
+        "properties": {
+            "p": {"type": "string", "description": "The contract's."},
+            "q": {"type": "string", "description": "Written."},
+        },
+        "required": ["p", "q"],
+        "additionalProperties": False,
+    }
+    assert json.dumps(SHAPE.input_schema) == before
+
+
+def test_a_parameter_not_offered_is_not_required() -> None:
+    schema = catalogue.described_schema(SHAPE, {}, ["q", "r"])
+    assert schema["required"] == ["q"]
+    assert schema["properties"] == {"q": {"type": "string"}, "r": {}}
+
+
+def test_an_unconfigured_tool_says_its_own_words_and_then_that_a_setting_is_off() -> None:
+    made = catalogue.tool(catalogue.SHAPES["read_status"], Audience.OPERATOR, catalogue.UNCONFIGURED)
+    assert made is not None
+    assert made.description == catalogue.words()["read_status"].operator + catalogue.UNCONFIGURED_NOTE
+
+
+def test_a_tool_offered_where_a_setting_is_off_says_so() -> None:
+    offered = catalogue.offered(capability_set({"/api/status": "unconfigured"}), Audience.OPERATOR)
+    assert (
+        offered["read_status"].description
+        == catalogue.words()["read_status"].operator + catalogue.UNCONFIGURED_NOTE
+    )
+
+
+def test_every_read_with_an_address_is_found_by_the_name_it_carries() -> None:
+    assert {shape.name for shape in catalogue.READABLE.values()} == {
+        shape.name
+        for shape in TOOLS
+        if shape.resource is not None and shape.resource.startswith("lemonfiber://read/")
+    }
+    assert catalogue.READABLE["status"].name == "read_status"

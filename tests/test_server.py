@@ -13,8 +13,8 @@ from mcp import Client
 from mcp.server.session import ServerSession
 from mcp.shared.exceptions import MCPError
 
+from lemonfiber_mcp import catalogue, outcome, serving
 from lemonfiber_mcp import connection as connection_module
-from lemonfiber_mcp import outcome, serving
 from lemonfiber_mcp import stack as stack_module
 from lemonfiber_mcp.connection import Connection
 from lemonfiber_mcp.outcome import State
@@ -83,16 +83,27 @@ async def test_a_read_key_is_offered_no_write(stack: Stack, mcp_client: Client) 
     assert not offered & {"restart", "rehearse_restart", "diagnose", "job"}
 
 
+async def test_the_server_introduces_itself_with_its_version_and_how_to_read_its_answers(
+    mcp_client: Client,
+) -> None:
+    assert mcp_client.server_info is not None
+    assert mcp_client.server_info.version == VERSION
+    assert mcp_client.instructions == serving.INSTRUCTIONS
+
+
 async def test_before_the_stack_answers_the_one_tool_is_connection_and_it_says_why(elsewhere: Client) -> None:
-    assert names(await elsewhere.list_tools()) == {"connection"}
+    listed = await elsewhere.list_tools()
+    assert names(listed) == {"connection"}
+    assert listed.tools[0].description == catalogue.words()["connection"].operator
     result = await elsewhere.call_tool("connection", {})
     assert result.is_error
     assert texts(result) == [outcome.UNANSWERED]
 
 
 async def test_the_connection_tool_says_when_the_stack_answers(mcp_client: Client) -> None:
+    offered = len((await mcp_client.list_tools()).tools)
     result = await mcp_client.call_tool("connection", {})
-    assert data_of(result)["state"] == "connected"
+    assert data_of(result) == {"state": "connected", "tools": offered}
 
 
 async def test_a_refused_key_is_told_by_every_tool_and_never_sent_again(
@@ -205,6 +216,7 @@ async def test_a_bundle_is_handed_over_as_the_file_it_is(stack: Stack, mcp_clien
     assert isinstance(embedded.resource, types.BlobResourceContents)
     assert base64.b64decode(embedded.resource.blob) == b"\x1f\x8bbundle"
     assert embedded.resource.uri == "lemonfiber://bundle/support-1.tar.gz"
+    assert embedded.resource.mime_type == "application/gzip"
 
 
 async def test_a_rehearsal_asks_the_action_to_write_nothing(stack: Stack, mcp_client: Client) -> None:
@@ -310,6 +322,22 @@ async def test_reads_are_resources_and_resource_templates(mcp_client: Client) ->
     assert not any("actions" in address for address in plain | templates)
 
 
+async def test_every_read_offered_is_a_resource_described_as_its_tool_is(mcp_client: Client) -> None:
+    tools = {tool.name: tool for tool in (await mcp_client.list_tools()).tools}
+    plain = (await mcp_client.list_resources()).resources
+    templates = (await mcp_client.list_resource_templates()).resource_templates
+    addressed = {name for name in tools if catalogue.SHAPES[name].resource is not None}
+    assert {resource.name for resource in plain} | {template.name for template in templates} == addressed
+    status = next(resource for resource in plain if resource.name == "read_status")
+    assert (status.uri, status.description, status.mime_type) == (
+        "lemonfiber://read/status",
+        tools["read_status"].description,
+        connection_module.JSON,
+    )
+    forms = next(template for template in templates if template.name == "read_forms")
+    assert (forms.description, forms.mime_type) == (tools["read_forms"].description, connection_module.JSON)
+
+
 async def test_a_resource_reads_as_the_tool_does(stack: Stack, mcp_client: Client) -> None:
     stack.reply("/api/status", STATUS)
     stack.reply("/api/forms", Reply(body=envelope("forms", [])))
@@ -317,6 +345,7 @@ async def test_a_resource_reads_as_the_tool_does(stack: Stack, mcp_client: Clien
     contents = read.contents[0]
     assert isinstance(contents, types.TextResourceContents)
     assert json.loads(contents.text) == envelope("status", {"services": []})
+    assert contents.mime_type == connection_module.JSON
     await mcp_client.read_resource("lemonfiber://read/forms?form=watching&form=listening")
     assert stack.asked("/api/forms")[-1].query == {"form": ["watching", "listening"]}
 
@@ -338,6 +367,46 @@ async def test_a_bundle_reads_as_a_blob_resource(stack: Stack, mcp_client: Clien
     contents = read.contents[0]
     assert isinstance(contents, types.BlobResourceContents)
     assert base64.b64decode(contents.blob) == b"bundle"
+    assert contents.mime_type == "application/gzip"
+
+
+async def test_a_parameter_given_empty_in_a_resource_address_reaches_the_stack_empty(
+    stack: Stack,
+    mcp_client: Client,
+) -> None:
+    stack.reply("/api/checks", Reply(body=envelope("doctor", {})))
+    await mcp_client.read_resource("lemonfiber://read/checks?only=")
+    assert stack.asked("/api/checks")[-1].query == {"only": [""]}
+
+
+async def test_a_parameter_a_read_does_not_take_is_refused_in_a_resource_address(
+    stack: Stack,
+    mcp_client: Client,
+) -> None:
+    with pytest.raises(MCPError, match=connection_module.ARGUMENTS_REFUSED):
+        await mcp_client.read_resource("lemonfiber://read/status?verbose=1")
+    assert not stack.asked("/api/status")
+
+
+async def test_a_reading_is_acted_on_for_its_time_and_no_longer(
+    stack: Stack,
+    withholding: Withholding,
+) -> None:
+    moment = [datetime.datetime(2026, 10, 9, tzinfo=datetime.UTC)]
+    stack.reply("/api/status", STATUS)
+    async with AsyncClient(Address(stack.url, pin=stack.pin), Credential(KEY)) as client:
+        held = Connection(client, withholding, clock=lambda: moment[0])
+        await held.tools()
+        moment[0] += connection_module.FRESH_FOR
+        await held.call("read_status", {})
+        assert len(stack.asked("/api/capabilities")) == 1
+        moment[0] += datetime.timedelta(microseconds=1)
+        await held.call("read_status", {})
+        assert len(stack.asked("/api/capabilities")) == 2
+
+
+def test_a_connections_clock_is_utc() -> None:
+    assert connection_module.utc_now().tzinfo is datetime.UTC
 
 
 @pytest.mark.parametrize(
@@ -390,6 +459,7 @@ async def test_nothing_unexpected_reaches_the_wire(
     stack: Stack,
     mcp_client: Client,
     monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     async def broken(*_: object) -> object:
         raise RuntimeError(KEY)
@@ -409,6 +479,14 @@ async def test_nothing_unexpected_reaches_the_wire(
         with pytest.raises(MCPError) as raised:
             await asking
         assert KEY not in str(raised.value)
+    logged = [record.getMessage() for record in caplog.records if record.name == serving.__name__]
+    assert logged == [
+        "a tool call failed",
+        "listing the tools failed",
+        "listing the resources failed",
+        "listing the resource templates failed",
+        "reading a resource failed",
+    ]
 
 
 async def test_no_key_or_pin_leaves_in_any_answer_or_refusal(stack: Stack, mcp_client: Client) -> None:

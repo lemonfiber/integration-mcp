@@ -3,16 +3,20 @@
 
 import contextlib
 import logging
+import re
 import runpy
 import sys
 from typing import TYPE_CHECKING
 
 import anyio
 import pytest
+from mcp import ClientSession
 from mcp.shared.message import SessionMessage
 
-from lemonfiber_mcp import cli, settings
+from lemonfiber_mcp import cli, serving, settings
+from lemonfiber_mcp.withheld import WITHHELD
 from tests.conftest import KEY
+from tests.stack import Reply, Stack, envelope
 
 if TYPE_CHECKING:
     from collections.abc import AsyncGenerator, Iterator
@@ -42,6 +46,62 @@ def test_the_server_serves_stdio_until_its_input_ends(monkeypatch: pytest.Monkey
     monkeypatch.setattr(cli, "stdio_server", closed_at_once)
     environment = {settings.ADDRESS: "http://127.0.0.1:9", settings.KEY: KEY}
     assert cli.main(["stdio"], environment) == 0
+
+
+@pytest.mark.anyio
+async def test_the_server_answers_over_stdio_with_the_key_and_pin_it_was_given(
+    stack: Stack,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    to_server, server_reads = anyio.create_memory_object_stream[SessionMessage | Exception](8)
+    server_writes, from_server = anyio.create_memory_object_stream[SessionMessage](8)
+
+    @contextlib.asynccontextmanager
+    async def standing_in() -> AsyncGenerator[tuple[object, object]]:
+        async with server_reads, server_writes:
+            yield server_reads, server_writes
+
+    monkeypatch.setattr(cli, "stdio_server", standing_in)
+    stack.reply("/api/status", Reply(body=envelope("status", {"note": f"{KEY} {stack.pin}"})))
+    environment = {settings.ADDRESS: stack.url, settings.PIN: stack.pin, settings.KEY: KEY}
+    async with anyio.create_task_group() as group:
+        group.start_soon(cli.serve_stdio, environment)
+        async with to_server, from_server, ClientSession(from_server, to_server) as session:
+            started = await session.initialize()
+            listed = await session.list_tools()
+            answered = await session.call_tool("read_status", {})
+            logging.getLogger("t").info("key %s pin %s", KEY, stack.pin)
+            assert started.instructions == serving.INSTRUCTIONS
+            assert started.server_info.version == cli.version()
+            assert started.capabilities.tools is not None
+            assert started.capabilities.tools.list_changed is True
+            assert "read_status" in {tool.name for tool in listed.tools}
+            said = " ".join(block.text for block in answered.content if block.type == "text")
+            assert KEY not in said
+            assert stack.pin not in said
+    assert {arrival.headers["X-Lemonfiber-Token"] for arrival in stack.arrived} == {KEY}
+    logged = capsys.readouterr().err
+    assert re.search(r"^\S+ \S+ INFO lemonfiber_mcp\.cli: serving over stdio$", logged, re.MULTILINE)
+    assert f"key {WITHHELD} pin {WITHHELD}" in logged
+
+
+def test_the_server_reads_the_process_environment_where_given_none(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(cli, "stdio_server", closed_at_once)
+    monkeypatch.setenv(settings.ADDRESS, "http://127.0.0.1:9")
+    monkeypatch.setenv(settings.KEY, KEY)
+    monkeypatch.delenv(settings.KEY_FILE, raising=False)
+    assert cli.main(["stdio"]) == 0
+
+
+def test_the_help_says_what_the_command_is_and_how_it_serves(capsys: pytest.CaptureFixture[str]) -> None:
+    with pytest.raises(SystemExit):
+        cli.main(["--help"], {})
+    said = capsys.readouterr().out
+    assert said.startswith("usage: lemonfiber-mcp [-h] {stdio} ...\n\nlemonfiber for AI assistants.\n")
+    assert "stdio serve one assistant on this machine over standard input and output" in " ".join(
+        said.split(),
+    )
 
 
 def test_a_start_with_a_refused_setting_names_it_and_not_its_value(

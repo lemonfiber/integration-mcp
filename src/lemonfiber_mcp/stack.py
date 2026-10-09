@@ -46,7 +46,7 @@ class Bundle:
 
     def encoded(self) -> str:
         """Return the content as base64, the form a resource's blob carries."""
-        return base64.b64encode(self.content).decode("ascii")
+        return base64.b64encode(self.content).decode()
 
 
 def whole(value: object, parameter: str) -> int:

@@ -8,7 +8,6 @@ tool only where it has household words, with only the parameters those words
 describe.
 """
 
-import copy
 import enum
 import functools
 import importlib.resources
@@ -88,6 +87,13 @@ WRITTEN: Final[tuple[ToolShape, ...]] = (
 SHAPES: Final[Mapping[str, ToolShape]] = {shape.name: shape for shape in (*TOOLS, *WRITTEN)}
 """Every tool the server knows, generated and written, by name."""
 
+READABLE: Final[Mapping[str, ToolShape]] = {
+    shape.target: shape
+    for shape in TOOLS
+    if shape.reach in {Reach.READ, Reach.LOGS} and shape.resource is not None
+}
+"""Every read a resource address names, by the name the address carries."""
+
 BUNDLE: Final = next(shape.name for shape in TOOLS if shape.reach is Reach.FILE)
 """The tool reading a file the stack hands over, which a resource address names apart from the reads."""
 
@@ -134,16 +140,15 @@ def described_schema(
     """Return a tool's input schema holding only the offered parameters, each described.
 
     A parameter's description is the written one where there is one, and the
-    contract's otherwise.
+    contract's otherwise; one with neither is left undescribed.
     """
-    schema = copy.deepcopy(dict(shape.input_schema))
+    schema = dict(shape.input_schema)
     properties = cast("dict[str, dict[str, object]]", schema.get("properties", {}))
     kept = [name for name in shape.parameters if name in set(offered)]
     schema["properties"] = {
-        name: {
-            **properties[name],
-            "description": described.get(name, properties[name].get("description", "")),
-        }
+        name: properties[name]
+        if name not in described
+        else {**properties[name], "description": described[name]}
         for name in kept
     }
     if "required" in schema:
@@ -154,14 +159,15 @@ def described_schema(
 def tool(shape: ToolShape, audience: Audience, state: str | None = None) -> types.Tool | None:
     """Return a tool as one audience is offered it, or None where that audience is offered none."""
     written = words()[shape.name]
-    if audience is Audience.HOUSEHOLD:
-        if written.household is None:
-            return None
-        description, described = written.household, written.household_parameters
-        offered: Iterable[str] = described
-    else:
+    offered: Iterable[str]
+    if audience is Audience.OPERATOR:
         description, described = written.operator, written.parameters
         offered = shape.parameters
+    elif written.household is not None:
+        description, described = written.household, written.household_parameters
+        offered = described
+    else:
+        return None
     if state == UNCONFIGURED:
         description += UNCONFIGURED_NOTE
     return types.Tool(

@@ -21,7 +21,7 @@ from lemonfiber_mcp.outcome import Failure, State
 from lemonfiber_mcp.shapes import Reach
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Callable, Mapping
 
     from lemonfiber import AsyncClient, CapabilitySet
 
@@ -36,15 +36,27 @@ NOT_A_RESOURCE: Final = "There is no resource at that address."
 ARGUMENTS_REFUSED: Final = "The arguments were refused: "
 
 
+def utc_now() -> datetime.datetime:
+    """Return the time now, in UTC, as the client stamps a reading of the capabilities."""
+    return datetime.datetime.now(datetime.UTC)
+
+
 class Connection:
     """What one credential is offered, and its calls to the stack."""
 
-    def __init__(self, client: AsyncClient, withholding: Withholding) -> None:
+    def __init__(
+        self,
+        client: AsyncClient,
+        withholding: Withholding,
+        clock: Callable[[], datetime.datetime] = utc_now,
+    ) -> None:
         """Hold the client the credential asks through; nothing is asked until a tool is listed or called."""
         self._client = client
+        self._clock = clock
         self._withholding = withholding
         self._audience = catalogue.Audience.OPERATOR
         self._capabilities: CapabilitySet | None = None
+        self._read_at: datetime.datetime | None = None
         self._tools: dict[str, types.Tool] = {}
         self._failure: Failure | None = None
 
@@ -55,10 +67,6 @@ class Connection:
             return self._failure.state
         return None if self._capabilities is None else State.CONNECTED
 
-    def _fell(self, failure: Failure) -> None:
-        if failure.state is not None and self.state is not State.REFUSED:
-            self._failure = failure
-
     async def refresh(self) -> Failure | None:
         """Read the capabilities again, unless the key was refused; return why not, where they could not be read."""
         if self.state is State.REFUSED:
@@ -66,10 +74,10 @@ class Connection:
         try:
             capabilities = await self._client.capabilities()
         except LemonfiberError as error:
-            failure = outcome.failure_of(error)
-            self._fell(failure)
-            return failure
+            self._failure = outcome.failure_of(error)
+            return self._failure
         self._capabilities = capabilities
+        self._read_at = self._clock()
         self._failure = None
         self._tools = catalogue.offered(capabilities, self._audience)
         return None
@@ -86,30 +94,25 @@ class Connection:
     async def resources(self) -> tuple[list[types.Resource], list[types.ResourceTemplate]]:
         """Return the resource and the resource template of every read tool offered now."""
         await self.refresh()
-        plain: list[types.Resource] = []
-        templates: list[types.ResourceTemplate] = []
-        for name, tool in self._tools.items():
-            address = catalogue.SHAPES[name].resource
-            if address is None:
-                continue
-            if "{" in address:
-                templates.append(
-                    types.ResourceTemplate(
-                        name=name,
-                        uri_template=address,
-                        description=tool.description,
-                        mime_type=JSON,
-                    ),
-                )
-            else:
-                plain.append(
-                    types.Resource(name=name, uri=address, description=tool.description, mime_type=JSON),
-                )
+        addressed = [
+            (name, tool.description, address)
+            for name, tool in self._tools.items()
+            if (address := catalogue.SHAPES[name].resource) is not None
+        ]
+        plain = [
+            types.Resource(name=name, uri=address, description=description, mime_type=JSON)
+            for name, description, address in addressed
+            if "{" not in address
+        ]
+        templates = [
+            types.ResourceTemplate(name=name, uri_template=address, description=description, mime_type=JSON)
+            for name, description, address in addressed
+            if "{" in address
+        ]
         return plain, templates
 
     async def _fresh(self) -> Failure | None:
-        held = self._capabilities
-        if held is None or datetime.datetime.now(datetime.UTC) - held.read_at > FRESH_FOR:
+        if self._read_at is None or self._clock() - self._read_at > FRESH_FOR:
             return await self.refresh()
         return None
 
@@ -173,9 +176,8 @@ class Connection:
         except stack.NotAWholeNumberError as refused:
             return Failure(ARGUMENTS_REFUSED + str(refused))
         except LemonfiberError as error:
-            failure = outcome.failure_of(error)
-            self._fell(failure)
-            return failure
+            self._failure = outcome.failure_of(error)
+            return self._failure
         self._failure = None
         return answer
 
@@ -213,8 +215,8 @@ class Connection:
         target = urllib.parse.unquote(parts.path.removeprefix("/"))
         if parts.scheme == SCHEME and parts.netloc == "bundle" and target:
             return catalogue.SHAPES[catalogue.BUNDLE], {"name": target}
-        shape = catalogue.SHAPES.get(f"read_{target.replace('-', '_')}")
-        if parts.scheme != SCHEME or parts.netloc != "read" or shape is None or shape.resource is None:
+        shape = catalogue.READABLE.get(target)
+        if parts.scheme != SCHEME or parts.netloc != "read" or shape is None:
             raise MCPError(types.INVALID_PARAMS, NOT_A_RESOURCE)
         given = urllib.parse.parse_qs(parts.query, keep_blank_values=True)
         properties = cast("dict[str, dict[str, object]]", shape.input_schema.get("properties", {}))

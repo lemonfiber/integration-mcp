@@ -35,8 +35,8 @@ INSTRUCTIONS: Final = (
     "its rehearsal answered with, so rehearse first and show the person what it would do."
 )
 
-type Opened = Callable[[ServerRequestContext[Any]], Awaitable[Connection]]
-"""Return the connection a request is answered from."""
+type Opened = Callable[[], Awaitable[Connection]]
+"""Return the connection the request being answered is answered from."""
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 def always(connection: Connection) -> Opened:
     """Return an opener answering every request from one connection, as stdio does."""
 
-    async def opened(_: ServerRequestContext[Any]) -> Connection:
+    async def opened() -> Connection:
         return connection
 
     return opened
@@ -63,15 +63,10 @@ class Handlers:
         self._opened = opened
         self._withholding = withholding
 
-    async def _guarded[T](
-        self,
-        ctx: ServerRequestContext[Any],
-        what: str,
-        work: Callable[[Connection], Awaitable[T]],
-    ) -> T:
+    async def _guarded[T](self, what: str, work: Callable[[Connection], Awaitable[T]]) -> T:
         """Run one request's work, turning anything unexpected into the protocol's error and saying no more."""
         try:
-            return await work(await self._opened(ctx))
+            return await work(await self._opened())
         except MCPError:
             raise
         except Exception:
@@ -80,11 +75,11 @@ class Handlers:
 
     async def list_tools(
         self,
-        ctx: ServerRequestContext[Any],
+        _ctx: ServerRequestContext[Any],
         _: types.PaginatedRequestParams | None,
     ) -> types.ListToolsResult:
         """List the tools this request's credential is offered."""
-        tools = await self._guarded(ctx, "listing the tools", lambda connection: connection.tools())
+        tools = await self._guarded("listing the tools", lambda connection: connection.tools())
         return types.ListToolsResult(tools=tools)
 
     async def call_tool(
@@ -102,18 +97,17 @@ class Handlers:
             return answer
 
         try:
-            return await self._guarded(ctx, "a tool call", call)
+            return await self._guarded("a tool call", call)
         except MCPError:
             return outcome.failed(outcome.Failure(outcome.UNEXPECTED), self._withholding)
 
     async def list_resources(
         self,
-        ctx: ServerRequestContext[Any],
+        _ctx: ServerRequestContext[Any],
         _: types.PaginatedRequestParams | None,
     ) -> types.ListResourcesResult:
         """List the resources this request's credential is offered."""
         plain, _templates = await self._guarded(
-            ctx,
             "listing the resources",
             lambda connection: connection.resources(),
         )
@@ -121,12 +115,11 @@ class Handlers:
 
     async def list_resource_templates(
         self,
-        ctx: ServerRequestContext[Any],
+        _ctx: ServerRequestContext[Any],
         _: types.PaginatedRequestParams | None,
     ) -> types.ListResourceTemplatesResult:
         """List the resource templates this request's credential is offered."""
         _plain, templates = await self._guarded(
-            ctx,
             "listing the resource templates",
             lambda connection: connection.resources(),
         )
@@ -134,12 +127,11 @@ class Handlers:
 
     async def read_resource(
         self,
-        ctx: ServerRequestContext[Any],
+        _ctx: ServerRequestContext[Any],
         params: types.ReadResourceRequestParams,
     ) -> types.ReadResourceResult:
         """Read a resource by its address."""
         return await self._guarded(
-            ctx,
             "reading a resource",
             lambda connection: connection.read_resource(params.uri),
         )

@@ -61,7 +61,7 @@ async def serve_stdio(environment: Mapping[str, str]) -> None:
 def main(arguments: Sequence[str] | None = None, environment: Mapping[str, str] | None = None) -> int:
     """Start the server as the arguments say, and return the exit status."""
     parser = argparse.ArgumentParser(prog=PACKAGE, description="lemonfiber for AI assistants.")
-    modes = parser.add_subparsers(dest="mode", required=True)
+    modes = parser.add_subparsers(required=True)
     modes.add_parser("stdio", help="serve one assistant on this machine over standard input and output")
     parser.parse_args(arguments)
     try:

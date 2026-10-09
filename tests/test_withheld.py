@@ -3,6 +3,7 @@
 
 import json
 import logging
+import re
 import sys
 from typing import TYPE_CHECKING
 
@@ -28,6 +29,17 @@ def test_a_configured_value_is_withheld_in_any_letter_case() -> None:
 def test_a_longer_value_is_withheld_before_one_it_contains() -> None:
     withholding = Withholding(["secret", "secret-and-more", ""])
     assert withholding.withhold("secret-and-more") == WITHHELD
+
+
+def test_the_longer_value_goes_first_whatever_its_letters() -> None:
+    assert Withholding(["b", "ab"]).withhold("ab") == WITHHELD
+
+
+def test_a_formatter_formats_as_it_is_told_before_withholding() -> None:
+    record = logging.LogRecord("t", logging.INFO, __file__, 1, "said %s", ("hello",), None)
+    assert (
+        WithholdingFormatter(Withholding(), "%(levelname)s: %(message)s").format(record) == "INFO: said hello"
+    )
 
 
 def test_a_key_inside_json_leaves_the_document_whole() -> None:
@@ -73,7 +85,11 @@ def test_installing_replaces_every_handler_with_one_that_withholds(
         handler = install(Withholding([PIN]))
         assert root.handlers == [handler]
         logging.getLogger("x").info("pin %s", PIN)
-        assert PIN not in capsys.readouterr().err
+        said = capsys.readouterr().err
+        assert re.fullmatch(
+            rf"\d{{4}}-\d\d-\d\d \d\d:\d\d:\d\d,\d{{3}} INFO x: pin {re.escape(WITHHELD)}\n",
+            said,
+        )
     finally:
         root.handlers[:] = kept[0]
         root.setLevel(kept[1])

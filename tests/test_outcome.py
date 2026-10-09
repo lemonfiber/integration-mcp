@@ -96,8 +96,16 @@ def test_a_refusal_with_no_code_carries_none() -> None:
 
 
 def test_waiting_after_too_many_wrong_keys_says_how_long() -> None:
-    failure = outcome.failure_of(TooManyAttemptsError("Wait.", status=429, retry_after=30))
+    error = TooManyAttemptsError("Wait.", status=429, retry_after=30)
+    failure = outcome.failure_of(error)
     assert failure.sentence == f"{outcome.TOO_MANY} Wait 30 seconds before asking again."
+    assert failure.refusal == outcome.refusal_of(error)
+
+
+def test_json_keeps_every_letter_and_the_stacks_order() -> None:
+    text, structured = outcome.as_json({"b": "café", "a": 1}, WITHHOLDING)
+    assert text == '{"b": "café", "a": 1}'
+    assert structured == {"b": "café", "a": 1}
 
 
 def test_another_version_names_both() -> None:

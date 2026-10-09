@@ -66,14 +66,14 @@ def key_from(written: str, where: str) -> Credential:
 
 def key_of(environment: Mapping[str, str]) -> tuple[Credential, str]:
     """Return the key the server asks with, and its text for withholding, from the setting or the file it names."""
-    given = environment.get(KEY, "")
+    given = environment.get(KEY)
     named = environment.get(KEY_FILE, "").strip()
     if given and named:
         msg = f"{KEY} and {KEY_FILE} are both set; give the key one way."
         raise SettingsError(msg)
     if named:
         try:
-            given = pathlib.Path(named).read_text(encoding="utf-8")
+            given = pathlib.Path(named).read_bytes().decode()
         except OSError, UnicodeDecodeError:
             msg = f"{KEY_FILE} names a file that could not be read."
             raise SettingsError(msg) from None
