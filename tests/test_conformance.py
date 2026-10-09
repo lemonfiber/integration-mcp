@@ -47,7 +47,11 @@ def wire(model: BaseModel) -> dict[str, Any]:
 def everything_offered(audience: Audience) -> dict[str, types.Tool]:
     """Return every tool an audience could be offered, with every capability available."""
     states: dict[str, CapabilityState] = {shape.capability: "available" for shape in TOOLS}
-    held = CapabilitySet(builtin_types.MappingProxyType(states), datetime.datetime.now(datetime.UTC))
+    held = CapabilitySet(
+        builtin_types.MappingProxyType(states),
+        datetime.datetime.now(datetime.UTC),
+        "operator",
+    )
     return {**catalogue.offered(held, audience), **catalogue.connection_only(audience)}
 
 

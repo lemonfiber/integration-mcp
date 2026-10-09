@@ -25,6 +25,10 @@ MEMBER_READS: Final = frozenset({Read.REQUESTS, Read.HELD, Read.PLAYING})
 EVERY_READ: Final = frozenset(Read)
 
 
+STACK_ID: Final = "stack-1f6a"
+"""The stand-in stack's own identifier."""
+
+
 def capabilities(scope: str, **overrides: str) -> dict[str, object]:
     """Return what the stack says a key of a scope may ask for, each read and each action a key may call."""
     reads = {
@@ -35,7 +39,11 @@ def capabilities(scope: str, **overrides: str) -> dict[str, object]:
     actions = {f"{ACTIONS}/{action}": acting for action in KEY_CALLABLE}
     return envelope(
         "capabilities",
-        {"capabilities": {**reads, **actions, f"{ACTIONS}/repair": "unpermitted", **overrides}},
+        {
+            "capabilities": {**reads, **actions, f"{ACTIONS}/repair": "unpermitted", **overrides},
+            "scope": scope,
+            "stack": STACK_ID,
+        },
     )
 
 

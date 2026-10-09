@@ -51,6 +51,11 @@ class LifecycleReport(typing.TypedDict):
     battery and nobody said to start anyway — and a run nobody is watching has to
     leave the reason somewhere a reader finds later.
     """
+    offer: typing.NotRequired[str | None]
+    """The offer a restart answers: the services it would restart, named so that a
+    restart carrying it back is carried out against those services or refused.
+    Absent for every other action.
+    """
     plan: Plan
     """What the named forms came to: the profiles, the services they hold, and
     what the configuration left out.

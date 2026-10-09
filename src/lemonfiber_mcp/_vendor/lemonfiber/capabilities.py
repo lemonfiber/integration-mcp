@@ -7,13 +7,16 @@ each with what it comes to for the credential that asked: `available`,
 `unconfigured` (a setting has to be turned on first) or `unpermitted` (this
 credential may not ask for it). A request the stack does not have is absent.
 It is a reading like any other: it can change while a client holds it, so it
-carries when it was read.
+carries when it was read. It also says whose credential asked, so a client
+words what it offers for an operator or a household member without inferring
+either, and which stack answered, so two credentials are told apart from two
+stacks.
 """
 
 import typing
 from dataclasses import dataclass
 
-from lemonfiber._generated import CapabilityState
+from lemonfiber._generated import CapabilityState, CredentialScope
 from lemonfiber.reads import ACTIONS
 
 if typing.TYPE_CHECKING:
@@ -24,6 +27,8 @@ if typing.TYPE_CHECKING:
 
 STATES: typing.Final[frozenset[CapabilityState]] = frozenset(typing.get_args(CapabilityState.__value__))
 """Every state the contract says a capability can be in."""
+SCOPES: typing.Final[frozenset[CredentialScope]] = frozenset(typing.get_args(CredentialScope.__value__))
+"""Every scope the contract says a credential can have."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,6 +39,10 @@ class CapabilitySet:
     """Each capability's path, to what it comes to for the credential that asked."""
     read_at: datetime.datetime
     """When the answer arrived, in UTC. A set not read again lately is an opinion, not a fact."""
+    scope: CredentialScope
+    """Whose credential asked: the operator, a `read` or `act` key, or a household member."""
+    stack: str | None = None
+    """The stack's own identifier, or None where the stack has nowhere to keep one."""
 
     def of(self, path: str) -> CapabilityState | None:
         """Return what the capability served at `path` comes to, or None where the stack does not have it."""
@@ -70,3 +79,8 @@ class CapabilitySet:
 def is_state(value: object) -> typing.TypeIs[CapabilityState]:
     """Tell whether a value is a state the contract lists."""
     return isinstance(value, str) and value in STATES
+
+
+def is_scope(value: object) -> typing.TypeIs[CredentialScope]:
+    """Tell whether a value is a scope the contract lists."""
+    return isinstance(value, str) and value in SCOPES

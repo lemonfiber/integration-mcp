@@ -6,11 +6,11 @@ and CI fails on any difference.
 """
 
 from . import affected as _affected
-from . import dashboard_envelope as _dashboard_envelope
+from . import snapshot as _snapshot
 
 from .affected import *
-from .dashboard_envelope import *
+from .snapshot import *
 
 __all__: list[str] = []
 __all__ += _affected.__all__
-__all__ += _dashboard_envelope.__all__
+__all__ += _snapshot.__all__

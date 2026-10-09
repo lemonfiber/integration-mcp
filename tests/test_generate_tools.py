@@ -252,16 +252,35 @@ def test_an_action_the_contract_does_not_publish_is_refused(
     assert "'uninstall'" in refused(root, capsys)
 
 
-def test_an_action_already_taking_an_offer_argument_is_refused(
+@pytest.mark.parametrize(
+    "named",
+    [
+        {"type": ["string", "null"], "default": None, "description": "What was read before answering."},
+        {"type": "string"},
+    ],
+)
+def test_an_action_whose_contract_names_its_offer_takes_that_offer_once_and_requires_it(
     root: pathlib.Path,
-    capsys: pytest.CaptureFixture[str],
+    named: dict[str, object],
 ) -> None:
     write(
         root,
-        "web-api/actions/diagnose.json",
-        {"action": "diagnose", "arguments": [{"name": "offer", "type": {"type": "string"}}]},
+        "web-api/actions/downloads-pause.json",
+        {
+            "action": "downloads-pause",
+            "arguments": [
+                {"name": "clients", "type": {"type": "string"}},
+                {"name": "offer", "type": named},
+            ],
+            "consent": ["offer"],
+        },
     )
-    assert "named 'offer'" in refused(root, capsys)
+    generated = shapes(root)
+    action = generated["downloads_pause"]
+    assert action.parameters == ("clients", "offer")
+    assert action.input_schema["properties"] == {"clients": {"type": "string"}, "offer": {"type": "string"}}
+    assert action.input_schema["required"] == ["clients", "offer"]
+    assert generated["rehearse_downloads_pause"].parameters == ("clients",)
 
 
 def test_two_tools_of_one_name_are_refused(root: pathlib.Path, capsys: pytest.CaptureFixture[str]) -> None:

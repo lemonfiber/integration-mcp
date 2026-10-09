@@ -8,8 +8,8 @@
 requirement = [
   { id = "F13-R1", state = "done", evidence = ["src/lemonfiber_mcp/settings.py", "src/lemonfiber_mcp/stack.py", "tests/test_architecture.py", "tests/test_settings.py"] },
   { id = "F13-R2", state = "done", evidence = ["scripts/generate_tools.py", "src/lemonfiber_mcp/_generated/tools.py", "src/lemonfiber_mcp/descriptions.toml", "tests/test_catalogue.py", "tests/test_generate_tools.py"] },
-  { id = "F13-R3", state = "open" },
-  { id = "F13-R4", state = "open" },
+  { id = "F13-R3", state = "done", evidence = ["src/lemonfiber_mcp/catalogue.py", "src/lemonfiber_mcp/connection.py", "src/lemonfiber_mcp/descriptions.toml", "README.md", "tests/test_catalogue.py", "tests/test_server.py::test_a_member_key_is_offered_no_technical_tool_and_reads_the_households_words"] },
+  { id = "F13-R4", state = "done", evidence = ["scripts/generate_tools.py", "src/lemonfiber_mcp/_generated/tools.py", "src/lemonfiber_mcp/connection.py", "src/lemonfiber_mcp/outcome.py", "README.md", "tests/test_generate_tools.py", "tests/test_outcome.py", "tests/test_server.py"] },
   { id = "F13-R5", state = "done", evidence = ["scripts/generate_tools.py", "src/lemonfiber_mcp/catalogue.py", "tests/test_catalogue.py::test_every_write_tool_states_whether_it_is_destructive_and_idempotent"] },
   { id = "F13-R6", state = "done", evidence = ["src/lemonfiber_mcp/cli.py", "Dockerfile", ".github/workflows/release.yml", ".github/workflows/ci.yml", "tests/test_cli.py", "tests/test_web.py"] },
   { id = "F13-R7", state = "done", evidence = ["src/lemonfiber_mcp/settings.py", "src/lemonfiber_mcp/cli.py", "tests/test_settings.py", "tests/test_cli.py"] },

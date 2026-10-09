@@ -5,7 +5,9 @@ A tool is offered where the stack's capabilities say the credential may use
 the request it reaches, or that a setting must be turned on first. Its words
 are the operator's, or the household's for a member, and a member is offered a
 tool only where it has household words, with only the parameters those words
-describe.
+describe. Whose credential it is the capabilities say by its scope; until they
+have said, it is described as a member's, so a member never reads a technical
+word.
 """
 
 import enum
@@ -24,6 +26,7 @@ if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
 
     from lemonfiber import CapabilitySet
+    from lemonfiber._generated import CredentialScope
 
 OFFERED_STATES: Final = frozenset({"available", "unconfigured"})
 """What a capability may come to for its tool to be offered."""
@@ -39,6 +42,17 @@ class Audience(enum.StrEnum):
 
     OPERATOR = "operator"
     HOUSEHOLD = "household"
+
+
+MEMBER: Final = "member"
+"""The scope of a household member's credential, which is offered the household's words."""
+UNKNOWN: Final = Audience.HOUSEHOLD
+"""Whose words a credential is described in before the stack has said its scope."""
+
+
+def audience_of(scope: CredentialScope) -> Audience:
+    """Return whose words a credential of a scope is described in: the household's for a member's."""
+    return Audience.HOUSEHOLD if scope == MEMBER else Audience.OPERATOR
 
 
 @dataclass(frozen=True, slots=True)

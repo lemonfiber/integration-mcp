@@ -7,7 +7,7 @@ from http import HTTPStatus
 from typing import TYPE_CHECKING, Final, cast
 
 from lemonfiber._protocol.refusals import code_in, problem_in, refusal_of, sentence_in
-from lemonfiber.capabilities import CapabilitySet, is_state
+from lemonfiber.capabilities import CapabilitySet, is_scope, is_state
 from lemonfiber.credential import Credential, Session
 from lemonfiber.envelope import expect, parse_envelope
 from lemonfiber.files import BundleFile
@@ -67,14 +67,24 @@ def standing_of(job: str, answer: Answer) -> JobStanding:
 def capabilities_of(answer: Answer) -> CapabilitySet:
     """Read the stack's capabilities as they stood when the answer arrived, or raise the refusal it is.
 
-    A capability name this client does not know is kept, never refused; a state the
-    contract does not list is not a document lemonfiber writes.
+    A capability name this client does not know is kept, never refused; a state or
+    a scope the contract does not list, or a stack named by anything but text, is
+    not a document lemonfiber writes.
     """
     arrived = datetime.datetime.now(datetime.UTC)
     data = cast("object", expect(envelope_of(answer), "capabilities")["data"])
-    held = cast("dict[str, object]", data).get("capabilities") if isinstance(data, dict) else None
+    answered = cast("dict[str, object]", data) if isinstance(data, dict) else {}
+    held = answered.get("capabilities")
     if not isinstance(held, dict):
         msg = f"the capabilities are {held!r}, and they are an object keyed by path"
+        raise UnreadableResponseError(msg)
+    scope = answered.get("scope")
+    if not is_scope(scope):
+        msg = f"the scope is {scope!r}, which is not a scope a credential can have"
+        raise UnreadableResponseError(msg)
+    stack = answered.get("stack")
+    if stack is not None and not isinstance(stack, str):
+        msg = f"the stack is {stack!r}, and it is named by text or not at all"
         raise UnreadableResponseError(msg)
     states: dict[str, CapabilityState] = {}
     for path, state in cast("dict[object, object]", held).items():
@@ -82,7 +92,7 @@ def capabilities_of(answer: Answer) -> CapabilitySet:
             msg = f"{path!r} is {state!r}, which is not a state a capability can be in"
             raise UnreadableResponseError(msg)
         states[path] = state
-    return CapabilitySet(types.MappingProxyType(states), arrived)
+    return CapabilitySet(types.MappingProxyType(states), arrived, scope, stack)
 
 
 def session_of(answer: Answer) -> Session:

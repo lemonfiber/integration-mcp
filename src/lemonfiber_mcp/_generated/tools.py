@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Every tool the server offers, as the contract describes it.
 
-Generated from the contract lemonfiber ad4e5f20666a8a10e0d0ed61f6a1a6a118614162 published, vendored in `contract/web-api/`.
+Generated from the contract lemonfiber 5d9be6f4ef7a1a93296960fc34ecb78e8c753b8d published, vendored in `contract/web-api/`.
 Do not edit: `just generate` rewrites it, and CI fails on any difference.
 """
 
@@ -12,7 +12,7 @@ from lemonfiber_mcp.shapes import Reach, ToolShape
 API_VERSION: Final = 1
 """The `api_version` the tools were generated for."""
 
-CONTRACT: Final = 'ad4e5f20666a8a10e0d0ed61f6a1a6a118614162'
+CONTRACT: Final = '5d9be6f4ef7a1a93296960fc34ecb78e8c753b8d'
 """The lemonfiber revision whose contract the tools were generated from."""
 
 TOOLS: Final[tuple[ToolShape, ...]] = (
@@ -552,7 +552,7 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
         reach=Reach.ACTION,
         target='update',
         capability='/api/actions/update',
-        parameters=('wait', 'service', 'confirm', 'offer'),
+        parameters=('wait', 'service', 'offer', 'confirm'),
         input_schema={'type': 'object',
                       'properties': {'wait': {'default': False,
                                               'description': 'Whether anything still downloading is let finish before '
@@ -561,11 +561,11 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
                                      'service': {'default': None,
                                                  'description': 'The one service to act on instead of the whole stack.',
                                                  'type': ['string', 'null']},
+                                     'offer': {'type': 'string'},
                                      'confirm': {'default': False,
                                                  'description': 'Whether a cost the action would incur was agreed to in '
                                                                 'advance.',
-                                                 'type': 'boolean'},
-                                     'offer': {'type': 'string'}},
+                                                 'type': 'boolean'}},
                       'required': ['offer'],
                       'additionalProperties': False},
         resource=None,

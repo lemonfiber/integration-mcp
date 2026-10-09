@@ -66,6 +66,8 @@ def test_a_stack_that_cannot_be_reached_says_why_and_is_tried_again(
         (DeclinedError("Not for a key.", status=403, code="ADMIT-12"), outcome.NOT_FOR_THIS_KEY),
         (DeclinedError("Not yours.", status=403, code="ADMIT-6"), outcome.DECLINED),
         (BusyError("Busy.", status=409), outcome.BUSY),
+        (BusyError("The offer moved.", status=409, code="LIFE-10"), outcome.OFFER_MOVED),
+        (MisaskedError("The offer moved.", status=400, code="RATE-6"), outcome.OFFER_MOVED),
         (MissingError("Nothing.", status=404, code="READ-3"), outcome.MISSING),
         (MisaskedError("Asked wrong.", status=400, code="READ-4"), outcome.MISASKED),
         (FailedError("Broke.", status=500), outcome.FAILED),

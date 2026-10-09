@@ -191,9 +191,6 @@ def action_shapes(entry: Json, contract: pathlib.Path, index: Json) -> list[Shap
         (str(row.get("name")), table(resolved(row.get("type", {}), where), where))
         for row in rows(published.get("arguments", []), where)
     ]
-    if any(name == OFFER for name, _ in arguments):
-        msg = f"{where} takes an argument named {OFFER!r}, the name the rehearsal's offer is sent under."
-        raise GenerationError(msg)
     capability = f"{ACTIONS}{action}"
     disturbs = entry.get("disturbs") is True
     idempotent = entry.get("idempotent") is True
@@ -203,7 +200,7 @@ def action_shapes(entry: Json, contract: pathlib.Path, index: Json) -> list[Shap
     acting: Json = copy.deepcopy(taken)
     if rehearsable:
         acting[OFFER] = {"type": "string"}
-        required = [*required, OFFER]
+        required = [*(name for name in required if name != OFFER), OFFER]
     shapes = [
         Shape(
             name=snake(action),

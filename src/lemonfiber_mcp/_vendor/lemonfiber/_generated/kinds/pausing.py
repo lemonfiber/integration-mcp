@@ -50,6 +50,11 @@ class PausingReport(typing.TypedDict):
     """
     clients: list[PausedClient]
     """Every download client the stack runs, in the order the stack declares them."""
+    offer: str
+    """The offer this answers: every client and what it said it was doing before it was
+    asked anything, named so that a request carrying it back acts on those clients
+    in those states or is refused.
+    """
     rehearsed: bool
     """Whether this was a rehearsal: what each client is doing now, with nothing asked
     of any of them.
