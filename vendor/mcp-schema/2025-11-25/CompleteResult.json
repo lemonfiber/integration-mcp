@@ -1,0 +1,37 @@
+{
+  "description": "The server's response to a completion/complete request",
+  "properties": {
+    "_meta": {
+      "additionalProperties": {},
+      "description": "See [General fields: `_meta`](/specification/2025-11-25/basic/index#meta) for notes on `_meta` usage.",
+      "type": "object"
+    },
+    "completion": {
+      "properties": {
+        "hasMore": {
+          "description": "Indicates whether there are additional completion options beyond those provided in the current response, even if the exact total is unknown.",
+          "type": "boolean"
+        },
+        "total": {
+          "description": "The total number of completion options available. This can exceed the number of values actually sent in the response.",
+          "type": "integer"
+        },
+        "values": {
+          "description": "An array of completion values. Must not exceed 100 items.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "values"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "completion"
+  ],
+  "type": "object"
+}

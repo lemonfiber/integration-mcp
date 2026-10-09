@@ -1,0 +1,48 @@
+{
+  "description": "The parameters for a request to elicit non-sensitive information from the user via a form in the client.",
+  "properties": {
+    "message": {
+      "description": "The message to present to the user describing what information is being requested.",
+      "type": "string"
+    },
+    "mode": {
+      "const": "form",
+      "description": "The elicitation mode.",
+      "type": "string"
+    },
+    "requestedSchema": {
+      "description": "A restricted subset of JSON Schema.\nOnly top-level properties are allowed, without nesting.",
+      "properties": {
+        "$schema": {
+          "type": "string"
+        },
+        "properties": {
+          "additionalProperties": {
+            "$ref": "#/$defs/PrimitiveSchemaDefinition"
+          },
+          "type": "object"
+        },
+        "required": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "const": "object",
+          "type": "string"
+        }
+      },
+      "required": [
+        "properties",
+        "type"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "message",
+    "requestedSchema"
+  ],
+  "type": "object"
+}

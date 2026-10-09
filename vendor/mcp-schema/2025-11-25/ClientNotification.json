@@ -1,0 +1,19 @@
+{
+  "anyOf": [
+    {
+      "$ref": "#/$defs/CancelledNotification"
+    },
+    {
+      "$ref": "#/$defs/InitializedNotification"
+    },
+    {
+      "$ref": "#/$defs/ProgressNotification"
+    },
+    {
+      "$ref": "#/$defs/TaskStatusNotification"
+    },
+    {
+      "$ref": "#/$defs/RootsListChangedNotification"
+    }
+  ]
+}

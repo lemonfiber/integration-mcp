@@ -1,0 +1,25 @@
+{
+  "description": "The parameters for a request to elicit information from the user via a URL in the client.",
+  "properties": {
+    "message": {
+      "description": "The message to present to the user explaining why the interaction is needed.",
+      "type": "string"
+    },
+    "mode": {
+      "const": "url",
+      "description": "The elicitation mode.",
+      "type": "string"
+    },
+    "url": {
+      "description": "The URL that the user should navigate to.",
+      "format": "uri",
+      "type": "string"
+    }
+  },
+  "required": [
+    "message",
+    "mode",
+    "url"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "One value a recipe could carry to one destination, as the operator agrees to it.",
+  "type": "object",
+  "properties": {
+    "approval": {
+      "description": "What approving this pair is written as, on the command line and over the web,\nwhere it carries the value to a host outside the stack or carries a release.\nAbsent on any other pair to a service in this stack, which takes nothing off the\nmachine or away from the service it came from, and asks for no approval.",
+      "type": "string"
+    },
+    "from": {
+      "description": "The service in this stack the released value was read from, where the pair\nreleases it. Absent on every other pair.",
+      "type": "string"
+    },
+    "origin": {
+      "description": "Whose value it is, as its input or the step that captures it says; empty where\nneither does.",
+      "type": "string"
+    },
+    "release": {
+      "description": "Why the value is carried away from the service it was read from, in the manifest's\nown sentence, where the pair releases it. Absent on every other pair.",
+      "type": "string"
+    },
+    "to": {
+      "description": "Where it may be carried, by the name the manifest gives it.",
+      "type": "string"
+    },
+    "value": {
+      "description": "What the value is called within the recipe.",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "value",
+    "origin",
+    "to"
+  ]
+}

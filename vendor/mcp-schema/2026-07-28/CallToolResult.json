@@ -1,0 +1,31 @@
+{
+  "description": "The result returned by the server for a {@link CallToolRequesttools/call} request.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/ResultMetaObject"
+    },
+    "content": {
+      "description": "A list of content objects that represent the unstructured result of the tool call.",
+      "items": {
+        "$ref": "#/$defs/ContentBlock"
+      },
+      "type": "array"
+    },
+    "isError": {
+      "description": "Whether the tool call ended in an error.\n\nIf not set, this is assumed to be false (the call was successful).\n\nAny errors that originate from the tool SHOULD be reported inside the result\nobject, with `isError` set to true, _not_ as an MCP protocol-level error\nresponse. Otherwise, the LLM would not be able to see that an error occurred\nand self-correct.\n\nHowever, any errors in _finding_ the tool, an error indicating that the\nserver does not support tool calls, or any other exceptional conditions,\nshould be reported as an MCP error response.",
+      "type": "boolean"
+    },
+    "resultType": {
+      "description": "Indicates the type of the result, which allows the client to determine\nhow to parse the result object.\n\nServers implementing this protocol version MUST include this field.\nFor backward compatibility, when a client receives a result from a\nserver implementing an earlier protocol version (which does not include\n`resultType`), the client MUST treat the absent field as `\"complete\"`.",
+      "type": "string"
+    },
+    "structuredContent": {
+      "description": "An optional JSON value that represents the structured result of the tool call.\n\nThis can be any JSON value (object, array, string, number, boolean, or null)\nthat conforms to the tool's outputSchema if one is defined."
+    }
+  },
+  "required": [
+    "content",
+    "resultType"
+  ],
+  "type": "object"
+}

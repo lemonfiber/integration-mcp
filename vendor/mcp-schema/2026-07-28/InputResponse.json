@@ -1,0 +1,13 @@
+{
+  "anyOf": [
+    {
+      "$ref": "#/$defs/CreateMessageResult"
+    },
+    {
+      "$ref": "#/$defs/ListRootsResult"
+    },
+    {
+      "$ref": "#/$defs/ElicitResult"
+    }
+  ]
+}

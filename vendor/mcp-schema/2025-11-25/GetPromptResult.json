@@ -1,0 +1,24 @@
+{
+  "description": "The server's response to a prompts/get request from the client.",
+  "properties": {
+    "_meta": {
+      "additionalProperties": {},
+      "description": "See [General fields: `_meta`](/specification/2025-11-25/basic/index#meta) for notes on `_meta` usage.",
+      "type": "object"
+    },
+    "description": {
+      "description": "An optional description for the prompt.",
+      "type": "string"
+    },
+    "messages": {
+      "items": {
+        "$ref": "#/$defs/PromptMessage"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "messages"
+  ],
+  "type": "object"
+}

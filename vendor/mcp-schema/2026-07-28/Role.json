@@ -1,0 +1,8 @@
+{
+  "description": "The sender or recipient of messages and data in a conversation.",
+  "enum": [
+    "assistant",
+    "user"
+  ],
+  "type": "string"
+}

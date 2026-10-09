@@ -1,0 +1,25 @@
+{
+  "description": "Text provided to or from an LLM.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/MetaObject"
+    },
+    "annotations": {
+      "$ref": "#/$defs/Annotations",
+      "description": "Optional annotations for the client."
+    },
+    "text": {
+      "description": "The text content of the message.",
+      "type": "string"
+    },
+    "type": {
+      "const": "text",
+      "type": "string"
+    }
+  },
+  "required": [
+    "text",
+    "type"
+  ],
+  "type": "object"
+}

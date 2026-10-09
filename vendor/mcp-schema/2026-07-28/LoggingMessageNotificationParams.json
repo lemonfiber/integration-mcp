@@ -1,0 +1,24 @@
+{
+  "description": "Parameters for a `notifications/message` notification.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/NotificationMetaObject"
+    },
+    "data": {
+      "description": "The data to be logged, such as a string message or an object. Any JSON serializable type is allowed here."
+    },
+    "level": {
+      "$ref": "#/$defs/LoggingLevel",
+      "description": "The severity of this log message."
+    },
+    "logger": {
+      "description": "An optional name of the logger issuing this message.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "data",
+    "level"
+  ],
+  "type": "object"
+}

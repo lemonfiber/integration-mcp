@@ -1,0 +1,25 @@
+{
+  "description": "A request that expects a response.",
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/RequestId"
+    },
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    },
+    "method": {
+      "type": "string"
+    },
+    "params": {
+      "additionalProperties": {},
+      "type": "object"
+    }
+  },
+  "required": [
+    "id",
+    "jsonrpc",
+    "method"
+  ],
+  "type": "object"
+}

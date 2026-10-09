@@ -1,0 +1,30 @@
+{
+  "description": "Extends {@link MetaObject} with additional request-specific fields. All key naming rules from `MetaObject` apply.",
+  "properties": {
+    "io.modelcontextprotocol/clientCapabilities": {
+      "$ref": "#/$defs/ClientCapabilities",
+      "description": "The client's capabilities for this specific request. Required.\n\nCapabilities are declared per-request rather than once at initialization;\nan empty object means the client supports no optional capabilities.\nServers MUST NOT infer capabilities from prior requests."
+    },
+    "io.modelcontextprotocol/clientInfo": {
+      "$ref": "#/$defs/Implementation",
+      "description": "Identifies the client software making the request. Clients SHOULD\ninclude this field on every request unless specifically configured not\nto do so.\n\nThe {@link Implementation} schema requires `name` and `version`; other\nfields are optional.\n\nThe value is self-reported by the client and is not verified by the\nprotocol. It is intended for display, logging, and debugging. Servers\nSHOULD NOT use it to change their behavior, and SHOULD NOT rely on it for\nsecurity decisions."
+    },
+    "io.modelcontextprotocol/logLevel": {
+      "$ref": "#/$defs/LoggingLevel",
+      "description": "The desired log level for this request. Optional.\n\nIf absent, the server MUST NOT send any {@link LoggingMessageNotificationnotifications/message}\nnotifications for this request. The client opts in to log messages by\nexplicitly setting a level. Replaces the former `logging/setLevel` RPC."
+    },
+    "io.modelcontextprotocol/protocolVersion": {
+      "description": "The MCP Protocol Version being used for this request. Required.\n\nFor the HTTP transport, this value MUST match the `MCP-Protocol-Version`\nheader; otherwise the server MUST return a `400 Bad Request`. If the\nserver does not support the requested version, it MUST return an\n{@link UnsupportedProtocolVersionError}.",
+      "type": "string"
+    },
+    "progressToken": {
+      "$ref": "#/$defs/ProgressToken",
+      "description": "If specified, the caller is requesting out-of-band progress notifications for this request (as represented by {@link ProgressNotificationnotifications/progress}). The value of this parameter is an opaque token that will be attached to any subsequent notifications. The receiver is not obligated to provide these notifications."
+    }
+  },
+  "required": [
+    "io.modelcontextprotocol/clientCapabilities",
+    "io.modelcontextprotocol/protocolVersion"
+  ],
+  "type": "object"
+}

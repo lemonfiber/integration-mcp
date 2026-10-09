@@ -1,0 +1,25 @@
+{
+  "description": "Sent from the server to request a list of root URIs from the client. Roots allow\nservers to ask for specific directories or files to operate on. A common example\nfor roots is providing a set of repositories or directories a server should operate\non.\n\nThis request is typically used when the server needs to understand the file system\nstructure or access specific locations that the client has permission to read from.",
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/RequestId"
+    },
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    },
+    "method": {
+      "const": "roots/list",
+      "type": "string"
+    },
+    "params": {
+      "$ref": "#/$defs/RequestParams"
+    }
+  },
+  "required": [
+    "id",
+    "jsonrpc",
+    "method"
+  ],
+  "type": "object"
+}

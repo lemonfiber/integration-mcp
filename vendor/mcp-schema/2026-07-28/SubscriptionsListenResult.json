@@ -1,0 +1,17 @@
+{
+  "description": "The response to a {@link SubscriptionsListenRequestsubscriptions/listen}\nrequest, signalling that the subscription has ended gracefully (for example,\nduring server shutdown). Because the listen stream is long-lived, this result\nis sent only when the server tears the subscription down; an abrupt transport\nclose carries no response. The result body is otherwise empty.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/SubscriptionsListenResultMetaObject"
+    },
+    "resultType": {
+      "description": "Indicates the type of the result, which allows the client to determine\nhow to parse the result object.\n\nServers implementing this protocol version MUST include this field.\nFor backward compatibility, when a client receives a result from a\nserver implementing an earlier protocol version (which does not include\n`resultType`), the client MUST treat the absent field as `\"complete\"`.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "_meta",
+    "resultType"
+  ],
+  "type": "object"
+}

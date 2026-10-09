@@ -1,0 +1,29 @@
+{
+  "anyOf": [
+    {
+      "$ref": "#/$defs/StringSchema"
+    },
+    {
+      "$ref": "#/$defs/NumberSchema"
+    },
+    {
+      "$ref": "#/$defs/BooleanSchema"
+    },
+    {
+      "$ref": "#/$defs/UntitledSingleSelectEnumSchema"
+    },
+    {
+      "$ref": "#/$defs/TitledSingleSelectEnumSchema"
+    },
+    {
+      "$ref": "#/$defs/UntitledMultiSelectEnumSchema"
+    },
+    {
+      "$ref": "#/$defs/TitledMultiSelectEnumSchema"
+    },
+    {
+      "$ref": "#/$defs/LegacyTitledEnumSchema"
+    }
+  ],
+  "description": "Restricted schema definitions that only allow primitive types\nwithout nested objects or arrays."
+}

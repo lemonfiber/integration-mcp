@@ -1,0 +1,25 @@
+{
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/MetaObject"
+    },
+    "mimeType": {
+      "description": "The MIME type of this resource, if known.",
+      "type": "string"
+    },
+    "text": {
+      "description": "The text of the item. This must only be set if the item can actually be represented as text (not binary data).",
+      "type": "string"
+    },
+    "uri": {
+      "description": "The URI of this resource.",
+      "format": "uri",
+      "type": "string"
+    }
+  },
+  "required": [
+    "text",
+    "uri"
+  ],
+  "type": "object"
+}

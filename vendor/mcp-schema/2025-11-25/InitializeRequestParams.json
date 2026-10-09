@@ -1,0 +1,32 @@
+{
+  "description": "Parameters for an `initialize` request.",
+  "properties": {
+    "_meta": {
+      "additionalProperties": {},
+      "description": "See [General fields: `_meta`](/specification/2025-11-25/basic/index#meta) for notes on `_meta` usage.",
+      "properties": {
+        "progressToken": {
+          "$ref": "#/$defs/ProgressToken",
+          "description": "If specified, the caller is requesting out-of-band progress notifications for this request (as represented by notifications/progress). The value of this parameter is an opaque token that will be attached to any subsequent notifications. The receiver is not obligated to provide these notifications."
+        }
+      },
+      "type": "object"
+    },
+    "capabilities": {
+      "$ref": "#/$defs/ClientCapabilities"
+    },
+    "clientInfo": {
+      "$ref": "#/$defs/Implementation"
+    },
+    "protocolVersion": {
+      "description": "The latest version of the Model Context Protocol that the client supports. The client MAY decide to support older versions as well.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "capabilities",
+    "clientInfo",
+    "protocolVersion"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,17 @@
+{
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/RequestMetaObject"
+    },
+    "inputResponses": {
+      "$ref": "#/$defs/InputResponses"
+    },
+    "requestState": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "_meta"
+  ],
+  "type": "object"
+}

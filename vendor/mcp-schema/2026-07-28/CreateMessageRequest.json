@@ -1,0 +1,17 @@
+{
+  "description": "A request from the server to sample an LLM via the client. The client has full discretion over which model to select. The client should also inform the user before beginning sampling, to allow them to inspect the request (human in the loop) and decide whether to approve it.",
+  "properties": {
+    "method": {
+      "const": "sampling/createMessage",
+      "type": "string"
+    },
+    "params": {
+      "$ref": "#/$defs/CreateMessageRequestParams"
+    }
+  },
+  "required": [
+    "method",
+    "params"
+  ],
+  "type": "object"
+}

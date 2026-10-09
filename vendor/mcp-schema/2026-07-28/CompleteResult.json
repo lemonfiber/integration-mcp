@@ -1,0 +1,41 @@
+{
+  "description": "The result returned by the server for a {@link CompleteRequestcompletion/complete} request.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/ResultMetaObject"
+    },
+    "completion": {
+      "properties": {
+        "hasMore": {
+          "description": "Indicates whether there are additional completion options beyond those provided in the current response, even if the exact total is unknown.",
+          "type": "boolean"
+        },
+        "total": {
+          "description": "The total number of completion options available. This can exceed the number of values actually sent in the response.",
+          "type": "integer"
+        },
+        "values": {
+          "description": "An array of completion values. Must not exceed 100 items.",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 100,
+          "type": "array"
+        }
+      },
+      "required": [
+        "values"
+      ],
+      "type": "object"
+    },
+    "resultType": {
+      "description": "Indicates the type of the result, which allows the client to determine\nhow to parse the result object.\n\nServers implementing this protocol version MUST include this field.\nFor backward compatibility, when a client receives a result from a\nserver implementing an earlier protocol version (which does not include\n`resultType`), the client MUST treat the absent field as `\"complete\"`.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "completion",
+    "resultType"
+  ],
+  "type": "object"
+}

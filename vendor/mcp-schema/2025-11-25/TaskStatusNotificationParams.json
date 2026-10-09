@@ -1,0 +1,11 @@
+{
+  "allOf": [
+    {
+      "$ref": "#/$defs/NotificationParams"
+    },
+    {
+      "$ref": "#/$defs/Task"
+    }
+  ],
+  "description": "Parameters for a `notifications/tasks/status` notification."
+}

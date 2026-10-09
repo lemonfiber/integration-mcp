@@ -1,0 +1,7 @@
+* text=auto eol=lf
+
+# sdk-python and its contract, copied byte for byte by `scripts/vendor_sdk.py` and never edited here.
+src/lemonfiber_mcp/_vendor/** linguist-vendored=true -text
+contract/** linguist-vendored=true -text
+src/lemonfiber_mcp/_generated/** linguist-generated=true
+uv.lock linguist-generated=true

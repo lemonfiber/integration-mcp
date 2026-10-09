@@ -1,0 +1,103 @@
+[project]
+name = "lemonfiber-mcp"
+version = "0.0.0"
+description = "lemonfiber for AI assistants: a Model Context Protocol server over the web API, through an integration key."
+readme = "README.md"
+license = "LicenseRef-Hippocratic-3.0"
+license-files = ["LICENSE"]
+authors = [{ name = "NightWorksIO", email = "info@nightworks.io" }]
+requires-python = ">=3.14.2"
+classifiers = [
+    "Private :: Do Not Upload",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
+]
+# `aiohttp` and `urllib3` are the vendored sdk-python's own two dependencies,
+# which it imports from its package root.
+dependencies = [
+    "aiohttp>=3.14",
+    "mcp>=2.3,<3",
+    "urllib3>=2.5",
+    "uvicorn>=0.37",
+]
+
+[project.scripts]
+lemonfiber-mcp = "lemonfiber_mcp.cli:main"
+
+[project.urls]
+Repository = "https://github.com/lemonfiber/integration-mcp"
+Specification = "https://github.com/lemonfiber/spec/blob/main/30-repos/integration-mcp.md"
+
+[dependency-groups]
+dev = [
+    "mutmut>=3.8",
+    "pyright[nodejs]>=1.1.414",
+    "pytest>=9.1",
+    "pytest-cov>=7.1",
+    "ruff>=0.16",
+    "rust-just>=1.58",
+    "trustme>=1.2",
+]
+
+[build-system]
+requires = ["uv_build>=0.11,<0.13"]
+build-backend = "uv_build"
+
+[tool.uv]
+required-version = ">=0.11"
+# The package is read from `src/` where it stands rather than installed, so a
+# sync builds nothing and CI syncs with `--no-build`, which refuses anything that
+# would run a setup script. `uvx --from` and `uv build` still build the package.
+package = false
+
+[tool.pyright]
+include = ["src", "tests", "scripts"]
+# The vendored client is held to strict typing in its own repository, and is
+# found here through `extraPaths`, where its own absolute imports find it.
+exclude = ["src/lemonfiber_mcp/_vendor", "scripts/no_open_codeql_alert.py", "**/__pycache__", ".venv"]
+extraPaths = ["src", "src/lemonfiber_mcp/_vendor"]
+pythonVersion = "3.14"
+typeCheckingMode = "strict"
+reportUnnecessaryTypeIgnoreComment = "error"
+enableTypeIgnoreComments = false
+reportImplicitOverride = "error"
+reportPropertyTypeMismatch = "error"
+reportUninitializedInstanceVariable = "error"
+# The suite checks documents against the MCP schema with `jsonschema`, whose
+# validators declare their methods only through an untyped protocol; every other
+# rule holds there too.
+executionEnvironments = [
+    { root = "tests", extraPaths = [".", "src", "src/lemonfiber_mcp/_vendor"], reportUnknownMemberType = false },
+    { root = ".", extraPaths = ["src", "src/lemonfiber_mcp/_vendor"] },
+]
+
+[tool.pytest.ini_options]
+minversion = "9.0"
+testpaths = ["tests"]
+pythonpath = [".", "src", "src/lemonfiber_mcp/_vendor"]
+addopts = ["--strict-markers", "-ra"]
+xfail_strict = true
+
+[tool.coverage.run]
+branch = true
+source = ["src", "scripts"]
+# The vendored client is measured in its own repository, and
+# `no_open_codeql_alert.py` is the spec's shared gate, measured where it is kept.
+omit = ["src/lemonfiber_mcp/_vendor/*", "scripts/no_open_codeql_alert.py"]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+skip_covered = true
+exclude_also = ['if __name__ == "__main__":']
+
+[tool.mutmut]
+source_paths = ["src/"]
+do_not_mutate = ["src/lemonfiber_mcp/_vendor/*", "src/lemonfiber_mcp/_generated/*"]
+also_copy = ["scripts/", "tests/", "contract/", "vendor/"]
+pytest_add_cli_args_test_selection = ["tests/", "--ignore=tests/test_architecture.py"]
+do_not_mutate_patterns = ["\\bcast\\("]
+
+[tool.lemonfiber.mutation]
+# The share of mutants the suite must tell apart from the code, as a percentage.
+minimum-score = 90

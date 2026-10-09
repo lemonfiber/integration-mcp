@@ -1,0 +1,18 @@
+{
+  "description": "Common params for resource-related requests.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/RequestMetaObject"
+    },
+    "uri": {
+      "description": "The URI of the resource. The URI can use any protocol; it is up to the server how to interpret it.",
+      "format": "uri",
+      "type": "string"
+    }
+  },
+  "required": [
+    "_meta",
+    "uri"
+  ],
+  "type": "object"
+}

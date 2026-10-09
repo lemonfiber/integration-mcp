@@ -1,0 +1,47 @@
+{
+  "description": "A template description for resources available on the server.",
+  "properties": {
+    "_meta": {
+      "additionalProperties": {},
+      "description": "See [General fields: `_meta`](/specification/2025-11-25/basic/index#meta) for notes on `_meta` usage.",
+      "type": "object"
+    },
+    "annotations": {
+      "$ref": "#/$defs/Annotations",
+      "description": "Optional annotations for the client."
+    },
+    "description": {
+      "description": "A description of what this template is for.\n\nThis can be used by clients to improve the LLM's understanding of available resources. It can be thought of like a \"hint\" to the model.",
+      "type": "string"
+    },
+    "icons": {
+      "description": "Optional set of sized icons that the client can display in a user interface.\n\nClients that support rendering icons MUST support at least the following MIME types:\n- `image/png` - PNG images (safe, universal compatibility)\n- `image/jpeg` (and `image/jpg`) - JPEG images (safe, universal compatibility)\n\nClients that support rendering icons SHOULD also support:\n- `image/svg+xml` - SVG images (scalable but requires security precautions)\n- `image/webp` - WebP images (modern, efficient format)",
+      "items": {
+        "$ref": "#/$defs/Icon"
+      },
+      "type": "array"
+    },
+    "mimeType": {
+      "description": "The MIME type for all resources that match this template. This should only be included if all resources matching this template have the same type.",
+      "type": "string"
+    },
+    "name": {
+      "description": "Intended for programmatic or logical use, but used as a display name in past specs or fallback (if title isn't present).",
+      "type": "string"
+    },
+    "title": {
+      "description": "Intended for UI and end-user contexts — optimized to be human-readable and easily understood,\neven by those unfamiliar with domain-specific terminology.\n\nIf not provided, the name should be used for display (except for Tool,\nwhere `annotations.title` should be given precedence over using `name`,\nif present).",
+      "type": "string"
+    },
+    "uriTemplate": {
+      "description": "A URI template (according to RFC 6570) that can be used to construct resource URIs.",
+      "format": "uri-template",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "uriTemplate"
+  ],
+  "type": "object"
+}

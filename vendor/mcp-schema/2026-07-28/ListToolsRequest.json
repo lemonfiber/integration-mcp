@@ -1,0 +1,26 @@
+{
+  "description": "Sent from the client to request a list of tools the server has.",
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/RequestId"
+    },
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    },
+    "method": {
+      "const": "tools/list",
+      "type": "string"
+    },
+    "params": {
+      "$ref": "#/$defs/PaginatedRequestParams"
+    }
+  },
+  "required": [
+    "id",
+    "jsonrpc",
+    "method",
+    "params"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,26 @@
+{
+  "description": "A request from the server to elicit additional information from the user via the client.",
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/RequestId"
+    },
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    },
+    "method": {
+      "const": "elicitation/create",
+      "type": "string"
+    },
+    "params": {
+      "$ref": "#/$defs/ElicitRequestParams"
+    }
+  },
+  "required": [
+    "id",
+    "jsonrpc",
+    "method",
+    "params"
+  ],
+  "type": "object"
+}

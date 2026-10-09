@@ -1,0 +1,6 @@
+{
+  "additionalProperties": {
+    "$ref": "#/$defs/JSONValue"
+  },
+  "type": "object"
+}

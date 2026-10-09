@@ -1,0 +1,17 @@
+{
+  "additionalProperties": {},
+  "description": "Common result fields.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/ResultMetaObject"
+    },
+    "resultType": {
+      "description": "Indicates the type of the result, which allows the client to determine\nhow to parse the result object.\n\nServers implementing this protocol version MUST include this field.\nFor backward compatibility, when a client receives a result from a\nserver implementing an earlier protocol version (which does not include\n`resultType`), the client MUST treat the absent field as `\"complete\"`.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "resultType"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,22 @@
+{
+  "description": "JSONRPCNotification of a log message passed from server to client. If no logging/setLevel request has been sent from the client, the server MAY decide which messages to send automatically.",
+  "properties": {
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    },
+    "method": {
+      "const": "notifications/message",
+      "type": "string"
+    },
+    "params": {
+      "$ref": "#/$defs/LoggingMessageNotificationParams"
+    }
+  },
+  "required": [
+    "jsonrpc",
+    "method",
+    "params"
+  ],
+  "type": "object"
+}

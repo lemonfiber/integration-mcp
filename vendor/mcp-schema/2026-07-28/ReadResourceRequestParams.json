@@ -1,0 +1,24 @@
+{
+  "description": "Parameters for a `resources/read` request.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/RequestMetaObject"
+    },
+    "inputResponses": {
+      "$ref": "#/$defs/InputResponses"
+    },
+    "requestState": {
+      "type": "string"
+    },
+    "uri": {
+      "description": "The URI of the resource. The URI can use any protocol; it is up to the server how to interpret it.",
+      "format": "uri",
+      "type": "string"
+    }
+  },
+  "required": [
+    "_meta",
+    "uri"
+  ],
+  "type": "object"
+}

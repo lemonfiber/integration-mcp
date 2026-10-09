@@ -1,0 +1,38 @@
+{
+  "description": "A prompt or prompt template that the server offers.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/MetaObject"
+    },
+    "arguments": {
+      "description": "A list of arguments to use for templating the prompt.",
+      "items": {
+        "$ref": "#/$defs/PromptArgument"
+      },
+      "type": "array"
+    },
+    "description": {
+      "description": "An optional description of what this prompt provides",
+      "type": "string"
+    },
+    "icons": {
+      "description": "Optional set of sized icons that the client can display in a user interface.\n\nClients that support rendering icons MUST support at least the following MIME types:\n- `image/png` - PNG images (safe, universal compatibility)\n- `image/jpeg` (and `image/jpg`) - JPEG images (safe, universal compatibility)\n\nClients that support rendering icons SHOULD also support:\n- `image/svg+xml` - SVG images (scalable but requires security precautions)\n- `image/webp` - WebP images (modern, efficient format)",
+      "items": {
+        "$ref": "#/$defs/Icon"
+      },
+      "type": "array"
+    },
+    "name": {
+      "description": "Intended for programmatic or logical use, but used as a display name in past specs or fallback (if title isn't present).",
+      "type": "string"
+    },
+    "title": {
+      "description": "Intended for UI and end-user contexts — optimized to be human-readable and easily understood,\neven by those unfamiliar with domain-specific terminology.\n\nIf not provided, the name should be used for display (except for {@link Tool},\nwhere `annotations.title` should be given precedence over using `name`,\nif present).",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "type": "object"
+}

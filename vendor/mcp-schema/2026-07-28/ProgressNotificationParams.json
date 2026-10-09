@@ -1,0 +1,29 @@
+{
+  "description": "Parameters for a {@link ProgressNotificationnotifications/progress} notification.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/NotificationMetaObject"
+    },
+    "message": {
+      "description": "An optional message describing the current progress.",
+      "type": "string"
+    },
+    "progress": {
+      "description": "The progress thus far. This should increase every time progress is made, even if the total is unknown.",
+      "type": "number"
+    },
+    "progressToken": {
+      "$ref": "#/$defs/ProgressToken",
+      "description": "The progress token which was given in the initial request, used to associate this notification with the request that is proceeding."
+    },
+    "total": {
+      "description": "Total number of items to process (or total progress required), if known.",
+      "type": "number"
+    }
+  },
+  "required": [
+    "progress",
+    "progressToken"
+  ],
+  "type": "object"
+}

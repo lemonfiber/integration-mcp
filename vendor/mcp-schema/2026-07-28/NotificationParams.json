@@ -1,0 +1,9 @@
+{
+  "description": "Common params for any notification.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/NotificationMetaObject"
+    }
+  },
+  "type": "object"
+}

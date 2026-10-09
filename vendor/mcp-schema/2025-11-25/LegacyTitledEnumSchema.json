@@ -1,0 +1,36 @@
+{
+  "description": "Use TitledSingleSelectEnumSchema instead.\nThis interface will be removed in a future version.",
+  "properties": {
+    "default": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "enum": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "enumNames": {
+      "description": "(Legacy) Display names for enum values.\nNon-standard according to JSON schema 2020-12.",
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "title": {
+      "type": "string"
+    },
+    "type": {
+      "const": "string",
+      "type": "string"
+    }
+  },
+  "required": [
+    "enum",
+    "type"
+  ],
+  "type": "object"
+}

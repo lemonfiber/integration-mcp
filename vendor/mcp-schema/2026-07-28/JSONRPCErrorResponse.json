@@ -1,0 +1,20 @@
+{
+  "description": "A response to a request that indicates an error occurred.",
+  "properties": {
+    "error": {
+      "$ref": "#/$defs/Error"
+    },
+    "id": {
+      "$ref": "#/$defs/RequestId"
+    },
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    }
+  },
+  "required": [
+    "error",
+    "jsonrpc"
+  ],
+  "type": "object"
+}

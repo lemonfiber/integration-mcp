@@ -1,0 +1,26 @@
+{
+  "description": "Sent from the client to request resources/updated notifications from the server whenever a particular resource changes.",
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/RequestId"
+    },
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    },
+    "method": {
+      "const": "resources/subscribe",
+      "type": "string"
+    },
+    "params": {
+      "$ref": "#/$defs/SubscribeRequestParams"
+    }
+  },
+  "required": [
+    "id",
+    "jsonrpc",
+    "method",
+    "params"
+  ],
+  "type": "object"
+}

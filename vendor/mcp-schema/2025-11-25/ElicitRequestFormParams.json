@@ -1,0 +1,63 @@
+{
+  "description": "The parameters for a request to elicit non-sensitive information from the user via a form in the client.",
+  "properties": {
+    "_meta": {
+      "additionalProperties": {},
+      "description": "See [General fields: `_meta`](/specification/2025-11-25/basic/index#meta) for notes on `_meta` usage.",
+      "properties": {
+        "progressToken": {
+          "$ref": "#/$defs/ProgressToken",
+          "description": "If specified, the caller is requesting out-of-band progress notifications for this request (as represented by notifications/progress). The value of this parameter is an opaque token that will be attached to any subsequent notifications. The receiver is not obligated to provide these notifications."
+        }
+      },
+      "type": "object"
+    },
+    "message": {
+      "description": "The message to present to the user describing what information is being requested.",
+      "type": "string"
+    },
+    "mode": {
+      "const": "form",
+      "description": "The elicitation mode.",
+      "type": "string"
+    },
+    "requestedSchema": {
+      "description": "A restricted subset of JSON Schema.\nOnly top-level properties are allowed, without nesting.",
+      "properties": {
+        "$schema": {
+          "type": "string"
+        },
+        "properties": {
+          "additionalProperties": {
+            "$ref": "#/$defs/PrimitiveSchemaDefinition"
+          },
+          "type": "object"
+        },
+        "required": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "const": "object",
+          "type": "string"
+        }
+      },
+      "required": [
+        "properties",
+        "type"
+      ],
+      "type": "object"
+    },
+    "task": {
+      "$ref": "#/$defs/TaskMetadata",
+      "description": "If specified, the caller is requesting task-augmented execution for this request.\nThe request will return a CreateTaskResult immediately, and the actual result can be\nretrieved later via tasks/result.\n\nTask augmentation is subject to capability negotiation - receivers MUST declare support\nfor task augmentation of specific request types in their capabilities."
+    }
+  },
+  "required": [
+    "message",
+    "requestedSchema"
+  ],
+  "type": "object"
+}

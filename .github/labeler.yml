@@ -1,9 +1,9 @@
 documentation:
   - changed-files:
-      - any-glob-to-any-file: ['**/*.md']
+      - any-glob-to-any-file: ['**/*.md', '.docs/**']
 ci:
   - changed-files:
-      - any-glob-to-any-file: ['.github/workflows/**']
+      - any-glob-to-any-file: ['.github/workflows/**', 'justfile']
 dependencies:
   - changed-files:
-      - any-glob-to-any-file: ['.github/dependabot.yml']
+      - any-glob-to-any-file: ['pyproject.toml', 'uv.lock', '.github/dependabot.yml']

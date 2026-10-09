@@ -1,6 +1,6 @@
-# CodeQL static analysis (Q-R53). The workflows are the one surface this
-# repository has yet: they call reusable workflows with a token, which is where
-# injection and supply-chain flaws live.
+# CodeQL static analysis (Q-R53), over the server and over the workflows. The
+# workflows call reusable workflows with a token, which is where injection and
+# supply-chain flaws live.
 name: codeql
 on:
   push:
@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [actions]
+        language: [actions, python]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

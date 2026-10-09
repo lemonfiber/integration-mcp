@@ -1,3 +1,14 @@
+/.venv/
+__pycache__/
+*.py[cod]
+/.pytest_cache/
+/.ruff_cache/
+/.coverage
+/.coverage.*
+/coverage.xml
+/htmlcov/
+/mutants/
+/.spec-canonical/
 .DS_Store
 .planning/
-.DS_Store
+/dist/

@@ -1,0 +1,25 @@
+{
+  "description": "A ping, issued by either the server or the client, to check that the other party is still alive. The receiver must promptly respond, or else may be disconnected.",
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/RequestId"
+    },
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    },
+    "method": {
+      "const": "ping",
+      "type": "string"
+    },
+    "params": {
+      "$ref": "#/$defs/RequestParams"
+    }
+  },
+  "required": [
+    "id",
+    "jsonrpc",
+    "method"
+  ],
+  "type": "object"
+}

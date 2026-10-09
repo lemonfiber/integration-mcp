@@ -1,0 +1,48 @@
+{
+  "anyOf": [
+    {
+      "$ref": "#/$defs/Result"
+    },
+    {
+      "$ref": "#/$defs/InitializeResult"
+    },
+    {
+      "$ref": "#/$defs/ListResourcesResult"
+    },
+    {
+      "$ref": "#/$defs/ListResourceTemplatesResult"
+    },
+    {
+      "$ref": "#/$defs/ReadResourceResult"
+    },
+    {
+      "$ref": "#/$defs/ListPromptsResult"
+    },
+    {
+      "$ref": "#/$defs/GetPromptResult"
+    },
+    {
+      "$ref": "#/$defs/ListToolsResult"
+    },
+    {
+      "$ref": "#/$defs/CallToolResult"
+    },
+    {
+      "$ref": "#/$defs/GetTaskResult",
+      "description": "The response to a tasks/get request."
+    },
+    {
+      "$ref": "#/$defs/GetTaskPayloadResult"
+    },
+    {
+      "$ref": "#/$defs/CancelTaskResult",
+      "description": "The response to a tasks/cancel request."
+    },
+    {
+      "$ref": "#/$defs/ListTasksResult"
+    },
+    {
+      "$ref": "#/$defs/CompleteResult"
+    }
+  ]
+}

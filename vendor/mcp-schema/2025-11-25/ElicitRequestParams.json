@@ -1,0 +1,11 @@
+{
+  "anyOf": [
+    {
+      "$ref": "#/$defs/ElicitRequestURLParams"
+    },
+    {
+      "$ref": "#/$defs/ElicitRequestFormParams"
+    }
+  ],
+  "description": "The parameters for a request to elicit additional information from the user via the client."
+}

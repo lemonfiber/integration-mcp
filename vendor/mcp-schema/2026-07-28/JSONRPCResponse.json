@@ -1,0 +1,11 @@
+{
+  "anyOf": [
+    {
+      "$ref": "#/$defs/JSONRPCResultResponse"
+    },
+    {
+      "$ref": "#/$defs/JSONRPCErrorResponse"
+    }
+  ],
+  "description": "A response to a request, containing either the result or error."
+}

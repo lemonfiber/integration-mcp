@@ -1,0 +1,28 @@
+{
+  "description": "A successful response from the server for a {@link ReadResourceRequestresources/read} request.",
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/RequestId"
+    },
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    },
+    "result": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/InputRequiredResult"
+        },
+        {
+          "$ref": "#/$defs/ReadResourceResult"
+        }
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "jsonrpc",
+    "result"
+  ],
+  "type": "object"
+}

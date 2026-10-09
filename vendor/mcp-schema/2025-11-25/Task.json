@@ -1,0 +1,44 @@
+{
+  "description": "Data associated with a task.",
+  "properties": {
+    "createdAt": {
+      "description": "ISO 8601 timestamp when the task was created.",
+      "type": "string"
+    },
+    "lastUpdatedAt": {
+      "description": "ISO 8601 timestamp when the task was last updated.",
+      "type": "string"
+    },
+    "pollInterval": {
+      "description": "Suggested polling interval in milliseconds.",
+      "type": "integer"
+    },
+    "status": {
+      "$ref": "#/$defs/TaskStatus",
+      "description": "Current task state."
+    },
+    "statusMessage": {
+      "description": "Optional human-readable message describing the current task state.\nThis can provide context for any status, including:\n- Reasons for \"cancelled\" status\n- Summaries for \"completed\" status\n- Diagnostic information for \"failed\" status (e.g., error details, what went wrong)",
+      "type": "string"
+    },
+    "taskId": {
+      "description": "The task identifier.",
+      "type": "string"
+    },
+    "ttl": {
+      "description": "Actual retention duration from creation in milliseconds, null for unlimited.",
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "createdAt",
+    "lastUpdatedAt",
+    "status",
+    "taskId",
+    "ttl"
+  ],
+  "type": "object"
+}

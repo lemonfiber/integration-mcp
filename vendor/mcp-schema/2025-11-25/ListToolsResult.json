@@ -1,0 +1,24 @@
+{
+  "description": "The server's response to a tools/list request from the client.",
+  "properties": {
+    "_meta": {
+      "additionalProperties": {},
+      "description": "See [General fields: `_meta`](/specification/2025-11-25/basic/index#meta) for notes on `_meta` usage.",
+      "type": "object"
+    },
+    "nextCursor": {
+      "description": "An opaque token representing the pagination position after the last returned result.\nIf present, there may be more results available.",
+      "type": "string"
+    },
+    "tools": {
+      "items": {
+        "$ref": "#/$defs/Tool"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "tools"
+  ],
+  "type": "object"
+}

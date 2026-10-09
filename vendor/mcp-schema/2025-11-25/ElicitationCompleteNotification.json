@@ -1,0 +1,31 @@
+{
+  "description": "An optional notification from the server to the client, informing it of a completion of a out-of-band elicitation request.",
+  "properties": {
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    },
+    "method": {
+      "const": "notifications/elicitation/complete",
+      "type": "string"
+    },
+    "params": {
+      "properties": {
+        "elicitationId": {
+          "description": "The ID of the elicitation that completed.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "elicitationId"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "jsonrpc",
+    "method",
+    "params"
+  ],
+  "type": "object"
+}

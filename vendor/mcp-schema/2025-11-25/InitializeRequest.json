@@ -1,0 +1,26 @@
+{
+  "description": "This request is sent from the client to the server when it first connects, asking it to begin initialization.",
+  "properties": {
+    "id": {
+      "$ref": "#/$defs/RequestId"
+    },
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    },
+    "method": {
+      "const": "initialize",
+      "type": "string"
+    },
+    "params": {
+      "$ref": "#/$defs/InitializeRequestParams"
+    }
+  },
+  "required": [
+    "id",
+    "jsonrpc",
+    "method",
+    "params"
+  ],
+  "type": "object"
+}

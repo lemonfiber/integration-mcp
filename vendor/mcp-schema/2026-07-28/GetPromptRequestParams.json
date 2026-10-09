@@ -1,0 +1,30 @@
+{
+  "description": "Parameters for a `prompts/get` request.",
+  "properties": {
+    "_meta": {
+      "$ref": "#/$defs/RequestMetaObject"
+    },
+    "arguments": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Arguments to use for templating the prompt.",
+      "type": "object"
+    },
+    "inputResponses": {
+      "$ref": "#/$defs/InputResponses"
+    },
+    "name": {
+      "description": "The name of the prompt or prompt template.",
+      "type": "string"
+    },
+    "requestState": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "_meta",
+    "name"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,13 @@
+{
+  "description": "Metadata for associating messages with a task.\nInclude this in the `_meta` field under the key `io.modelcontextprotocol/related-task`.",
+  "properties": {
+    "taskId": {
+      "description": "The task identifier this message is associated with.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "taskId"
+  ],
+  "type": "object"
+}

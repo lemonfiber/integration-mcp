@@ -1,0 +1,16 @@
+{
+  "description": "Describes a message returned as part of a prompt.\n\nThis is similar to `SamplingMessage`, but also supports the embedding of\nresources from the MCP server.",
+  "properties": {
+    "content": {
+      "$ref": "#/$defs/ContentBlock"
+    },
+    "role": {
+      "$ref": "#/$defs/Role"
+    }
+  },
+  "required": [
+    "content",
+    "role"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,22 @@
+{
+  "description": "An out-of-band notification used to inform the receiver of a progress update for a long-running request.",
+  "properties": {
+    "jsonrpc": {
+      "const": "2.0",
+      "type": "string"
+    },
+    "method": {
+      "const": "notifications/progress",
+      "type": "string"
+    },
+    "params": {
+      "$ref": "#/$defs/ProgressNotificationParams"
+    }
+  },
+  "required": [
+    "jsonrpc",
+    "method",
+    "params"
+  ],
+  "type": "object"
+}

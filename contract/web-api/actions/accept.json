@@ -1,0 +1,26 @@
+{
+  "action": "accept",
+  "arguments": [
+    {
+      "name": "check",
+      "type": {
+        "default": null,
+        "description": "The check a warning is being answered for.",
+        "type": [
+          "string",
+          "null"
+        ]
+      }
+    },
+    {
+      "name": "disruptive",
+      "type": {
+        "default": false,
+        "description": "Whether the checks that disturb the running system are included.",
+        "type": "boolean"
+      }
+    }
+  ],
+  "consent": [],
+  "rehearsal": false
+}

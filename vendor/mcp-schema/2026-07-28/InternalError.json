@@ -1,0 +1,22 @@
+{
+  "description": "A JSON-RPC error indicating that an internal error occurred on the receiver. This error is returned when the receiver encounters an unexpected condition that prevents it from fulfilling the request.",
+  "properties": {
+    "code": {
+      "const": -32603,
+      "description": "The error type that occurred.",
+      "type": "integer"
+    },
+    "data": {
+      "description": "Additional information about the error. The value of this member is defined by the sender (e.g. detailed error information, nested errors etc.)."
+    },
+    "message": {
+      "description": "A short description of the error. The message SHOULD be limited to a concise single sentence.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "code",
+    "message"
+  ],
+  "type": "object"
+}

@@ -1,0 +1,19 @@
+{
+  "anyOf": [
+    {
+      "$ref": "#/$defs/UntitledSingleSelectEnumSchema"
+    },
+    {
+      "$ref": "#/$defs/TitledSingleSelectEnumSchema"
+    },
+    {
+      "$ref": "#/$defs/UntitledMultiSelectEnumSchema"
+    },
+    {
+      "$ref": "#/$defs/TitledMultiSelectEnumSchema"
+    },
+    {
+      "$ref": "#/$defs/LegacyTitledEnumSchema"
+    }
+  ]
+}
