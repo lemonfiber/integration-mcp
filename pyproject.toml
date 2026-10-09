@@ -107,8 +107,6 @@ do_not_mutate = ["src/lemonfiber_mcp/_vendor/*", "src/lemonfiber_mcp/_generated/
 also_copy = ["scripts/", "tests/", "contract/", "vendor/"]
 pytest_add_cli_args_test_selection = ["tests/", "--ignore=tests/test_architecture.py"]
 do_not_mutate_patterns = ["\\bcast\\("]
-# Every test the clean pass runs is named as it starts, so a stalled pass names its test.
-debug = true
 
 [tool.lemonfiber.mutation]
 # The share of mutants the suite must tell apart from the code, as a percentage.

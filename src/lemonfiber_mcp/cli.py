@@ -125,7 +125,8 @@ def http_server(environment: Mapping[str, str]) -> tuple[uvicorn.Server, Certifi
         root,
     )
     config = uvicorn.Config(
-        gate,
+        lambda: gate,
+        factory=True,
         host=host,
         port=port,
         ssl_context_factory=lambda _config, _default: certificates.context,
@@ -134,6 +135,7 @@ def http_server(environment: Mapping[str, str]) -> tuple[uvicorn.Server, Certifi
         server_header=False,
         proxy_headers=False,
         lifespan="on",
+        interface="asgi3",
     )
     logger.info("serving over HTTPS at %s", shown(host, port))
     return uvicorn.Server(config), certificates

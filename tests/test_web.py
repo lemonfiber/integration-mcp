@@ -113,10 +113,12 @@ async def serving(
     server, _certificates = cli.http_server(environment)
     async with anyio.create_task_group() as group:
         group.start_soon(server.serve)
-        await started(server)
-        async with httpx2.AsyncClient(verify=False) as client:
-            yield Served(port, client, environment)
-        server.should_exit = True
+        try:
+            await started(server)
+            async with httpx2.AsyncClient(verify=False) as client:
+                yield Served(port, client, environment)
+        finally:
+            server.should_exit = True
 
 
 async def test_health_answers_without_a_key_and_says_nothing_of_the_stack(
