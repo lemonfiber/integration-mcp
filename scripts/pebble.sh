@@ -8,6 +8,10 @@
 #
 # The binding's key is made here for this run alone. Every name resolves to
 # this machine, where the tests answer TLS-ALPN-01 on 5001 and HTTP-01 on 5002.
+# On Linux the containers share this machine's network, so each test can give
+# its name a loopback address of its own (PEBBLE_ADDRESSES=own) and tests run
+# at once without answering each other's challenges; elsewhere they share one
+# address (PEBBLE_ADDRESSES=shared).
 # `scripts/pebble.sh stop` removes the three containers.
 set -euo pipefail
 
@@ -37,11 +41,13 @@ if [ "$(uname -s)" = Linux ]; then
 	placed=(--network host)
 	host_ip=127.0.0.1
 	dns=127.0.0.1:8053
+	addresses=own
 else
 	docker network create "${NETWORK}" >/dev/null
 	placed=(--network "${NETWORK}")
 	host_ip="$(docker run --rm "${PYTHON}" python -c 'import socket; print(socket.gethostbyname("host.docker.internal"))')"
 	dns=lemonfiber-mcp-challtestsrv:8053
+	addresses=shared
 fi
 
 kid="kid-1"
@@ -88,3 +94,5 @@ echo "PEBBLE_EAB_DIRECTORY=https://localhost:14001/dir"
 echo "PEBBLE_ROOTS=${HELD}/roots.pem"
 echo "PEBBLE_EAB_KID=${kid}"
 echo "PEBBLE_EAB_HMAC_FILE=${HELD}/eab-hmac"
+echo "PEBBLE_CHALLTESTSRV=http://localhost:8055"
+echo "PEBBLE_ADDRESSES=${addresses}"

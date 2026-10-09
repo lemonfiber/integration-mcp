@@ -3,7 +3,9 @@
 
 Pebble and its challenge test server are started by `scripts/pebble.sh`, which
 says where they are; without them these tests are skipped. Every name resolves
-to this machine, where TLS-ALPN-01 is answered on 5001 and HTTP-01 on 5002.
+to this machine, where TLS-ALPN-01 is answered on 5001 and HTTP-01 on 5002, and
+each test asks for a name of its own, answered on a loopback address of its own
+where Pebble reaches this machine's loopback.
 """
 
 import asyncio
@@ -14,11 +16,14 @@ import logging
 import os
 import pathlib
 import random
+import re
+import secrets
 import socket
 import socketserver
 import stat
 import threading
 import types
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Final, cast, override
 
 import anyio
@@ -35,21 +40,88 @@ from lemonfiber_mcp.certificates.modes import CertificateError, Served
 from lemonfiber_mcp.certificates.settings import KeyType, Mode, Tls
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator, Generator
+    from collections.abc import AsyncIterator, Generator, Iterator
 
 NAMES: Final = ("mcp.acme.test",)
 TLS_PORT: Final = 5001
 HTTP_PORT: Final = 5002
+"""The ports Pebble validates TLS-ALPN-01 and HTTP-01 on, the same for every name."""
 EVERYWHERE: Final = "0.0.0.0"  # The tests' TLS-ALPN-01 server, reached by Pebble from wherever it runs.
+LOOPBACK: Final = "127.0.0.1"
 NOW: Final = datetime.datetime(2026, 10, 9, tzinfo=datetime.UTC)
 PEBBLE: Final = os.environ.get("PEBBLE_DIRECTORY", "")
 ROOTS: Final = os.environ.get("PEBBLE_ROOTS", "")
+CHALLTESTSRV: Final = os.environ.get("PEBBLE_CHALLTESTSRV", "")
+"""Where the challenge test server takes the records it answers Pebble's lookups with."""
+OWN_ADDRESSES: Final = os.environ.get("PEBBLE_ADDRESSES") == "own"
+"""Whether each test answers on a loopback address of its own, where Pebble reaches this machine's loopback."""
 needs_pebble = pytest.mark.skipif(not PEBBLE, reason="Pebble is not running: start it with scripts/pebble.sh")
 
 
-def tls_of(root: pathlib.Path) -> Tls:
-    """Return settings for the `acme` mode, keeping state under `root`."""
-    return Tls(Mode.ACME, NAMES, None, None, KeyType.EC_P256, state.kept(root / "state"))
+@dataclass(frozen=True, slots=True)
+class Place:
+    """Where one test answers the authority: a name no other test asks for, and the address it listens on."""
+
+    name: str
+    address: str
+
+    @property
+    def names(self) -> tuple[str, ...]:
+        """Return the names the test's certificate is for."""
+        return (self.name,)
+
+    @property
+    def reached(self) -> str:
+        """Return the address the test's own listeners are reached at."""
+        return LOOPBACK if self.address == EVERYWHERE else self.address
+
+    @property
+    def dual_stack(self) -> str:
+        """Return the address an IPv6 listener taking IPv4 too binds to, to listen where this test does."""
+        return http01.EVERYWHERE if self.address == EVERYWHERE else f"::ffff:{self.address}"
+
+
+def free_loopback() -> str:
+    """Return a loopback address on which both challenge ports are free."""
+    while True:
+        address = f"127.{secrets.randbelow(254) + 1}.{secrets.randbelow(256)}.{secrets.randbelow(254) + 1}"
+        try:
+            for port in (TLS_PORT, HTTP_PORT):
+                with socket.create_server((address, port)):
+                    pass
+        except OSError:
+            continue
+        return address
+
+
+def told(path: str, record: dict[str, str | list[str]]) -> None:
+    """Tell the challenge test server a record to answer with, or to forget."""
+    requests.post(f"{CHALLTESTSRV}/{path}", json=record, timeout=5).raise_for_status()
+
+
+@pytest.fixture
+def place() -> Iterator[Place]:
+    """Return a name of this test's own, and where it answers for it.
+
+    Parallel runs, as a mutation run's workers are, share Pebble and its ports.
+    Where Pebble reaches this machine's loopback, each test listens on a loopback
+    address of its own and the challenge test server resolves the test's name to
+    it, so no test answers another's challenge. Elsewhere the tests share this
+    machine's address and run one at a time.
+    """
+    name = f"t{secrets.token_hex(6)}.acme.test"
+    if not OWN_ADDRESSES:
+        yield Place(name, EVERYWHERE)
+        return
+    address = free_loopback()
+    told("add-a", {"host": name, "addresses": [address]})
+    yield Place(name, address)
+    told("clear-a", {"host": name})
+
+
+def tls_of(root: pathlib.Path, names: tuple[str, ...] = NAMES) -> Tls:
+    """Return settings for the `acme` mode for some names, keeping state under `root`."""
+    return Tls(Mode.ACME, names, None, None, KeyType.EC_P256, state.kept(root / "state"))
 
 
 def settings_of(challenge: Challenge = Challenge.TLS_ALPN_01, *, bound: bool | None = None) -> Acme:
@@ -65,17 +137,22 @@ def settings_of(challenge: Challenge = Challenge.TLS_ALPN_01, *, bound: bool | N
     return Acme(os.environ["PEBBLE_EAB_DIRECTORY"], roots, None, binding, challenge, None)
 
 
-def source_of(root: pathlib.Path, settings: Acme, pending: alpn.Challenges | None = None) -> acme.AcmeSource:
-    """Return the `acme` source, its jitter fixed so a wait is the wait itself."""
-    return acme.AcmeSource(tls_of(root), settings, pending or alpn.Challenges(root), random.Random(0))
+def source_of(
+    root: pathlib.Path,
+    settings: Acme,
+    pending: alpn.Challenges | None = None,
+    names: tuple[str, ...] = NAMES,
+) -> acme.AcmeSource:
+    """Return the `acme` source for some names, its jitter fixed so a wait is the wait itself."""
+    return acme.AcmeSource(tls_of(root, names), settings, pending or alpn.Challenges(root), random.Random(0))
 
 
 @pytest.fixture
-async def answering(tmp_path: pathlib.Path) -> AsyncIterator[alpn.Challenges]:
-    """Serve TLS on 5001 as the server does, answering TLS-ALPN-01 for whatever challenge is pending."""
+async def answering(tmp_path: pathlib.Path, place: Place) -> AsyncIterator[alpn.Challenges]:
+    """Serve TLS on 5001 where the test answers, as the server does, answering TLS-ALPN-01 for whatever is pending."""
     pending = alpn.Challenges(tmp_path)
     key = making.generated(KeyType.EC_P256)
-    state.write(tmp_path / "standing.pem", making.certificate_pem(making.pinned(NAMES, key, NOW)))
+    state.write(tmp_path / "standing.pem", making.certificate_pem(making.pinned(place.names, key, NOW)))
     state.write(tmp_path / "standing-key.pem", making.key_pem(key))
     context = server_context(pending)
     context.load_cert_chain(tmp_path / "standing.pem", tmp_path / "standing-key.pem")
@@ -83,7 +160,7 @@ async def answering(tmp_path: pathlib.Path) -> AsyncIterator[alpn.Challenges]:
     async def closed(_: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
         writer.close()
 
-    server = await asyncio.start_server(closed, EVERYWHERE, TLS_PORT, ssl=context)
+    server = await asyncio.start_server(closed, place.address, TLS_PORT, ssl=context)
     async with server:
         yield pending
 
@@ -98,15 +175,15 @@ def making_covered(served: Served) -> set[object]:
     return set(making.covered(served.leaf))
 
 
-def acme_hello() -> hello.Hello:
-    """Return what a validator's ClientHello asks for, for the tests' name."""
-    return hello.Hello(NAMES[0], (alpn.ACME_TLS,))
+def acme_hello(name: str) -> hello.Hello:
+    """Return what a validator's ClientHello asks for, for a name."""
+    return hello.Hello(name, (alpn.ACME_TLS,))
 
 
-def closed(port: int) -> bool:
-    """Tell whether nothing listens on a loopback port."""
+def closed(address: str, port: int) -> bool:
+    """Tell whether nothing listens on a port."""
     try:
-        socket.create_connection(("127.0.0.1", port), timeout=2).close()
+        socket.create_connection((address, port), timeout=2).close()
     except ConnectionRefusedError:
         return True
     return False
@@ -121,46 +198,50 @@ def private(path: pathlib.Path) -> bool:
 @pytest.mark.anyio
 async def test_the_first_certificate_is_issued_by_tls_alpn_01_and_kept(
     tmp_path: pathlib.Path,
+    place: Place,
     answering: alpn.Challenges,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     caplog.set_level(logging.INFO)
-    source = source_of(tmp_path, settings_of(), answering)
+    source = source_of(tmp_path, settings_of(), answering, place.names)
     now = datetime.datetime.now(datetime.UTC)
     assert source.first(now).standing_in
     served = await obtained(source, now)
     assert not served.standing_in
-    assert making_covered(served) == set(NAMES)
+    assert making_covered(served) == set(place.names)
     assert "agreeing to the authority's terms: data:text/plain" in caplog.text
     account = next((tmp_path / "state" / acme.ACCOUNT).iterdir())
     assert private(account / acme.ACCOUNT_KEY)
     assert private(account / acme.ACCOUNT_RECORD)
     assert private(served.key)
     assert source.obtain(now) == served
-    assert source_of(tmp_path, settings_of()).first(now).fingerprint == served.fingerprint
-    assert answering.context_for(acme_hello()) is None
+    assert source_of(tmp_path, settings_of(), names=place.names).first(now).fingerprint == served.fingerprint
+    assert answering.context_for(acme_hello(place.name)) is None
 
 
 @needs_pebble
 @pytest.mark.anyio
 async def test_the_first_certificate_is_issued_by_http_01_on_port_80_opened_for_it(
     tmp_path: pathlib.Path,
+    place: Place,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(http01, "PORT", HTTP_PORT)
-    source = source_of(tmp_path, settings_of(Challenge.HTTP_01))
+    monkeypatch.setattr(http01, "EVERYWHERE", place.dual_stack)
+    source = source_of(tmp_path, settings_of(Challenge.HTTP_01), names=place.names)
     served = await obtained(source, datetime.datetime.now(datetime.UTC))
-    assert making_covered(served) == set(NAMES)
-    assert closed(HTTP_PORT)
+    assert making_covered(served) == set(place.names)
+    assert closed(place.reached, HTTP_PORT)
 
 
 @needs_pebble
 @pytest.mark.anyio
 async def test_the_authority_is_asked_when_to_renew(
     tmp_path: pathlib.Path,
+    place: Place,
     answering: alpn.Challenges,
 ) -> None:
-    source = source_of(tmp_path, settings_of(), answering)
+    source = source_of(tmp_path, settings_of(), answering, place.names)
     first = await obtained(source, datetime.datetime.now(datetime.UTC))
     due = cast("datetime.datetime", source.due(first))
     assert first.leaf.not_valid_before_utc < due < first.expires
@@ -170,6 +251,7 @@ async def test_the_authority_is_asked_when_to_renew(
 @pytest.mark.anyio
 async def test_a_certificate_is_renewed_when_the_authority_says(
     tmp_path: pathlib.Path,
+    place: Place,
     answering: alpn.Challenges,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -179,7 +261,7 @@ async def test_a_certificate_is_renewed_when_the_authority_says(
         return said, said - datetime.timedelta(days=1)
 
     monkeypatch.setattr(client.ClientV2, "renewal_time", saying)
-    source = source_of(tmp_path, settings_of(), answering)
+    source = source_of(tmp_path, settings_of(), answering, place.names)
     first = await obtained(source, datetime.datetime.now(datetime.UTC))
     assert source.due(first) == said
     assert await obtained(source, said - datetime.timedelta(seconds=1)) == first
@@ -191,6 +273,7 @@ async def test_a_certificate_is_renewed_when_the_authority_says(
 @pytest.mark.anyio
 async def test_a_certificate_is_renewed_with_a_third_left_where_the_authority_says_nothing(
     tmp_path: pathlib.Path,
+    place: Place,
     answering: alpn.Challenges,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -198,15 +281,18 @@ async def test_a_certificate_is_renewed_with_a_third_left_where_the_authority_sa
         return None, datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=6)
 
     monkeypatch.setattr(client.ClientV2, "renewal_time", silent)
-    source = source_of(tmp_path, settings_of(), answering)
+    source = source_of(tmp_path, settings_of(), answering, place.names)
     first = await obtained(source, datetime.datetime.now(datetime.UTC))
     lifetime = first.leaf.not_valid_after_utc - first.leaf.not_valid_before_utc
     assert source.due(first) == first.leaf.not_valid_after_utc - lifetime / 3
 
 
 @needs_pebble
-def test_an_authority_requiring_a_binding_refuses_a_start_without_one(tmp_path: pathlib.Path) -> None:
-    source = source_of(tmp_path, settings_of(bound=False))
+def test_an_authority_requiring_a_binding_refuses_a_start_without_one(
+    tmp_path: pathlib.Path,
+    place: Place,
+) -> None:
+    source = source_of(tmp_path, settings_of(bound=False), names=place.names)
     with pytest.raises(CertificateError, match="LEMONFIBER_ACME_EAB_KID and LEMONFIBER_ACME_EAB_HMAC_FILE"):
         source.first(NOW)
 
@@ -215,9 +301,10 @@ def test_an_authority_requiring_a_binding_refuses_a_start_without_one(tmp_path: 
 @pytest.mark.anyio
 async def test_an_authority_requiring_a_binding_issues_with_one(
     tmp_path: pathlib.Path,
+    place: Place,
     answering: alpn.Challenges,
 ) -> None:
-    source = source_of(tmp_path, settings_of(bound=True), answering)
+    source = source_of(tmp_path, settings_of(bound=True), answering, place.names)
     now = datetime.datetime.now(datetime.UTC)
     assert source.first(now).standing_in
     assert not (await obtained(source, now)).standing_in
@@ -227,14 +314,16 @@ async def test_an_authority_requiring_a_binding_issues_with_one(
 @pytest.mark.anyio
 async def test_an_order_that_fails_is_tried_again_after_a_minute_then_two(
     tmp_path: pathlib.Path,
+    place: Place,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(http01, "PORT", HTTP_PORT + 1000)
-    source = source_of(tmp_path, settings_of(Challenge.HTTP_01))
+    monkeypatch.setattr(http01, "EVERYWHERE", place.dual_stack)
+    source = source_of(tmp_path, settings_of(Challenge.HTTP_01), names=place.names)
     now = datetime.datetime.now(datetime.UTC)
     with pytest.raises(
         CertificateError,
-        match=r"could not validate mcp\.acme\.test: urn:ietf:params:acme:error",
+        match=f"could not validate {re.escape(place.name)}: urn:ietf:params:acme:error",
     ):
         await obtained(source, now)
     jitter = random.Random(0)
@@ -253,15 +342,16 @@ async def test_an_order_that_fails_is_tried_again_after_a_minute_then_two(
 @pytest.mark.anyio
 async def test_an_account_whose_record_is_lost_is_found_again_by_its_key(
     tmp_path: pathlib.Path,
+    place: Place,
     answering: alpn.Challenges,
 ) -> None:
     now = datetime.datetime.now(datetime.UTC)
-    await obtained(source_of(tmp_path, settings_of(), answering), now)
+    await obtained(source_of(tmp_path, settings_of(), answering, place.names), now)
     record = next((tmp_path / "state" / acme.ACCOUNT).iterdir()) / acme.ACCOUNT_RECORD
     known = json.loads(record.read_text(encoding="utf-8"))
     record.unlink()
-    (tmp_path / "state" / "certificates" / NAMES[0] / "chain.pem").unlink()
-    await obtained(source_of(tmp_path, settings_of(), answering), now)
+    (tmp_path / "state" / "certificates" / place.name / "chain.pem").unlink()
+    await obtained(source_of(tmp_path, settings_of(), answering, place.names), now)
     assert json.loads(record.read_text(encoding="utf-8"))["url"] == known["url"]
 
 
