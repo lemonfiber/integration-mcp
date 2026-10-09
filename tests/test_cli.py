@@ -6,7 +6,7 @@ import logging
 import re
 import runpy
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import anyio
 import anyio.lowlevel
@@ -17,15 +17,16 @@ from mcp import ClientSession
 from mcp.shared.message import SessionMessage
 
 from lemonfiber_mcp import cli, serving, settings, web
-from lemonfiber_mcp.certificates import making, modes
+from lemonfiber_mcp.certificates import acme_settings, making, modes
 from lemonfiber_mcp.certificates import settings as tls
+from lemonfiber_mcp.certificates.alpn import Challenges
 from lemonfiber_mcp.withheld import WITHHELD
 from tests.conftest import KEY
 from tests.stack import Reply, Stack, envelope
 
 if TYPE_CHECKING:
     import pathlib
-    from collections.abc import AsyncGenerator, Iterator
+    from collections.abc import AsyncGenerator, Callable, Iterator
 
 
 @pytest.fixture(autouse=True)
@@ -183,6 +184,81 @@ def test_the_http_mode_refuses_to_guess_where_to_listen(listen: str, tmp_path: p
     with pytest.raises(settings.SettingsError) as refused:
         cli.http_server(environment)
     assert str(refused.value) == cli.LISTEN_NEEDED
+
+
+def test_the_http_mode_without_a_place_to_listen_is_refused(tmp_path: pathlib.Path) -> None:
+    environment = http_environment(tmp_path)
+    del environment[web.LISTEN]
+    with pytest.raises(settings.SettingsError, match=re.escape(cli.LISTEN_NEEDED)):
+        cli.http_server(environment)
+
+
+def test_the_http_mode_is_served_as_the_gate_alone_named_as_asgi_3(tmp_path: pathlib.Path) -> None:
+    server, certificates = cli.http_server(http_environment(tmp_path))
+    config = server.config
+    assert (config.host, config.port, config.factory, config.interface, config.lifespan) == (
+        "127.0.0.1",
+        8443,
+        True,
+        "asgi3",
+        "on",
+    )
+    assert (config.log_config, config.access_log, config.server_header, config.proxy_headers) == (
+        None,
+        False,
+        False,
+        False,
+    )
+    gate = cast("Callable[[], object]", config.app)()
+    assert isinstance(gate, web.Gate)
+    assert gate.certificates is certificates
+    assert isinstance(certificates.context.pending, Challenges)
+
+
+def test_the_http_mode_in_acme_reads_the_authority_from_its_settings_and_stands_in_until_it_answers(
+    tmp_path: pathlib.Path,
+) -> None:
+    environment = http_environment(
+        tmp_path,
+        **{tls.MODE: "acme", acme_settings.DIRECTORY: "https://127.0.0.1:9/directory"},
+    )
+    _, certificates = cli.http_server(environment)
+    assert certificates.served.standing_in
+
+
+@pytest.mark.parametrize("command", [["ca"], ["pinned"]])
+def test_a_command_acting_on_a_certificate_needs_to_be_told_what_to_do(
+    command: list[str],
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    with pytest.raises(SystemExit):
+        cli.main(command, {})
+    assert "the following arguments are required" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    ("command", "lines"),
+    [
+        (
+            "ca",
+            [
+                "replace make a replacement root beside the one in force",
+                "switch put the replacement root in force",
+            ],
+        ),
+        ("pinned", ["replace make a new pinned certificate"]),
+    ],
+)
+def test_each_certificate_command_says_what_it_does(
+    command: str,
+    lines: list[str],
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    with pytest.raises(SystemExit):
+        cli.main([command, "--help"], {})
+    words = " ".join(capsys.readouterr().out.split())
+    for line in lines:
+        assert line in words
 
 
 @pytest.mark.parametrize(

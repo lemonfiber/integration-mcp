@@ -209,8 +209,15 @@ async def test_the_first_certificate_is_issued_by_tls_alpn_01_and_kept(
     served = await obtained(source, now)
     assert not served.standing_in
     assert making_covered(served) == set(place.names)
-    assert "agreeing to the authority's terms: data:text/plain" in caplog.text
+    assert any(
+        message.startswith(
+            "An ACME account is registered, agreeing to the authority's terms: data:text/plain",
+        )
+        for message in caplog.messages
+    )
     account = next((tmp_path / "state" / acme.ACCOUNT).iterdir())
+    kept = json.loads((account / acme.ACCOUNT_RECORD).read_text(encoding="utf-8"))
+    assert kept["contact"] == ["mailto:operator@acme.test"]
     assert private(account / acme.ACCOUNT_KEY)
     assert private(account / acme.ACCOUNT_RECORD)
     assert private(served.key)
@@ -365,7 +372,10 @@ def test_a_directory_that_cannot_be_reached_at_start_leaves_a_certificate_standi
     assert served.standing_in
     assert source.first(NOW) == served
     assert source.due(served) is None
-    assert "The ACME directory could not be asked" in caplog.text
+    assert (
+        "The ACME directory could not be asked: "
+        "The ACME authority could not be reached or answered unexpectedly: ConnectionError."
+    ) in caplog.messages
     with pytest.raises(CertificateError, match="could not be reached"):
         source.obtain(NOW)
     assert source.obtain(NOW) == served

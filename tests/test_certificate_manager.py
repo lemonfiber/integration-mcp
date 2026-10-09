@@ -5,9 +5,8 @@ import dataclasses
 import datetime
 import json
 import logging
-import pathlib
 import threading
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
 import anyio
 import pytest
@@ -17,6 +16,9 @@ from lemonfiber_mcp.certificates.alpn import Challenges
 from lemonfiber_mcp.certificates.manager import Certificates
 from lemonfiber_mcp.certificates.settings import Mode
 from tests.test_certificate_modes import NOW, files_tls, tls_of
+
+if TYPE_CHECKING:
+    import pathlib
 
 
 class Clock:
@@ -111,12 +113,15 @@ def test_starting_loads_the_first_certificate_and_says_who_can_check_it(
     certificates = Certificates(source, Challenges(tmp_path), Clock())
     served = certificates.start()
     assert certificates.served == served
-    assert "Only a client given its fingerprint can check it" in caplog.text
-    assert served.fingerprint in caplog.text
-    recorded = json.loads(
-        (tmp_path / "state" / "certificates" / "mcp.home.example" / modes.RENEWAL).read_text(),
+    assert caplog.messages[0].startswith(
+        "serving the pinned certificate. Only a client given its fingerprint",
     )
+    assert f"The certificate's fingerprint, for each client to pin: {served.fingerprint}" in caplog.messages
+    written = (tmp_path / "state" / "certificates" / "mcp.home.example" / modes.RENEWAL).read_text()
+    recorded = json.loads(written)
     assert (recorded["mode"], recorded["outcome"], recorded["healthy"]) == ("pinned", "obtained", True)
+    assert recorded["last_attempt"] == NOW.isoformat()
+    assert written == json.dumps(recorded, indent=2) + "\n"
 
 
 def test_nothing_is_in_force_before_the_start(tmp_path: pathlib.Path) -> None:
@@ -150,6 +155,9 @@ def test_a_renewed_certificate_is_swapped_in(
     assert certificates.served.fingerprint != first.fingerprint
     status, body = certificates.health()
     assert (status, body["outcome"]) == (manager.HEALTHY, "renewed")
+    assert body["last_attempt"] == clock.now.isoformat()
+    valid_until = certificates.served.expires.isoformat()
+    assert f"A new certificate is in force, valid until {valid_until}." in caplog.messages
     assert body["renewal_due"] == (certificates.served.expires - modes.ISSUED_RENEWED_WITH).isoformat()
     assert "A new certificate is in force" in caplog.text
 
@@ -166,16 +174,19 @@ def test_a_failed_renewal_is_logged_and_critical_hourly_inside_seven_days(
     )
     served = certificates.start()
     certificates.check()
-    assert "could not be renewed" in caplog.text
+    assert f"The certificate could not be renewed. It has {served.expires - NOW} left." in caplog.messages
     assert not [record for record in caplog.records if record.levelno == logging.CRITICAL]
     clock.now = served.expires - manager.UNHEALTHY_WITHIN
     certificates.check()
     clock.now += HOUR / 2
     certificates.check()
-    clock.now += HOUR
+    clock.now += HOUR / 2
     certificates.check()
-    critical_lines = [record for record in caplog.records if record.levelno == logging.CRITICAL]
-    assert len(critical_lines) == 2
+    critical_lines = [record.getMessage() for record in caplog.records if record.levelno == logging.CRITICAL]
+    assert critical_lines == [
+        f"The certificate in force expires in {left} and has not been renewed."
+        for left in (manager.UNHEALTHY_WITHIN, manager.UNHEALTHY_WITHIN - HOUR)
+    ]
     status, body = certificates.health()
     assert (status, body["outcome"]) == (manager.UNHEALTHY, "failed")
 
@@ -233,9 +244,14 @@ def test_a_certificate_standing_in_is_served_and_unhealthy_until_the_first_is_is
     assert certificates.health()[1]["outcome"] == "renewed"
 
 
-def test_the_tls_context_speaks_tls_1_2_at_least() -> None:
-    context = manager.server_context(Challenges(pathlib.Path()))
+def test_the_tls_context_is_a_servers_answering_the_challenges_pending(tmp_path: pathlib.Path) -> None:
+    pending = Challenges(tmp_path)
+    context = manager.server_context(pending)
     assert context.minimum_version is manager.ssl.TLSVersion.TLSv1_2
+    assert context.protocol is manager.ssl.PROTOCOL_TLS_SERVER
+    assert context.pending is pending
+    certificates = Certificates(StandingIn(modes.Pinned(tls_of(tmp_path, Mode.PINNED))), pending)
+    assert certificates.context.pending is pending
 
 
 def test_the_clock_is_utc() -> None:
