@@ -188,6 +188,38 @@ def test_a_root_vouches_for_tls_servers_and_no_client() -> None:
         verifier.verify(client, [])
 
 
+def usage(*, signs: bool) -> x509.KeyUsage:
+    """Return the key usage of a root where it signs certificates, and of a server's certificate where not."""
+    return x509.KeyUsage(
+        digital_signature=not signs,
+        content_commitment=False,
+        key_encipherment=False,
+        data_encipherment=False,
+        key_agreement=False,
+        key_cert_sign=signs,
+        crl_sign=signs,
+        encipher_only=False,
+        decipher_only=False,
+    )
+
+
+def common_name(certificate: x509.Certificate) -> object:
+    """Return a certificate's common name."""
+    return certificate.subject.get_attributes_for_oid(x509.NameOID.COMMON_NAME)[0].value
+
+
+def test_a_root_and_what_it_issues_say_their_use_exactly_and_as_critical() -> None:
+    signer = making.generated(KeyType.EC_P384)
+    root = making.root(NAMES, signer, NOW)
+    leaf = making.issued(NAMES, making.generated(KeyType.EC_P256), root, signer, NOW)
+    for certificate, signs in ((root, True), (leaf, False)):
+        used = certificate.extensions.get_extension_for_class(x509.KeyUsage)
+        assert (used.value, used.critical) == (usage(signs=signs), True)
+        assert certificate.extensions.get_extension_for_class(x509.BasicConstraints).critical
+    assert common_name(root) == "lemonfiber MCP root for mcp.home.example"
+    assert common_name(leaf) == "lemonfiber MCP server for mcp.home.example"
+
+
 def test_a_certificate_made_here_names_itself_by_a_label_no_validator_reads_as_a_host_name() -> None:
     leaf = making.pinned(ADDRESS_ONLY, making.generated(KeyType.EC_P256), NOW)
     common_name = leaf.subject.get_attributes_for_oid(x509.NameOID.COMMON_NAME)[0].value
@@ -227,6 +259,7 @@ def test_a_chain_is_written_leaf_first() -> None:
     root = making.root(NAMES, signer, NOW)
     leaf = making.issued(NAMES, making.generated(KeyType.EC_P256), root, signer, NOW)
     assert x509.load_pem_x509_certificates(making.certificate_pem(leaf, root)) == [leaf, root]
+    assert making.certificate_pem(leaf, root) == making.certificate_pem(leaf) + making.certificate_pem(root)
 
 
 def test_a_certificate_without_alternative_names_covers_none() -> None:
@@ -284,3 +317,4 @@ def test_a_kept_file_is_written_whole_and_readable_by_this_user_alone(tmp_path: 
     assert path.read_bytes() == b"second"
     assert stat.S_IMODE(path.stat().st_mode) == state.FILE_MODE
     assert sorted(item.name for item in path.parent.iterdir()) == ["key.pem"]
+    assert stat.S_IMODE(path.parent.stat().st_mode) == state.DIRECTORY_MODE
