@@ -44,8 +44,15 @@ def test_a_hello_not_yet_whole_is_waited_for(cut: int) -> None:
     assert hello.read(whole[:cut]) is hello.INCOMPLETE
 
 
-def test_what_is_not_a_handshake_asks_for_nothing() -> None:
-    assert hello.read(b"GET / HTTP/1.1\r\n\r\n") == hello.NOTHING_ASKED
+@pytest.mark.parametrize("data", [b"GET /", b"GET / HTTP/1.1\r\n\r\n"])
+def test_what_is_not_a_handshake_asks_for_nothing(data: bytes) -> None:
+    assert hello.read(data) == hello.NOTHING_ASKED
+
+
+def test_a_read_past_the_end_is_refused() -> None:
+    reader = hello.Reader(b"ab")
+    with pytest.raises(ValueError, match=r"^past the end$"):
+        reader.take(3)
 
 
 def test_a_handshake_that_is_not_a_client_hello_asks_for_nothing() -> None:

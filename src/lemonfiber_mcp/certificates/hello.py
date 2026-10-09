@@ -92,7 +92,9 @@ def protocols(extension: Reader) -> tuple[str, ...]:
     offered = extension.vector(2)
     found: list[str] = []
     while offered.left:
-        found.append(offered.vector(1).take_all().decode("ascii"))
+        # Each protocol is taken off before it is decoded, so every pass shortens what is left.
+        protocol = offered.vector(1).take_all()
+        found.append(protocol.decode("ascii"))
     return tuple(found)
 
 
