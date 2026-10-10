@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Every tool the server offers, as the contract describes it.
 
-Generated from the contract lemonfiber 5d9be6f4ef7a1a93296960fc34ecb78e8c753b8d published, vendored in `contract/web-api/`.
+Generated from the contract lemonfiber 0e9fbff3d7b423c54967af31b0b77d083e37b0a0 published, vendored in `contract/web-api/`.
 Do not edit: `just generate` rewrites it, and CI fails on any difference.
 """
 
@@ -12,7 +12,7 @@ from lemonfiber_mcp.shapes import Reach, ToolShape
 API_VERSION: Final = 1
 """The `api_version` the tools were generated for."""
 
-CONTRACT: Final = '5d9be6f4ef7a1a93296960fc34ecb78e8c753b8d'
+CONTRACT: Final = '0e9fbff3d7b423c54967af31b0b77d083e37b0a0'
 """The lemonfiber revision whose contract the tools were generated from."""
 
 TOOLS: Final[tuple[ToolShape, ...]] = (
@@ -118,6 +118,37 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
                                      'most': {'type': 'string'}},
                       'additionalProperties': False},
         resource='lemonfiber://read/held{?member,defaults,most}',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_held_by_id',
+        reach=Reach.READ,
+        target='held/{id}',
+        capability='/api/held/{id}',
+        parameters=('id', 'member', 'defaults'),
+        input_schema={'type': 'object',
+                      'properties': {'id': {'type': 'string'},
+                                     'member': {'type': 'string'},
+                                     'defaults': {'type': 'string'}},
+                      'required': ['id'],
+                      'additionalProperties': False},
+        resource='lemonfiber://read/held/{id}{?member,defaults}',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_watching',
+        reach=Reach.READ,
+        target='watching',
+        capability='/api/watching',
+        parameters=('member', 'most'),
+        input_schema={'type': 'object',
+                      'properties': {'member': {'type': 'string'}, 'most': {'type': 'string'}},
+                      'additionalProperties': False},
+        resource='lemonfiber://read/watching{?member,most}',
         read_only=True,
         destructive=False,
         idempotent=True,
@@ -445,7 +476,7 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
     ToolShape(
         name='read_bundle',
         reach=Reach.FILE,
-        target='bundle',
+        target='bundle/{name}',
         capability='/api/bundle/{name}',
         parameters=('name',),
         input_schema={'type': 'object',
@@ -453,6 +484,40 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
                       'required': ['name'],
                       'additionalProperties': False},
         resource='lemonfiber://bundle/{name}',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_held_poster',
+        reach=Reach.FILE,
+        target='held/{id}/poster',
+        capability='/api/held/{id}/poster',
+        parameters=('id', 'member', 'defaults'),
+        input_schema={'type': 'object',
+                      'properties': {'id': {'type': 'string'},
+                                     'member': {'type': 'string'},
+                                     'defaults': {'type': 'string'}},
+                      'required': ['id'],
+                      'additionalProperties': False},
+        resource='lemonfiber://held/{id}/poster{?member,defaults}',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_held_backdrop',
+        reach=Reach.FILE,
+        target='held/{id}/backdrop',
+        capability='/api/held/{id}/backdrop',
+        parameters=('id', 'member', 'defaults'),
+        input_schema={'type': 'object',
+                      'properties': {'id': {'type': 'string'},
+                                     'member': {'type': 'string'},
+                                     'defaults': {'type': 'string'}},
+                      'required': ['id'],
+                      'additionalProperties': False},
+        resource='lemonfiber://held/{id}/backdrop{?member,defaults}',
         read_only=True,
         destructive=False,
         idempotent=True,

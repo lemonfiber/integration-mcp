@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import pytest
 from lemonfiber.reads import LOGS
 
-from lemonfiber_mcp import connection, stack
+from lemonfiber_mcp import catalogue, stack
 from scripts import generate_tools
 
 if TYPE_CHECKING:
@@ -17,6 +17,8 @@ if TYPE_CHECKING:
 PAUSE = {"action": "downloads-pause", "disturbs": False, "rehearsal": True, "idempotent": True}
 NONE: list[object] = []
 """A list the contract leaves empty."""
+AS_WHOM: list[object] = [{"name": "member", "repeatable": False}, {"name": "defaults", "repeatable": False}]
+"""The query of a read answered as one member, or as the household's defaults."""
 DIAGNOSE = {"action": "diagnose", "disturbs": True, "rehearsal": False, "idempotent": False}
 
 
@@ -59,6 +61,8 @@ def root(tmp_path: pathlib.Path) -> pathlib.Path:
                 "file": False,
             },
             {"path": "/api/bundle/{name}", "parameters": NONE, "kinds": NONE, "file": True},
+            {"path": "/api/held/{id}", "parameters": AS_WHOM, "kinds": ["title"], "file": False},
+            {"path": "/api/held/{id}/poster", "parameters": AS_WHOM, "kinds": NONE, "file": True},
         ],
     )
     write(tmp_path, "web-api/key-callable.json", [PAUSE, DIAGNOSE])
@@ -123,10 +127,50 @@ def test_the_log_read_takes_its_parameters_but_not_the_one_that_makes_it_a_strea
 
 def test_a_read_answering_with_a_file_takes_its_path_placeholders(root: pathlib.Path) -> None:
     bundle = shapes(root)["read_bundle"]
-    assert (bundle.reach, bundle.target, bundle.capability) == ("file", "bundle", "/api/bundle/{name}")
+    assert (bundle.reach, bundle.target, bundle.capability) == ("file", "bundle/{name}", "/api/bundle/{name}")
     assert bundle.parameters == ("name",)
     assert bundle.input_schema["required"] == ["name"]
     assert bundle.resource == "lemonfiber://bundle/{name}"
+
+
+def test_a_read_of_one_item_takes_the_segment_it_fills_and_its_query(root: pathlib.Path) -> None:
+    title = shapes(root)["read_held_by_id"]
+    assert (title.reach, title.target, title.capability) == ("read", "held/{id}", "/api/held/{id}")
+    assert title.parameters == ("id", "member", "defaults")
+    assert title.input_schema == {
+        "type": "object",
+        "properties": {
+            "id": {"type": "string"},
+            "member": {"type": "string"},
+            "defaults": {"type": "string"},
+        },
+        "required": ["id"],
+        "additionalProperties": False,
+    }
+    assert title.resource == "lemonfiber://read/held/{id}{?member,defaults}"
+
+
+def test_a_file_read_takes_the_segment_it_fills_and_its_query(root: pathlib.Path) -> None:
+    poster = shapes(root)["read_held_poster"]
+    assert (poster.reach, poster.target) == ("file", "held/{id}/poster")
+    assert poster.parameters == ("id", "member", "defaults")
+    assert poster.input_schema["required"] == ["id"]
+    assert poster.resource == "lemonfiber://held/{id}/poster{?member,defaults}"
+
+
+@pytest.mark.parametrize(
+    ("target", "file", "name"),
+    [
+        ("status", False, "read_status"),
+        ("front-door", False, "read_front_door"),
+        ("held", False, "read_held"),
+        ("held/{id}", False, "read_held_by_id"),
+        ("bundle/{name}", True, "read_bundle"),
+        ("held/{id}/poster", True, "read_held_poster"),
+    ],
+)
+def test_a_read_is_named_for_its_path(target: str, *, file: bool, name: str) -> None:
+    assert generate_tools.read_name(target, file=file) == name
 
 
 def test_a_rehearsable_action_becomes_a_rehearsal_and_an_action_taking_its_offer(root: pathlib.Path) -> None:
@@ -331,5 +375,6 @@ def test_a_missing_contract_is_refused(root: pathlib.Path, capsys: pytest.Captur
 
 def test_the_generator_spells_what_the_server_reads_as_the_server_does() -> None:
     assert generate_tools.OFFER == stack.OFFER
-    assert f"{connection.SCHEME}://" == generate_tools.SCHEME
+    assert f"{catalogue.SCHEME}://" == generate_tools.SCHEME
+    assert generate_tools.PLACEHOLDER.pattern == stack.PLACED.pattern
     assert generate_tools.LOGS == LOGS

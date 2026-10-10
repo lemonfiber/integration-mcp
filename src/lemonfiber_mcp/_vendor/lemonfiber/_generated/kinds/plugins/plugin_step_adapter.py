@@ -19,6 +19,7 @@ from .api_kind import (
     PluginOverriding,
     PluginPair,
     PluginPlaced,
+    PluginShape,
 )
 from ...shared.doctor__error__plugins import StepCame
 from ...shared.plugins__undo import UndoReversal
@@ -84,6 +85,10 @@ class PluginInstall(typing.TypedDict):
     that had nothing to put back, which is both a rehearsal and an install that
     held.
     """
+    taking: list[PluginTaking]
+    """Every service taking a privileged shape, with what it is given, each approved
+    apart from the offer.
+    """
     verified: typing.NotRequired[PluginVerification | None]
     """What the stack's own checks made of the install, or nothing on a run that
     asked them nothing.
@@ -95,6 +100,21 @@ class PluginInstall(typing.TypedDict):
     """
     would: PluginInstalled
     """What the install settled, said whether or not it was written down."""
+
+
+class PluginNonconforming(typing.TypedDict):
+    """One answer a plugin's adapter gave outside a contract it speaks."""
+
+    at: str
+    """When it answered so, as RFC 3339."""
+    capability: str
+    """The capability it was asked as."""
+    operation: str
+    """The operation it was asked."""
+    plugin: str
+    """The plugin whose adapter answered."""
+    why: str
+    """What was outside the contract."""
 
 
 class PluginProving(typing.TypedDict):
@@ -189,6 +209,23 @@ class PluginRemoval(typing.TypedDict):
     a reversal with a name on it, and an account of its own would be a second
     description of the same work.
     """
+
+
+class PluginReproof(typing.TypedDict):
+    """What asking an installed plugin's adapters again came to."""
+
+    asked: bool
+    """Whether its adapters were asked, rather than only said to be."""
+    cleared: bool
+    """Whether every answer kept against the plugin was cleared, which a proof that did
+    not hold never does.
+    """
+    kept: list[PluginNonconforming]
+    """Every answer kept against the plugin when it was proved, which a pass clears."""
+    plugin: str
+    """The plugin proved."""
+    proofs: list[PluginProving]
+    """Each proof asked, or that would be asked, with what it came to."""
 
 
 class PluginRestored(typing.TypedDict):
@@ -318,6 +355,21 @@ class PluginSubstituted(typing.TypedDict):
     """The service chosen."""
 
 
+class PluginTaking(typing.TypedDict):
+    """One service taking a privileged shape, as the reading states it."""
+
+    approval: str
+    """What approving it is written as, apart from the offer."""
+    devices: list[str]
+    """The devices it is given."""
+    grants: list[str]
+    """The kernel capabilities it is given."""
+    service: str
+    """The service taking it."""
+    shape: PluginShape
+    """The shape it takes."""
+
+
 class PluginUnfilled(typing.TypedDict):
     """A capability that would have nothing filling it."""
 
@@ -419,6 +471,7 @@ PluginInstalled = typing.TypedDict(
         "description": typing.NotRequired[str | None],
         "from": typing.NotRequired[str],
         "installed_at": typing.NotRequired[str],
+        "manifest": typing.NotRequired[str],
         "name": typing.NotRequired[str | None],
         "plugin": str,
         "provides": typing.NotRequired[list[str]],
@@ -443,38 +496,15 @@ PluginSource = typing.TypedDict(
 """Whether one installed plugin's source can still be fetched."""
 
 
-PluginUpdate = typing.TypedDict(
-    "PluginUpdate",
-    {
-        "from": str,
-        "install": PluginInstall,
-        "interrupts": list[str],
-        "plugin": str,
-        "restored": typing.NotRequired[PluginRestored | None],
-        "stopped": typing.NotRequired[str | None],
-        "to": str,
-        "went_back": UndoReversal,
-    },
-)
-"""What updating a plugin came to, or would come to, as one account.
-
-**One account, because it is one operation.** An update is the version installed
-going back and another coming on, and a report that gave those as a removal and an
-install side by side would invite reading them as two things that might each have
-happened. What an operator has to be able to read off this is which version the
-machine is on, and there are exactly two answers: the new one, where
-`install.recorded` is true, or the one it replaced, which `restored` says the state
-of.
-"""
-
-
 __all__ = [
     "PluginInstall",
     "PluginInstalled",
+    "PluginNonconforming",
     "PluginProving",
     "PluginRecipe",
     "PluginRecipeRan",
     "PluginRemoval",
+    "PluginReproof",
     "PluginRestored",
     "PluginServiceAdapter",
     "PluginSource",
@@ -486,8 +516,8 @@ __all__ = [
     "PluginStepAdapter",
     "PluginStepRan",
     "PluginSubstituted",
+    "PluginTaking",
     "PluginUnfilled",
-    "PluginUpdate",
     "PluginVerdict",
     "PluginVerdictFailed",
     "PluginVerdictFailingAsDeclared",

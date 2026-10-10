@@ -7,7 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.held__playing import Medium
+from ..shared.held__part_way__playing__title import Medium
+from ..shared.held__part_way__title import Pinned
 
 
 class Held(typing.TypedDict):
@@ -18,14 +19,24 @@ class Held(typing.TypedDict):
     transcode, and a surface handed those would have to decide not to draw them.
     """
 
+    backdrop: typing.NotRequired[str | None]
+    """Where its backdrop is served, where it has one."""
+    door: typing.NotRequired[Pinned | None]
+    """The certificate the door presents, which a client pins, beside any location."""
     id: str
     """The identifier the server tells it apart by, which is what asking to play one
     of them names.
     """
     medium: Medium
     """Which of the kinds this product deals in it is."""
+    poster: typing.NotRequired[str | None]
+    """Where its poster is served, where it has one."""
+    stream_from: typing.NotRequired[str | None]
+    """Where it streams from, where it plays."""
     title: str
     """What it is called, in the words the server holds it under."""
+    unlocated: typing.NotRequired[str | None]
+    """Why no location is stated, where none is."""
     year: typing.NotRequired[int | None]
     """The year it came out, where the server knows one. Absent rather than guessed:
     two films share a title far more often than they share a title and a year.

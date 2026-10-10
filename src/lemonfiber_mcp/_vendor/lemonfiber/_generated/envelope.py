@@ -29,6 +29,7 @@ from .kinds import (
     FormsEnvelope,
     FrontDoorEnvelope,
     GlossaryEnvelope,
+    GrantEnvelope,
     HandoffEnvelope,
     HeldEnvelope,
     HistoryEnvelope,
@@ -47,6 +48,7 @@ from .kinds import (
     NewsItemsEnvelope,
     OutboundEnvelope,
     PairingEnvelope,
+    PartWayEnvelope,
     PausingEnvelope,
     PlayingEnvelope,
     PluginsEnvelope,
@@ -70,6 +72,7 @@ from .kinds import (
     StoredEnvelope,
     StuckEnvelope,
     SubstitutionEnvelope,
+    TitleEnvelope,
     TraceEnvelope,
     UndoEnvelope,
     UninstallEnvelope,
@@ -78,6 +81,7 @@ from .kinds import (
     VersionEnvelope,
     WalkthroughEnvelope,
     WatchEnvelope,
+    WatchedEnvelope,
     WiringEnvelope,
     WizardEnvelope,
     WordEnvelope,
@@ -108,6 +112,7 @@ type Kind = typing.Literal[
     "forms",
     "front-door",
     "glossary",
+    "grant",
     "handoff",
     "held",
     "history",
@@ -126,6 +131,7 @@ type Kind = typing.Literal[
     "news-items",
     "outbound",
     "pairing",
+    "part-way",
     "pausing",
     "playing",
     "plugins",
@@ -149,6 +155,7 @@ type Kind = typing.Literal[
     "stored",
     "stuck",
     "substitution",
+    "title",
     "trace",
     "undo",
     "uninstall",
@@ -157,6 +164,7 @@ type Kind = typing.Literal[
     "version",
     "walkthrough",
     "watch",
+    "watched",
     "wiring",
     "wizard",
     "word",
@@ -188,6 +196,7 @@ type Envelope = (
     | FormsEnvelope
     | FrontDoorEnvelope
     | GlossaryEnvelope
+    | GrantEnvelope
     | HandoffEnvelope
     | HeldEnvelope
     | HistoryEnvelope
@@ -206,6 +215,7 @@ type Envelope = (
     | NewsItemsEnvelope
     | OutboundEnvelope
     | PairingEnvelope
+    | PartWayEnvelope
     | PausingEnvelope
     | PlayingEnvelope
     | PluginsEnvelope
@@ -229,6 +239,7 @@ type Envelope = (
     | StoredEnvelope
     | StuckEnvelope
     | SubstitutionEnvelope
+    | TitleEnvelope
     | TraceEnvelope
     | UndoEnvelope
     | UninstallEnvelope
@@ -237,6 +248,7 @@ type Envelope = (
     | VersionEnvelope
     | WalkthroughEnvelope
     | WatchEnvelope
+    | WatchedEnvelope
     | WiringEnvelope
     | WizardEnvelope
     | WordEnvelope

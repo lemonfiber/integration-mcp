@@ -5,9 +5,12 @@ import json
 import urllib.parse
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from http import HTTPMethod
+from http import HTTPMethod, HTTPStatus
 from typing import TYPE_CHECKING, Final
 
+from lemonfiber._generated import READS
+from lemonfiber.files import PICTURE_MOST, PICTURE_TYPES
+from lemonfiber.problems import MisaskedError
 from lemonfiber.reads import ACTIONS, BUNDLE, CAPABILITIES, JOBS, LOGS, SESSION
 
 if TYPE_CHECKING:
@@ -29,6 +32,12 @@ NOTHING_SAFE: Final = ""
 JSON_TYPE: Final = "application/json"
 """What every request but the one for a file asks to be answered in, and what a body is sent as."""
 
+UNKEPT_SEGMENTS: Final = frozenset({"", ".", ".."})
+"""Values a URL does not keep as a segment: the folder itself, the path's own folder, the one above it."""
+
+TITLE: Final = "id"
+"""The segment a title's picture is read under: the id the shelf lists it by."""
+
 ANY_TYPE: Final = "*/*"
 """What a request for a file takes, whatever it is served as."""
 
@@ -48,6 +57,9 @@ class Call:
     path: str
     headers: Mapping[str, str] = field(default_factory=dict[str, str], repr=False)
     body: bytes | None = field(default=None, repr=False)
+    most: int | None = None
+    """The most bytes the answer may be: a transport reads one byte past it and no further, and nothing of an
+    answer that declares more. `None` reads the whole answer."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -62,6 +74,12 @@ class Answer:
 def received(status: int, headers: Mapping[str, str], body: bytes) -> Answer:
     """Return an answer as a transport received it, its header names lower-cased."""
     return Answer(status, {name.lower(): value for name, value in headers.items()}, body)
+
+
+def declared_over(headers: Mapping[str, str], most: int) -> bool:
+    """Tell whether an answer's `Content-Length` declares more than `most` bytes, its headers read without regard to case."""
+    length = headers.get("content-length")
+    return length is not None and length.isdecimal() and int(length) > most
 
 
 def segment(name: str) -> str:
@@ -95,12 +113,40 @@ def written(value: Scalar) -> str:
 
 def with_credential(call: Call, credential: Credential) -> Call:
     """Return the call carrying the credential in its header."""
-    return Call(call.method, call.path, {**call.headers, **credential.header()}, call.body)
+    return Call(call.method, call.path, {**call.headers, **credential.header()}, call.body, call.most)
+
+
+def filled_in(read: Read, query: Query | None) -> tuple[str, Query]:
+    """Return a read's path with each segment a caller fills written in, and the query left to send.
+
+    A segment is one value, written escaped so it stays one segment and cannot
+    reach a path beside the read's own. One not given, given as a list, or one a
+    URL would resolve away is refused before anything is sent.
+    """
+    given = dict(query or {})
+    path = read.path
+    for name in READS[read].segments:
+        path = placed(path, name, given.pop(name, None))
+    return path, given
+
+
+def placed(path: str, name: str, value: Scalar | Sequence[Scalar] | None) -> str:
+    """Return the path with the segment `name` written in as one escaped value.
+
+    A value not given, given as a list, or one a URL would resolve away is
+    refused before anything is sent.
+    """
+    one = written(value) if isinstance(value, str | int) else None
+    if one is None or one in UNKEPT_SEGMENTS:
+        sentence = f"This read needs one `{name}` it can send, and was not given one."
+        raise MisaskedError(sentence, status=HTTPStatus.BAD_REQUEST)
+    return path.replace(f"{{{name}}}", segment(one))
 
 
 def read_call(read: Read, query: Query | None) -> Call:
     """Ask for what a command prints under `--json`."""
-    return Call(HTTPMethod.GET, read.path + search(query), {"Accept": JSON_TYPE})
+    path, rest = filled_in(read, query)
+    return Call(HTTPMethod.GET, path + search(rest), {"Accept": JSON_TYPE})
 
 
 def capabilities_call() -> Call:
@@ -121,6 +167,12 @@ def logs_call(services: Sequence[str], forms: Sequence[str], tail: int | None) -
 def bundle_call(name: str) -> Call:
     """Ask for one support bundle, by the name it was written under."""
     return Call(HTTPMethod.GET, f"{BUNDLE}/{segment(name)}", {"Accept": ANY_TYPE})
+
+
+def picture_call(template: str, title: str, query: Query | None) -> Call:
+    """Ask for one of a title's pictures, by the id its shelf lists it under."""
+    path = placed(template, TITLE, title)
+    return Call(HTTPMethod.GET, path + search(query), {"Accept": ", ".join(PICTURE_TYPES)}, most=PICTURE_MOST)
 
 
 def action_call(name: str, arguments: Mapping[str, Json] | None) -> Call:

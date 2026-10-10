@@ -29,7 +29,7 @@ from lemonfiber.address import Address, CertificatePin, Route
 from lemonfiber.capabilities import CapabilitySet
 from lemonfiber.credential import CREDENTIAL_HEADER, Credential, Session
 from lemonfiber.envelope import SPOKEN_API_VERSION, expect, parse_envelope, read_envelope
-from lemonfiber.files import BundleFile
+from lemonfiber.files import PICTURE_MOST, PICTURE_TYPES, BundleFile, Picture
 from lemonfiber.jobs import Ended, Finished, JobStanding, Running
 from lemonfiber.problems import (
     AddressRefusedError,
@@ -63,6 +63,8 @@ __all__ = [
     "HEARTBEAT",
     "KEY_CALLABLE",
     "KINDS",
+    "PICTURE_MOST",
+    "PICTURE_TYPES",
     "REFUSAL_CODES",
     "SILENCE_ALLOWED",
     "SPOKEN_API_VERSION",
@@ -100,6 +102,7 @@ __all__ = [
     "NoSuchJobError",
     "NotAdmittedError",
     "PasswordRefusedError",
+    "Picture",
     "Query",
     "Read",
     "RefusalCode",

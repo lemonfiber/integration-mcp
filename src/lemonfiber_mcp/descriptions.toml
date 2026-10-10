@@ -51,6 +51,49 @@ description = "What you can watch right now, newest first."
 [read_held.household.parameters]
 most = "How many titles to show, newest first, as a whole number."
 
+[read_held_by_id]
+operator = "One title on a member's shelf, by the id the shelf lists it under: what it is, and for a show its seasons and episodes, each with where that member left off. Or as the household's defaults would see it."
+[read_held_by_id.parameters]
+id = "The title's id, as the shelf lists it."
+member = "Whose shelf, by the name they are known by."
+defaults = "`true` to read it as the household's defaults would, instead of one member."
+[read_held_by_id.household]
+description = "One thing you can watch, with its seasons and episodes, and where you left off."
+[read_held_by_id.household.parameters]
+id = "Which title, as your list of what you can watch shows it."
+
+[read_watching]
+operator = "What one member is part-way through, most recent first, each with how far they got."
+[read_watching.parameters]
+member = "Whose viewing, by the name they are known by."
+most = "How many titles to answer with, most recent first, as a whole number."
+[read_watching.household]
+description = "What you are part-way through, most recent first, so you can carry on."
+[read_watching.household.parameters]
+most = "How many titles to show, most recent first, as a whole number."
+
+[read_held_poster]
+operator = "A title's poster, by the id the shelf lists it under, as the image it is. Read as one member, or as the household's defaults."
+[read_held_poster.parameters]
+id = "The title's id, as the shelf lists it."
+member = "Whose shelf, by the name they are known by."
+defaults = "`true` to read it as the household's defaults would, instead of one member."
+[read_held_poster.household]
+description = "The poster of one thing you can watch."
+[read_held_poster.household.parameters]
+id = "Which title, as your list of what you can watch shows it."
+
+[read_held_backdrop]
+operator = "A title's backdrop, the wide image behind it, by the id the shelf lists it under. Read as one member, or as the household's defaults."
+[read_held_backdrop.parameters]
+id = "The title's id, as the shelf lists it."
+member = "Whose shelf, by the name they are known by."
+defaults = "`true` to read it as the household's defaults would, instead of one member."
+[read_held_backdrop.household]
+description = "The wide picture behind one thing you can watch."
+[read_held_backdrop.household.parameters]
+id = "Which title, as your list of what you can watch shows it."
+
 [read_playing]
 operator = "What is playing now: who is watching what, and on which device."
 [read_playing.parameters]

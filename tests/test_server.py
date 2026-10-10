@@ -90,7 +90,7 @@ async def test_a_member_key_is_offered_no_technical_tool_and_reads_the_household
     stack.reply("/api/capabilities", Reply(body=capabilities("member")))
     listed = await mcp_client.list_tools()
     written = catalogue.words()
-    assert names(listed) == {"read_requests", "read_held", "read_playing"}
+    assert names(listed) == {"read_requests", "read_held", "read_held_by_id", "read_watching", "read_playing"}
     assert {tool.name: tool.description for tool in listed.tools} == {
         name: written[name].household for name in names(listed)
     }
@@ -239,6 +239,49 @@ async def test_a_bundle_is_handed_over_as_the_file_it_is(stack: Stack, mcp_clien
     assert base64.b64decode(embedded.resource.blob) == b"\x1f\x8bbundle"
     assert embedded.resource.uri == "lemonfiber://bundle/support-1.tar.gz"
     assert embedded.resource.mime_type == "application/gzip"
+
+
+async def test_a_read_of_one_item_fills_its_path_and_asks_with_the_rest(
+    stack: Stack,
+    mcp_client: Client,
+) -> None:
+    stack.reply("/api/capabilities", Reply(body=capabilities("act", **{"/api/held/{id}": "available"})))
+    stack.reply("/api/held/t/1", Reply(body=envelope("title", {"id": "t/1"})))
+    await mcp_client.list_tools()
+    result = await mcp_client.call_tool("read_held_by_id", {"id": "t/1", "member": "ana"})
+    assert data_of(result) == envelope("title", {"id": "t/1"})
+    assert stack.asked("/api/held/t/1")[-1].query == {"member": ["ana"]}
+
+
+async def test_a_picture_is_handed_over_as_the_image_it_is(stack: Stack, mcp_client: Client) -> None:
+    stack.reply(
+        "/api/capabilities",
+        Reply(body=capabilities("act", **{"/api/held/{id}/poster": "available"})),
+    )
+    stack.reply("/api/held/t 1/poster", Reply(raw=b"\xff\xd8poster", content_type="image/jpeg"))
+    await mcp_client.list_tools()
+    result = await mcp_client.call_tool("read_held_poster", {"id": "t 1", "member": "ana"})
+    _, embedded = result.content
+    assert isinstance(embedded, types.EmbeddedResource)
+    assert isinstance(embedded.resource, types.BlobResourceContents)
+    assert base64.b64decode(embedded.resource.blob) == b"\xff\xd8poster"
+    assert embedded.resource.uri == "lemonfiber://held/t%201/poster"
+    assert embedded.resource.mime_type == "image/jpeg"
+    assert stack.asked("/api/held/t 1/poster")[-1].query == {"member": ["ana"]}
+
+
+async def test_a_backdrop_is_fetched_as_a_poster_is(stack: Stack, mcp_client: Client) -> None:
+    stack.reply(
+        "/api/capabilities",
+        Reply(body=capabilities("act", **{"/api/held/{id}/backdrop": "available"})),
+    )
+    stack.reply("/api/held/t1/backdrop", Reply(raw=b"backdrop", content_type="image/png"))
+    await mcp_client.list_tools()
+    result = await mcp_client.call_tool("read_held_backdrop", {"id": "t1"})
+    _, embedded = result.content
+    assert isinstance(embedded, types.EmbeddedResource)
+    assert embedded.resource.uri == "lemonfiber://held/t1/backdrop"
+    assert stack.asked("/api/held/t1/backdrop")[-1].query == {}
 
 
 async def test_a_rehearsal_asks_the_action_to_write_nothing(stack: Stack, mcp_client: Client) -> None:
@@ -390,6 +433,30 @@ async def test_a_bundle_reads_as_a_blob_resource(stack: Stack, mcp_client: Clien
     assert isinstance(contents, types.BlobResourceContents)
     assert base64.b64decode(contents.blob) == b"bundle"
     assert contents.mime_type == "application/gzip"
+
+
+async def test_an_address_fills_the_segments_of_a_read_s_path(stack: Stack, mcp_client: Client) -> None:
+    stack.reply(
+        "/api/capabilities",
+        Reply(body=capabilities("act", **{"/api/held/{id}/poster": "available"})),
+    )
+    stack.reply("/api/held/t1", Reply(body=envelope("title", {"id": "t1"})))
+    stack.reply("/api/held/t/2/poster", Reply(raw=b"poster", content_type="image/webp"))
+    await mcp_client.list_tools()
+    read = await mcp_client.read_resource("lemonfiber://read/held/t1?member=ana")
+    contents = read.contents[0]
+    assert isinstance(contents, types.TextResourceContents)
+    assert json.loads(contents.text) == envelope("title", {"id": "t1"})
+    assert stack.asked("/api/held/t1")[-1].query == {"member": ["ana"]}
+    pictured = (await mcp_client.read_resource("lemonfiber://held/t%2F2/poster")).contents[0]
+    assert isinstance(pictured, types.BlobResourceContents)
+    assert (base64.b64decode(pictured.blob), pictured.mime_type) == (b"poster", "image/webp")
+
+
+async def test_an_address_no_read_is_at_is_refused(mcp_client: Client) -> None:
+    for address in ("lemonfiber://read/held/t1/more", "other://read/status", "lemonfiber://held/t1"):
+        with pytest.raises(MCPError, match=connection_module.NOT_A_RESOURCE):
+            await mcp_client.read_resource(address)
 
 
 async def test_a_parameter_given_empty_in_a_resource_address_reaches_the_stack_empty(

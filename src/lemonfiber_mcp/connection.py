@@ -31,7 +31,6 @@ if TYPE_CHECKING:
 
 FRESH_FOR: Final = datetime.timedelta(seconds=30)
 """How long a reading of the capabilities is acted on before a call reads it again."""
-SCHEME: Final = "lemonfiber"
 JSON: Final = "application/json"
 NOT_A_RESOURCE: Final = "There is no resource at that address."
 ARGUMENTS_REFUSED: Final = "The arguments were refused: "
@@ -141,13 +140,13 @@ class Connection:
         answer = await self._asked(shape, arguments)
         if isinstance(answer, Failure):
             return outcome.failed(answer, self._withholding)
-        if isinstance(answer, stack.Bundle):
+        if isinstance(answer, stack.File):
             return types.CallToolResult(
                 content=[
                     types.TextContent(text=outcome.DATA),
                     types.EmbeddedResource(
                         resource=types.BlobResourceContents(
-                            uri=f"{SCHEME}://bundle/{urllib.parse.quote(answer.name)}",
+                            uri=answer.address,
                             mime_type=answer.content_type,
                             blob=answer.encoded(),
                         ),
@@ -213,7 +212,7 @@ class Connection:
         answer = await self._asked(shape, arguments)
         if isinstance(answer, Failure):
             raise MCPError(types.INVALID_PARAMS, self._withholding.withhold(answer.sentence))
-        if isinstance(answer, stack.Bundle):
+        if isinstance(answer, stack.File):
             contents: types.TextResourceContents | types.BlobResourceContents = types.BlobResourceContents(
                 uri=uri,
                 mime_type=answer.content_type,
@@ -225,18 +224,25 @@ class Connection:
         return types.ReadResourceResult(contents=[contents])
 
     def _addressed(self, uri: str) -> tuple[ToolShape, dict[str, object]]:
-        """Return the read tool an address names and the arguments it carries."""
+        """Return the read tool an address names and the arguments it carries: each segment it fills, then its query."""
         parts = urllib.parse.urlsplit(uri)
-        target = urllib.parse.unquote(parts.path.removeprefix("/"))
-        if parts.scheme == SCHEME and parts.netloc == "bundle" and target:
-            return catalogue.SHAPES[catalogue.BUNDLE], {"name": target}
-        shape = catalogue.READABLE.get(target)
-        if parts.scheme != SCHEME or parts.netloc != "read" or shape is None:
+        found = next(
+            (
+                (shape, matched)
+                for pattern, shape in catalogue.ADDRESSED
+                if parts.scheme == catalogue.SCHEME
+                and (matched := pattern.fullmatch(parts.netloc + parts.path))
+            ),
+            None,
+        )
+        if found is None:
             raise MCPError(types.INVALID_PARAMS, NOT_A_RESOURCE)
+        shape, matched = found
         given = urllib.parse.parse_qs(parts.query, keep_blank_values=True)
         properties = cast("dict[str, dict[str, object]]", shape.input_schema.get("properties", {}))
         arguments: dict[str, object] = {
             name: values if properties.get(name, {}).get("type") == "array" else values[-1]
             for name, values in given.items()
         }
+        arguments.update({name: urllib.parse.unquote(value) for name, value in matched.groupdict().items()})
         return shape, arguments

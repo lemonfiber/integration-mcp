@@ -10,11 +10,14 @@ import typing
 from .plugin_step_adapter import (
     PluginInstall,
     PluginInstalled,
+    PluginNonconforming,
     PluginRemoval,
+    PluginReproof,
+    PluginRestored,
     PluginSource,
     PluginSubstituted,
-    PluginUpdate,
 )
+from ...shared.plugins__undo import UndoReversal
 
 
 class PluginInstalls(typing.TypedDict):
@@ -45,6 +48,14 @@ class PluginInstalls(typing.TypedDict):
     what it settled is in `install` and not here. A listing that counted it
     would report an install that did not happen.
     """
+    nonconforming: typing.NotRequired[list[PluginNonconforming]]
+    """Every answer an installed plugin's adapter gave outside its contract, kept until a
+    proof it passes clears it: the plugin fills none of those capabilities meanwhile.
+
+    Filled on the reading of what is installed, as `substituted` is.
+    """
+    proof: typing.NotRequired[PluginReproof | None]
+    """What proving a plugin again came to, or nothing where nothing was proved."""
     rehearsed: bool
     """Whether this was a rehearsal: what would have happened, with none of it done.
 
@@ -95,7 +106,33 @@ class PluginsEnvelope(typing.TypedDict):
     kind: typing.Literal["plugins"]
 
 
+PluginUpdate = typing.TypedDict(
+    "PluginUpdate",
+    {
+        "from": str,
+        "install": PluginInstall,
+        "interrupts": list[str],
+        "plugin": str,
+        "restored": typing.NotRequired[PluginRestored | None],
+        "stopped": typing.NotRequired[str | None],
+        "to": str,
+        "went_back": UndoReversal,
+    },
+)
+"""What updating a plugin came to, or would come to, as one account.
+
+**One account, because it is one operation.** An update is the version installed
+going back and another coming on, and a report that gave those as a removal and an
+install side by side would invite reading them as two things that might each have
+happened. What an operator has to be able to read off this is which version the
+machine is on, and there are exactly two answers: the new one, where
+`install.recorded` is true, or the one it replaced, which `restored` says the state
+of.
+"""
+
+
 __all__ = [
     "PluginInstalls",
+    "PluginUpdate",
     "PluginsEnvelope",
 ]

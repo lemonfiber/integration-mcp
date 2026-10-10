@@ -6,11 +6,12 @@ import types
 from http import HTTPStatus
 from typing import TYPE_CHECKING, Final, cast
 
+from lemonfiber._protocol.calls import declared_over
 from lemonfiber._protocol.refusals import code_in, problem_in, refusal_of, sentence_in
 from lemonfiber.capabilities import CapabilitySet, is_scope, is_state
 from lemonfiber.credential import Credential, Session
 from lemonfiber.envelope import expect, parse_envelope
-from lemonfiber.files import BundleFile
+from lemonfiber.files import PICTURE_MOST, PICTURE_TYPES, BundleFile, Picture
 from lemonfiber.jobs import Ended, Finished, JobStanding, Running
 from lemonfiber.problems import NoSuchJobError, PasswordRefusedError, UnreadableResponseError
 
@@ -51,6 +52,22 @@ def bundle_of(name: str, answer: Answer) -> BundleFile:
     if not succeeded(answer):
         raise refusal_of(answer)
     return BundleFile(name, answer.body, answer.headers.get("content-type"))
+
+
+def picture_of(answer: Answer) -> Picture:
+    """Keep a picture as it arrived, refusing anything but a raster image of at most `PICTURE_MOST` bytes."""
+    if not succeeded(answer):
+        raise refusal_of(answer)
+    if declared_over(answer.headers, PICTURE_MOST) or len(answer.body) > PICTURE_MOST:
+        msg = f"the picture is larger than the {PICTURE_MOST} bytes a picture is at most, and none of it was kept"
+        raise UnreadableResponseError(msg)
+    labelled = answer.headers.get("content-type", "")
+    media_type = labelled.partition(";")[0].strip().lower()
+    if media_type not in PICTURE_TYPES:
+        shown = repr(labelled) if labelled else "no type"
+        msg = f"the picture is labelled {shown}, and a picture is one of {', '.join(PICTURE_TYPES)}"
+        raise UnreadableResponseError(msg)
+    return Picture(answer.body, media_type)
 
 
 def standing_of(job: str, answer: Answer) -> JobStanding:
