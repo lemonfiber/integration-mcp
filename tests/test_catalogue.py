@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Final, cast
 import pytest
 from lemonfiber import CapabilitySet
 
-from lemonfiber_mcp import catalogue
+from lemonfiber_mcp import catalogue, stack
 from lemonfiber_mcp._generated.tools import TOOLS
 from lemonfiber_mcp.catalogue import Audience
 from lemonfiber_mcp.shapes import Reach, ToolShape
@@ -20,8 +20,20 @@ if TYPE_CHECKING:
 
 ROOT: Final = pathlib.Path(__file__).resolve().parent.parent
 CONTRACT: Final = ROOT / "contract" / "web-api"
-HOUSEHOLD_TOOLS: Final = frozenset({"read_requests", "read_held", "read_playing", "connection"})
-"""The tools a household member is offered words for: their requests, their shelf, what they are playing, and the connection."""
+HOUSEHOLD_TOOLS: Final = frozenset(
+    {
+        "read_requests",
+        "read_held",
+        "read_held_by_id",
+        "read_held_poster",
+        "read_held_backdrop",
+        "read_watching",
+        "read_playing",
+        "connection",
+    },
+)
+"""The tools a household member is offered words for: their requests, their shelf and each title on it with its
+pictures, what they are part-way through and playing, and the connection."""
 
 
 def capability_set(states: dict[str, CapabilityState], scope: CredentialScope = "operator") -> CapabilitySet:
@@ -283,10 +295,38 @@ def test_a_tool_offered_where_a_setting_is_off_says_so() -> None:
     )
 
 
-def test_every_read_with_an_address_is_found_by_the_name_it_carries() -> None:
-    assert {shape.name for shape in catalogue.READABLE.values()} == {
-        shape.name
-        for shape in TOOLS
-        if shape.resource is not None and shape.resource.startswith("lemonfiber://read/")
-    }
-    assert catalogue.READABLE["status"].name == "read_status"
+def test_every_read_with_an_address_is_found_by_it() -> None:
+    assert [shape.name for _, shape in catalogue.ADDRESSED] == [
+        shape.name for shape in TOOLS if shape.resource is not None
+    ]
+
+
+@pytest.mark.parametrize(
+    ("address", "name", "filled"),
+    [
+        ("read/status", "read_status", {}),
+        ("read/held", "read_held", {}),
+        ("read/held/t%2F1", "read_held_by_id", {"id": "t%2F1"}),
+        ("held/t1/poster", "read_held_poster", {"id": "t1"}),
+        ("bundle/support.tar.gz", "read_bundle", {"name": "support.tar.gz"}),
+    ],
+)
+def test_an_address_matches_one_read_and_gives_each_segment_it_fills(
+    address: str,
+    name: str,
+    filled: dict[str, str],
+) -> None:
+    matched = [
+        (shape.name, found.groupdict())
+        for pattern, shape in catalogue.ADDRESSED
+        if (found := pattern.fullmatch(address))
+    ]
+    assert matched == [(name, filled)]
+
+
+def test_a_segment_is_filled_by_one_segment_and_never_more() -> None:
+    assert not any(pattern.fullmatch("read/held/t1/more") for pattern, _ in catalogue.ADDRESSED)
+
+
+def test_every_file_read_the_contract_lists_has_a_call_that_fetches_it() -> None:
+    assert {shape.capability for shape in TOOLS if shape.reach is Reach.FILE} == set(stack.FETCHERS)

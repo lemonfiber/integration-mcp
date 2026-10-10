@@ -1,5 +1,5 @@
 # Copyright (c) 2026 NightWorksIO
-"""The shapes `held` and `playing` both carry.
+"""The shapes `held`, `part-way`, `playing` and `title` all carry.
 
 Generated from the contract vendored in `contract/`. Do not edit: `just generate` rewrites it,
 and CI fails on any difference.
@@ -8,7 +8,7 @@ and CI fails on any difference.
 import typing
 
 
-type Medium = typing.Literal["film", "series", "other"]
+type Medium = typing.Literal["film", "series", "episode", "other"]
 """The kinds of thing a household holds.
 
 Named rather than passed through as the server's own word, because a surface

@@ -13,6 +13,7 @@ word.
 import enum
 import functools
 import importlib.resources
+import re
 import tomllib
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Final, cast
@@ -101,15 +102,25 @@ WRITTEN: Final[tuple[ToolShape, ...]] = (
 SHAPES: Final[Mapping[str, ToolShape]] = {shape.name: shape for shape in (*TOOLS, *WRITTEN)}
 """Every tool the server knows, generated and written, by name."""
 
-READABLE: Final[Mapping[str, ToolShape]] = {
-    shape.target: shape
-    for shape in TOOLS
-    if shape.reach in {Reach.READ, Reach.LOGS} and shape.resource is not None
-}
-"""Every read a resource address names, by the name the address carries."""
+SCHEME: Final = "lemonfiber"
+"""The scheme every resource address the server offers is written in."""
 
-BUNDLE: Final = next(shape.name for shape in TOOLS if shape.reach is Reach.FILE)
-"""The tool reading a file the stack hands over, which a resource address names apart from the reads."""
+
+def address_pattern(resource: str) -> re.Pattern[str]:
+    """Return what a resource template's address matches, below its scheme: each segment it fills one segment."""
+    fixed = resource.removeprefix(f"{SCHEME}://").split("{?", 1)[0]
+    return re.compile(
+        "".join(
+            f"(?P<{part[1:-1]}>[^/]+)" if part.startswith("{") else re.escape(part)
+            for part in re.split(r"(\{[a-z_]+\})", fixed)
+        ),
+    )
+
+
+ADDRESSED: Final[tuple[tuple[re.Pattern[str], ToolShape], ...]] = tuple(
+    (address_pattern(shape.resource), shape) for shape in TOOLS if shape.resource is not None
+)
+"""Every read a resource address names, by what its address matches below the scheme."""
 
 
 def strings(value: object) -> dict[str, str]:

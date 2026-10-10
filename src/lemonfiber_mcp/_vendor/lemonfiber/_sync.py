@@ -15,12 +15,13 @@ import urllib3
 import urllib3.exceptions
 
 from lemonfiber._protocol import operation
-from lemonfiber._protocol.calls import DEFAULT_TIMEOUT, Answer, Call, received, with_credential
+from lemonfiber._protocol.calls import DEFAULT_TIMEOUT, Answer, Call, declared_over, received, with_credential
 from lemonfiber._protocol.following import DEFAULT_EVERY, job_name, next_wait
 from lemonfiber._protocol.refusals import CERTIFICATE_REFUSED, NOT_ANSWERING, opening_refusal
 from lemonfiber._protocol.retry import Attempts
 from lemonfiber.jobs import Ended, Finished, Running
 from lemonfiber.problems import CertificateRefusedError, LemonfiberError, UnreachableError
+from lemonfiber.reads import HELD_ID_BACKDROP, HELD_ID_POSTER
 from lemonfiber.stream import FIRST_WAIT, OPENED, RECONNECTS_ALLOWED, SILENCE_ALLOWED, Break, Following
 
 if TYPE_CHECKING:
@@ -32,7 +33,7 @@ if TYPE_CHECKING:
     from lemonfiber.address import Address, Route
     from lemonfiber.capabilities import CapabilitySet
     from lemonfiber.credential import Credential, Session
-    from lemonfiber.files import BundleFile
+    from lemonfiber.files import BundleFile, Picture
     from lemonfiber.jobs import JobStanding
     from lemonfiber.reads import Read
     from lemonfiber.stream import Arrival, Live, Stale
@@ -97,7 +98,9 @@ def attempt(way: Way, prefix: str, call: Call, limit: float) -> Answer | None:
             headers={**call.headers, **route.headers()},
             retries=False,
             timeout=urllib3.Timeout(total=limit),
+            preload_content=False,
         )
+        body = response.data if call.most is None else capped(response, call.most)
     except urllib3.exceptions.SSLError:
         failure: LemonfiberError = CertificateRefusedError(CERTIFICATE_REFUSED)
     except urllib3.exceptions.NewConnectionError:
@@ -105,8 +108,24 @@ def attempt(way: Way, prefix: str, call: Call, limit: float) -> Answer | None:
     except urllib3.exceptions.HTTPError:
         failure = UnreachableError(NOT_ANSWERING)
     else:
-        return received(response.status, response.headers, response.data)
+        return received(response.status, response.headers, body)
     raise failure
+
+
+def capped(response: urllib3.BaseHTTPResponse, most: int) -> bytes:
+    """Return at most one byte past `most` of an answer, and none of one that declares more.
+
+    A connection read to its end goes back to the pool; one left part-read is closed.
+    """
+    if declared_over(response.headers, most):
+        response.close()
+        return b""
+    kept = response.read(most + 1)
+    if len(kept) > most:
+        response.close()
+    else:
+        response.release_conn()
+    return kept
 
 
 def exchange(ways: Sequence[Way], prefix: str, call: Call, limit: float) -> Answer:
@@ -206,6 +225,18 @@ class SyncClient:
     def bundle(self, name: str) -> BundleFile:
         """Fetch one support bundle this run wrote, by name, as the bytes it is."""
         return self._run(operation.bundle(name))
+
+    def poster(self, title: str, query: Query | None = None) -> Picture:
+        """Fetch a title's poster, by the id its shelf lists it under, as the raster image it is.
+
+        `query` takes `member` and `defaults`, as the title read does. A title outside
+        the member's limits is `PLAY-2`, and one with no poster is `PLAY-9`.
+        """
+        return self._run(operation.picture(HELD_ID_POSTER, title, query))
+
+    def backdrop(self, title: str, query: Query | None = None) -> Picture:
+        """Fetch a title's backdrop, as `poster` fetches its poster."""
+        return self._run(operation.picture(HELD_ID_BACKDROP, title, query))
 
     def act(self, action: str, arguments: Mapping[str, Json] | None = None) -> Envelope:
         """Tell lemonfiber to do something the command line could also do. Sent once, never retried."""

@@ -8,15 +8,18 @@ where it is still going.
 """
 
 import base64
+import re
+import urllib.parse
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Final, cast
 
 from lemonfiber import Ended, Finished, Read, Running, StillRunningError
+from lemonfiber.reads import BUNDLE, HELD_ID_BACKDROP, HELD_ID_POSTER
 
 from lemonfiber_mcp.shapes import Reach
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
+    from collections.abc import Awaitable, Callable, Mapping
 
     from lemonfiber import AsyncClient, JobStanding, Json, Query
 
@@ -37,16 +40,80 @@ class NotAWholeNumberError(ValueError):
 
 
 @dataclass(frozen=True, slots=True)
-class Bundle:
-    """A file the stack handed over."""
+class File:
+    """A file the stack handed over, and the resource address it is read at."""
 
-    name: str
+    address: str
     content: bytes
     content_type: str | None
 
     def encoded(self) -> str:
         """Return the content as base64, the form a resource's blob carries."""
         return base64.b64encode(self.content).decode()
+
+
+type Fetcher = Callable[[AsyncClient, Mapping[str, object], Query], Awaitable[tuple[bytes, str | None]]]
+"""One file read's call of the client: the bytes it answers with, and their type."""
+
+PLACED: Final = re.compile(r"\{([a-z_]+)\}")
+"""A segment of a read's path a caller fills, written as `{name}`."""
+
+
+async def bundle(
+    client: AsyncClient,
+    arguments: Mapping[str, object],
+    _query: Query,
+) -> tuple[bytes, str | None]:
+    """Fetch one support bundle, by the name in its path."""
+    answer = await client.bundle(str(arguments["name"]))
+    return answer.content, answer.content_type
+
+
+async def poster(
+    client: AsyncClient,
+    arguments: Mapping[str, object],
+    query: Query,
+) -> tuple[bytes, str | None]:
+    """Fetch a title's poster, by the id in its path."""
+    answer = await client.poster(str(arguments["id"]), query)
+    return answer.content, answer.media_type
+
+
+async def backdrop(
+    client: AsyncClient,
+    arguments: Mapping[str, object],
+    query: Query,
+) -> tuple[bytes, str | None]:
+    """Fetch a title's backdrop, by the id in its path."""
+    answer = await client.backdrop(str(arguments["id"]), query)
+    return answer.content, answer.media_type
+
+
+FETCHERS: Final[Mapping[str, Fetcher]] = {
+    f"{BUNDLE}/{{name}}": bundle,
+    HELD_ID_POSTER: poster,
+    HELD_ID_BACKDROP: backdrop,
+}
+"""Each file read the contract lists, by the path its capability names, to the client call that fetches it."""
+
+
+def asked(shape: ToolShape, arguments: Mapping[str, object], *, placed: bool) -> Query:
+    """Return the arguments a read is asked with: its query, and the segments of its path where the client fills them."""
+    filled = set(PLACED.findall(shape.capability))
+    return cast(
+        "Query",
+        {
+            name: arguments[name]
+            for name in shape.parameters
+            if name in arguments and (placed or name not in filled)
+        },
+    )
+
+
+def addressed(shape: ToolShape, arguments: Mapping[str, object]) -> str:
+    """Return the resource address a file read is read at, each segment of its path filled."""
+    template = cast("str", shape.resource).split("{?", 1)[0]
+    return PLACED.sub(lambda placed: urllib.parse.quote(str(arguments[placed[1]]), safe=""), template)
 
 
 def whole(value: object, parameter: str) -> int:
@@ -78,11 +145,11 @@ async def read(client: AsyncClient, shape: ToolShape, arguments: Mapping[str, ob
             )
             return {"lines": lines}
         case Reach.FILE:
-            bundle = await client.bundle(str(arguments["name"]))
-            return Bundle(bundle.name, bundle.content, bundle.content_type)
+            fetched = FETCHERS[shape.capability]
+            content, content_type = await fetched(client, arguments, asked(shape, arguments, placed=False))
+            return File(addressed(shape, arguments), content, content_type)
         case _:
-            query = cast("Query", {name: arguments[name] for name in shape.parameters if name in arguments})
-            return await client.read(Read(shape.target), query)
+            return await client.read(Read(shape.target), asked(shape, arguments, placed=True))
 
 
 async def rehearse(client: AsyncClient, shape: ToolShape, arguments: Mapping[str, object]) -> object:

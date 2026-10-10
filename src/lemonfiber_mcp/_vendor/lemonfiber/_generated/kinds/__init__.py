@@ -26,6 +26,7 @@ from . import error as _error
 from . import forms as _forms
 from . import front_door as _front_door
 from . import glossary as _glossary
+from . import grant as _grant
 from . import handoff as _handoff
 from . import held as _held
 from . import history as _history
@@ -44,6 +45,7 @@ from . import news as _news
 from . import news_items as _news_items
 from . import outbound as _outbound
 from . import pairing as _pairing
+from . import part_way as _part_way
 from . import pausing as _pausing
 from . import playing as _playing
 from . import plugins as _plugins
@@ -67,6 +69,7 @@ from . import stop_seeding as _stop_seeding
 from . import stored as _stored
 from . import stuck as _stuck
 from . import substitution as _substitution
+from . import title as _title
 from . import trace as _trace
 from . import undo as _undo
 from . import uninstall as _uninstall
@@ -75,6 +78,7 @@ from . import upgrade as _upgrade
 from . import version as _version
 from . import walkthrough as _walkthrough
 from . import watch as _watch
+from . import watched as _watched
 from . import wiring as _wiring
 from . import wizard as _wizard
 from . import word as _word
@@ -100,6 +104,7 @@ from .error import *
 from .forms import *
 from .front_door import *
 from .glossary import *
+from .grant import *
 from .handoff import *
 from .held import *
 from .history import *
@@ -118,6 +123,7 @@ from .news import *
 from .news_items import *
 from .outbound import *
 from .pairing import *
+from .part_way import *
 from .pausing import *
 from .playing import *
 from .plugins import *
@@ -141,6 +147,7 @@ from .stop_seeding import *
 from .stored import *
 from .stuck import *
 from .substitution import *
+from .title import *
 from .trace import *
 from .undo import *
 from .uninstall import *
@@ -149,6 +156,7 @@ from .upgrade import *
 from .version import *
 from .walkthrough import *
 from .watch import *
+from .watched import *
 from .wiring import *
 from .wizard import *
 from .word import *
@@ -175,6 +183,7 @@ __all__ += _error.__all__
 __all__ += _forms.__all__
 __all__ += _front_door.__all__
 __all__ += _glossary.__all__
+__all__ += _grant.__all__
 __all__ += _handoff.__all__
 __all__ += _held.__all__
 __all__ += _history.__all__
@@ -193,6 +202,7 @@ __all__ += _news.__all__
 __all__ += _news_items.__all__
 __all__ += _outbound.__all__
 __all__ += _pairing.__all__
+__all__ += _part_way.__all__
 __all__ += _pausing.__all__
 __all__ += _playing.__all__
 __all__ += _plugins.__all__
@@ -216,6 +226,7 @@ __all__ += _stop_seeding.__all__
 __all__ += _stored.__all__
 __all__ += _stuck.__all__
 __all__ += _substitution.__all__
+__all__ += _title.__all__
 __all__ += _trace.__all__
 __all__ += _undo.__all__
 __all__ += _uninstall.__all__
@@ -224,6 +235,7 @@ __all__ += _upgrade.__all__
 __all__ += _version.__all__
 __all__ += _walkthrough.__all__
 __all__ += _watch.__all__
+__all__ += _watched.__all__
 __all__ += _wiring.__all__
 __all__ += _wizard.__all__
 __all__ += _word.__all__

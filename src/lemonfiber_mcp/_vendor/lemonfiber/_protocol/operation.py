@@ -10,6 +10,7 @@ from lemonfiber._protocol.answers import (
     capabilities_of,
     envelope_of,
     log_lines_of,
+    picture_of,
     session_of,
     standing_of,
 )
@@ -21,6 +22,7 @@ from lemonfiber._protocol.calls import (
     capabilities_call,
     job_call,
     logs_call,
+    picture_call,
     read_call,
     session_call,
 )
@@ -32,7 +34,7 @@ if TYPE_CHECKING:
     from lemonfiber._protocol.calls import Json, Query
     from lemonfiber.capabilities import CapabilitySet
     from lemonfiber.credential import Session
-    from lemonfiber.files import BundleFile
+    from lemonfiber.files import BundleFile, Picture
     from lemonfiber.jobs import JobStanding
     from lemonfiber.reads import Read
 
@@ -65,6 +67,11 @@ def logs(services: Sequence[str], forms: Sequence[str], tail: int | None) -> Ope
 def bundle(name: str) -> Operation[BundleFile]:
     """Fetch one support bundle, by name, as the bytes it is."""
     return Operation(bundle_call(name), lambda answer: bundle_of(name, answer), again=True)
+
+
+def picture(template: str, title: str, query: Query | None) -> Operation[Picture]:
+    """Fetch one of a title's pictures, as the raster image it is."""
+    return Operation(picture_call(template, title, query), picture_of, again=True)
 
 
 def action(name: str, arguments: Mapping[str, Json] | None) -> Operation[Envelope]:

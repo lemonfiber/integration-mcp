@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Final, Self
 import aiohttp
 
 from lemonfiber._protocol import operation
-from lemonfiber._protocol.calls import DEFAULT_TIMEOUT, Answer, Call, received, with_credential
+from lemonfiber._protocol.calls import DEFAULT_TIMEOUT, Answer, Call, declared_over, received, with_credential
 from lemonfiber._protocol.following import DEFAULT_EVERY, job_name, next_wait
 from lemonfiber._protocol.refusals import CERTIFICATE_REFUSED, NOT_ANSWERING, opening_refusal
 from lemonfiber._protocol.retry import Attempts
@@ -28,6 +28,7 @@ from lemonfiber.problems import (
     LemonfiberError,
     UnreachableError,
 )
+from lemonfiber.reads import HELD_ID_BACKDROP, HELD_ID_POSTER
 from lemonfiber.stream import FIRST_WAIT, OPENED, RECONNECTS_ALLOWED, SILENCE_ALLOWED, Break, Following
 
 if TYPE_CHECKING:
@@ -39,7 +40,7 @@ if TYPE_CHECKING:
     from lemonfiber.address import Address, Route
     from lemonfiber.capabilities import CapabilitySet
     from lemonfiber.credential import Credential, Session
-    from lemonfiber.files import BundleFile
+    from lemonfiber.files import BundleFile, Picture
     from lemonfiber.jobs import JobStanding
     from lemonfiber.reads import Read
     from lemonfiber.stream import Arrival, Live, Stale
@@ -117,7 +118,11 @@ async def attempt(
             raise_for_status=False,
             timeout=limit,
         ) as response:
-            body = await response.read()
+            body = (
+                await response.read()
+                if call.most is None
+                else await capped(response.headers, response.content, call.most)
+            )
     except aiohttp.ServerFingerprintMismatch, aiohttp.ClientSSLError:
         failure: LemonfiberError = CertificateRefusedError(CERTIFICATE_REFUSED)
     except aiohttp.ClientConnectorError:
@@ -127,6 +132,20 @@ async def attempt(
     else:
         return received(response.status, response.headers, body)
     raise failure
+
+
+async def capped(headers: Mapping[str, str], content: aiohttp.StreamReader, most: int) -> bytes:
+    """Return at most one byte past `most` of an answer's body, and none of one whose headers declare more.
+
+    What is left unread is aiohttp's to deal with: a connection whose answer was not
+    read to its end is closed when the answer is let go, not kept for the next request.
+    """
+    if declared_over(headers, most):
+        return b""
+    kept = bytearray()
+    while len(kept) <= most and (chunk := await content.read(most + 1 - len(kept))):
+        kept += chunk
+    return bytes(kept)
 
 
 async def exchange(
@@ -244,6 +263,18 @@ class AsyncClient:
     async def bundle(self, name: str) -> BundleFile:
         """Fetch one support bundle this run wrote, by name, as the bytes it is."""
         return await self._run(operation.bundle(name))
+
+    async def poster(self, title: str, query: Query | None = None) -> Picture:
+        """Fetch a title's poster, by the id its shelf lists it under, as the raster image it is.
+
+        `query` takes `member` and `defaults`, as the title read does. A title outside
+        the member's limits is `PLAY-2`, and one with no poster is `PLAY-9`.
+        """
+        return await self._run(operation.picture(HELD_ID_POSTER, title, query))
+
+    async def backdrop(self, title: str, query: Query | None = None) -> Picture:
+        """Fetch a title's backdrop, as `poster` fetches its poster."""
+        return await self._run(operation.picture(HELD_ID_BACKDROP, title, query))
 
     async def act(self, action: str, arguments: Mapping[str, Json] | None = None) -> Envelope:
         """Tell lemonfiber to do something the command line could also do. Sent once, never retried."""

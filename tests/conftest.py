@@ -20,8 +20,9 @@ if TYPE_CHECKING:
 KEY: Final = "lfk_" + "0123456789abcdef" * 4
 """A key shaped as the core mints one, so a test can look for it in everything the server says."""
 VERSION: Final = "0.0.0-test"
-MEMBER_READS: Final = frozenset({Read.REQUESTS, Read.HELD, Read.PLAYING})
-"""The reads a member's key reaches: their own row of the household, their own shelf and their own sessions."""
+MEMBER_READS: Final = frozenset({Read.REQUESTS, Read.HELD, Read.HELD_ID, Read.WATCHING, Read.PLAYING})
+"""The reads a member's key reaches: their own row of the household, their own shelf and each title on it, what
+they are part-way through, and their own sessions."""
 EVERY_READ: Final = frozenset(Read)
 
 

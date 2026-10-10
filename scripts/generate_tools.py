@@ -119,58 +119,58 @@ def resolved(schema: object, where: pathlib.Path, seen: tuple[pathlib.Path, ...]
     return definition
 
 
+def read_name(target: str, *, file: bool) -> str:
+    """Return a read tool's name, from its path below `API`.
+
+    A file read is named for what it fetches, its path's fixed segments alone. An
+    envelope read is named for its whole path, each segment a caller fills
+    written as `by_` and its name, so a read of one item never shares a name with
+    the read of the list it comes from.
+    """
+    segments = target.split("/")
+    named = [
+        segment if (placed := PLACEHOLDER.fullmatch(segment)) is None else f"by_{placed[1]}"
+        for segment in segments
+        if not file or PLACEHOLDER.fullmatch(segment) is None
+    ]
+    return f"read_{snake('_'.join(named))}"
+
+
 def read_shape(entry: Json, where: pathlib.Path) -> Shape:
-    """Return the tool a read the contract lists becomes."""
+    """Return the tool a read the contract lists becomes: each segment of its path a caller fills, then its query."""
     path = str(entry.get("path", ""))
     if not path.startswith(API):
         msg = f"{where} lists a read at {path!r}, which is not under {API}."
         raise GenerationError(msg)
     listed = rows(entry.get("parameters", []), where)
-    if entry.get("file") is True:
-        names = tuple(PLACEHOLDER.findall(path))
-        target = path.removeprefix(API).split("/", 1)[0]
-        properties: Json = {name: {"type": "string"} for name in names}
-        return Shape(
-            name=f"read_{snake(target)}",
-            reach="file",
-            target=target,
-            capability=path,
-            parameters=names,
-            input_schema={
-                "type": "object",
-                "properties": properties,
-                "required": list(names),
-                "additionalProperties": False,
-            },
-            resource=f"{SCHEME}{target}/" + "/".join(f"{{{name}}}" for name in names),
-            read_only=True,
-            destructive=False,
-            idempotent=True,
-        )
     if path == LOGS:
         if not {str(row.get("name")) for row in listed} >= STREAMING:
             msg = f"{where} lists {LOGS} without {', '.join(sorted(STREAMING))}, so what makes it a stream has moved."
             raise GenerationError(msg)
         listed = [row for row in listed if row.get("name") not in STREAMING]
+    file = entry.get("file") is True
     target = path.removeprefix(API)
-    names = tuple(str(row.get("name")) for row in listed)
-    properties = {
-        str(row.get("name")): (
-            {"type": "array", "items": {"type": "string"}}
-            if row.get("repeatable") is True
-            else {"type": "string"}
+    placed = tuple(PLACEHOLDER.findall(path))
+    names = (*placed, *(str(row.get("name")) for row in listed))
+    properties: Json = {name: {"type": "string"} for name in placed}
+    for row in listed:
+        repeatable = row.get("repeatable") is True
+        properties[str(row.get("name"))] = (
+            {"type": "array", "items": {"type": "string"}} if repeatable else {"type": "string"}
         )
-        for row in listed
-    }
+    schema: Json = {"type": "object", "properties": properties}
+    if placed:
+        schema["required"] = list(placed)
+    schema["additionalProperties"] = False
     template = ",".join(f"{row.get('name')}{'*' if row.get('repeatable') is True else ''}" for row in listed)
     return Shape(
-        name=f"read_{snake(target)}",
-        reach="logs" if path == LOGS else "read",
+        name=read_name(target, file=file),
+        reach="file" if file else "logs" if path == LOGS else "read",
         target=target,
         capability=path,
         parameters=names,
-        input_schema={"type": "object", "properties": properties, "additionalProperties": False},
-        resource=f"{SCHEME}read/{target}" + (f"{{?{template}}}" if template else ""),
+        input_schema=schema,
+        resource=f"{SCHEME}{'' if file else 'read/'}{target}" + (f"{{?{template}}}" if template else ""),
         read_only=True,
         destructive=False,
         idempotent=True,

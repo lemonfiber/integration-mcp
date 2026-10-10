@@ -335,22 +335,19 @@ class PluginPlaced(typing.TypedDict):
     """
     digest: str
     """The digest that fixes what runs."""
+    fronts: typing.NotRequired[str | None]
+    """The service of the same plugin it stands in front of, as an adapter."""
     image: str
     """The registry path, carrying no pin of its own."""
     listens: typing.NotRequired[int | None]
     """The port it answers on inside the stack's network, where it declared one."""
     media_types: typing.NotRequired[list[str]]
     """The media it files, in the stack manifest's vocabulary, which decides what it
-    comes to in each service that asks for what it provides.
-
-    Defaulted for a record written before this was kept, which reads as filing
-    nothing named.
+    comes to in each service that asks for what it provides; none in an older record.
     """
     name: typing.NotRequired[str]
-    """What it is called, for a reader, which is what its dashboard entry is listed as.
-
-    Defaulted for a record written before this was kept, which lists it by its id
-    rather than leaving it off the panel.
+    """What it is called, for a reader, which is what its dashboard entry is listed as;
+    a record written before this was kept lists it by its id.
     """
     networks: typing.NotRequired[list[str]]
     """The stack's own networks it joins beside the default one, because a stack service
@@ -375,13 +372,17 @@ class PluginPlaced(typing.TypedDict):
     """How it is reached, or nothing where it has no listener."""
     service: str
     """The service's id, which is the name its container is written under."""
+    shape: typing.NotRequired[PluginShape | None]
+    """The privileged shape lemonfiber writes for it, where it took one."""
+    speaks: typing.NotRequired[list[str]]
+    """Each capability contract it answers as an adapter, as `capability@major`."""
     tag: str
     """The readable name that digest went by when it was installed."""
     takes_data: bool
     """Whether the library is mounted for it."""
 
 
-type PluginPuts = typing.Literal["directory", "document", "region"]
+type PluginPuts = typing.Literal["directory", "document", "key", "region"]
 """What an install puts at one path."""
 
 
@@ -469,6 +470,10 @@ class PluginSecret(typing.TypedDict):
     """What holding it is for."""
 
 
+type PluginShape = typing.Literal["egress-guard"]
+"""A privileged shape lemonfiber writes for a plugin's service."""
+
+
 Contribution = typing.TypedDict(
     "Contribution",
     {
@@ -538,4 +543,5 @@ __all__ = [
     "PluginReachedLoopback",
     "PluginRequest",
     "PluginSecret",
+    "PluginShape",
 ]
