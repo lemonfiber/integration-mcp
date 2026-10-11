@@ -106,7 +106,7 @@ def test_the_help_says_what_the_command_is_and_how_it_serves(capsys: pytest.Capt
         cli.main(["--help"], {})
     said = capsys.readouterr().out
     assert said.startswith(
-        "usage: lemonfiber-mcp [-h] {stdio,http,ca,pinned,health} ...\n\nlemonfiber for AI assistants.\n",
+        "usage: lemonfiber-mcp [-h] {stdio,http,ca,pinned,health,collect} ...\n\nlemonfiber for AI assistants.\n",
     )
     words = " ".join(said.split())
     for line in (

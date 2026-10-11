@@ -58,6 +58,12 @@ NOT_ADMITTED: Final = (
 """What a request turned away for its credential is told, whatever the stack said."""
 
 
+LAPSED: Final = (
+    "That key link's claim has lapsed, so nothing was sent. Ask for the key to be minted as a claim again."
+)
+"""What a key link whose claim lapsed before it was sent is told."""
+
+
 def problem_in(body: bytes) -> Problem | None:
     """Return the problem an `error` envelope carries, or None where the body is not one."""
     text = body.decode(errors="replace").strip()

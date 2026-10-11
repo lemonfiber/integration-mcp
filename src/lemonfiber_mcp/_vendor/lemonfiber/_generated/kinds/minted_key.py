@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.keys__minted_key import KeyPurpose
+from ..shared.key_claim__keys__minted_key import KeyPurpose
 
 
 class MintedKey(typing.TypedDict):

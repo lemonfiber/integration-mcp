@@ -19,11 +19,12 @@ import aiohttp
 from lemonfiber._protocol import operation
 from lemonfiber._protocol.calls import DEFAULT_TIMEOUT, Answer, Call, declared_over, received, with_credential
 from lemonfiber._protocol.following import DEFAULT_EVERY, job_name, next_wait
-from lemonfiber._protocol.refusals import CERTIFICATE_REFUSED, NOT_ANSWERING, opening_refusal
+from lemonfiber._protocol.refusals import CERTIFICATE_REFUSED, LAPSED, NOT_ANSWERING, opening_refusal
 from lemonfiber._protocol.retry import Attempts
 from lemonfiber.jobs import Ended, Finished, Running
 from lemonfiber.problems import (
     CertificateRefusedError,
+    ClaimLapsedError,
     ConfigurationError,
     LemonfiberError,
     UnreachableError,
@@ -35,13 +36,22 @@ if TYPE_CHECKING:
     from collections.abc import AsyncGenerator, AsyncIterator, Callable, Mapping, Sequence
     from types import TracebackType
 
-    from lemonfiber._generated import Envelope, JobEnvelope, LogEnvelope
+    from lemonfiber._generated import (
+        Envelope,
+        JobEnvelope,
+        KeyClaimEnvelope,
+        KeysEnvelope,
+        LogEnvelope,
+        MintedKey,
+        MintedKeyEnvelope,
+    )
     from lemonfiber._protocol.calls import Json, Query
     from lemonfiber.address import Address, Route
     from lemonfiber.capabilities import CapabilitySet
     from lemonfiber.credential import Credential, Session
     from lemonfiber.files import BundleFile, Picture
     from lemonfiber.jobs import JobStanding
+    from lemonfiber.keys import KeyLink, Minting
     from lemonfiber.reads import Read
     from lemonfiber.stream import Arrival, Live, Stale
 
@@ -288,6 +298,22 @@ class AsyncClient:
         """Tell lemonfiber to do something the command line could also do. Sent once, never retried."""
         return await self._run(operation.action(action, arguments))
 
+    async def keys(self) -> KeysEnvelope:
+        """Ask for the integration keys this credential may see, without their secrets."""
+        return await self._run(operation.keys())
+
+    async def mint(self, minting: Minting) -> MintedKeyEnvelope:
+        """Mint one integration key, its secret in this answer and in no other. Sent once, never retried."""
+        return await self._run(operation.mint(minting))
+
+    async def mint_claim(self, minting: Minting) -> KeyClaimEnvelope:
+        """Mint one integration key as a claim, answered with the key link that collects it and no secret."""
+        return await self._run(operation.mint_claim(minting))
+
+    async def revoke(self, name: str) -> KeysEnvelope:
+        """Revoke one integration key by its name, answered with the keys as they now stand."""
+        return await self._run(operation.revoke(name))
+
     async def job(self, job: str) -> JobStanding:
         """Ask where the work a name stands for got to."""
         return await self._run(operation.job(job))
@@ -490,3 +516,19 @@ async def admit_async(
         return offered.read(await exchange(checked(session), address, tls, offered.call, limit))
     async with aiohttp.ClientSession() as opened:
         return offered.read(await exchange(opened, address, tls, offered.call, limit))
+
+
+async def collect_async(link: KeyLink, *, session: aiohttp.ClientSession | None = None) -> MintedKey:
+    """Collect the key a key link's claim was minted for, once, over the TLS the link's fingerprint verifies.
+
+    As `collect` does, on a session of the caller's where one is given.
+    """
+    if link.lapsed():
+        raise ClaimLapsedError(LAPSED)
+    collecting = operation.collection(link.claim)
+    tls = tls_for(link.address)
+    limit = aiohttp.ClientTimeout(total=DEFAULT_TIMEOUT)
+    if session is not None:
+        return collecting.read(await exchange(checked(session), link.address, tls, collecting.call, limit))
+    async with aiohttp.ClientSession() as opened:
+        return collecting.read(await exchange(opened, link.address, tls, collecting.call, limit))

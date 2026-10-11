@@ -7,6 +7,7 @@
     lemonfiber-mcp ca switch        put the replacement root in force
     lemonfiber-mcp pinned replace   make a new pinned certificate
     lemonfiber-mcp health           whether the HTTP mode running beside this answers healthy
+    lemonfiber-mcp collect          collect the key a key link's claim was minted for, into a new file
 
 A setting that is missing or refused stops the start with a sentence naming
 the setting and never its value.
@@ -22,7 +23,7 @@ from typing import TYPE_CHECKING, Final
 
 import anyio
 import uvicorn
-from lemonfiber import AsyncClient
+from lemonfiber import AsyncClient, ClaimLapsedError, ClaimRefusedError, LemonfiberError, collect_async
 from mcp.server.stdio import stdio_server
 
 from lemonfiber_mcp import serving, settings, web
@@ -52,6 +53,10 @@ LISTEN_NEEDED: Final = (
     "0.0.0.0:8443 or [::]:8443. There is no default port."
 )
 PORTS: Final = range(1, 2**16)
+CLAIM_LAPSED: Final = (
+    "LEMONFIBER_KEY_LINK's claim has lapsed, so nothing was sent. Mint the key as a claim again and collect it "
+    "within ten minutes."
+)
 REFUSALS: Final = (settings.SettingsError, TlsSettingsError, modes.CertificateError, state.StateError)
 """Every refusal a start or a command ends with, each a sentence naming what to change."""
 
@@ -223,6 +228,46 @@ def said(sentence: Callable[[Mapping[str, str]], str]) -> Run:
     return run
 
 
+async def collected_key(environment: Mapping[str, str]) -> str:
+    """Collect the key a key link's claim was minted for, once, into a new file, and say what to give the server.
+
+    The claim goes over the TLS the link's fingerprint verifies, with no key.
+    The key is written to the file alone, readable by its owner only, and
+    neither the link nor the claim is kept.
+    """
+    link = settings.link_from(environment)
+    path = settings.collected_into(environment)
+    install(Withholding([link.claim]))
+    try:
+        key = await collect_async(link)
+    except ClaimLapsedError:
+        raise settings.SettingsError(CLAIM_LAPSED) from None
+    except ClaimRefusedError as refused:
+        msg = f"The stack collected no key with {settings.KEY_LINK}: {refused.sentence} Mint the key as a claim again."
+        raise settings.SettingsError(msg) from None
+    except LemonfiberError as failed:
+        msg = f"The key could not be collected: {failed}"
+        raise settings.SettingsError(msg) from None
+    try:
+        state.write(path, f"{key['secret']}\n".encode())
+    except OSError:
+        msg = (
+            f"{settings.KEY_FILE} names a file that could not be written; the key it would have held is lost."
+        )
+        raise settings.SettingsError(msg) from None
+    address = key.get("address") or link.address.base
+    pin = key.get("pin") or link.pin.hex
+    return (
+        f"The key is in {path}. Give the server {settings.ADDRESS}={address}, {settings.PIN}={pin} "
+        f"and {settings.KEY_FILE}={path}."
+    )
+
+
+def collect_key(environment: Mapping[str, str]) -> str:
+    """Collect a key with a key link, and say what to give the server."""
+    return anyio.run(collected_key, environment)
+
+
 def health(environment: Mapping[str, str]) -> int:
     """Return the exit status a health check comes to: 0 where the HTTP mode answers healthy."""
     return 0 if checked_health(environment) else UNHEALTHY
@@ -249,6 +294,10 @@ def parser() -> argparse.ArgumentParser:
     commands.add_parser("health", help="whether the HTTP mode beside this answers healthy").set_defaults(
         run=health,
     )
+    commands.add_parser(
+        "collect",
+        help="collect the key a key link's claim was minted for, into a new file",
+    ).set_defaults(run=said(collect_key))
     return made
 
 

@@ -19,7 +19,7 @@ ASK: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
     "ASK-11": ListedRefusal(
         "NOT_A_KEY_REQUEST",
         400,
-        "Raised where the body of a mint is not a key's name, scope, purpose and the password.",
+        "Raised where the body of a mint is not a key's name, scope, purpose and the password, or the body of a collection is not a claim alone.",
     ),
     "ASK-12": ListedRefusal(
         "NOT_AN_IDEMPOTENCY_KEY",

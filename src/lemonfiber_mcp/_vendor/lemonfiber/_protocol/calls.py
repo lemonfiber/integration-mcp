@@ -11,10 +11,11 @@ from typing import TYPE_CHECKING, Final
 from lemonfiber._generated import READS
 from lemonfiber.files import PICTURE_MOST, PICTURE_TYPES
 from lemonfiber.problems import MisaskedError
-from lemonfiber.reads import ACTIONS, BUNDLE, CAPABILITIES, JOBS, LOGS, SESSION
+from lemonfiber.reads import ACTIONS, BUNDLE, CAPABILITIES, JOBS, KEY_CLAIMS, KEYS, LOGS, SESSION
 
 if TYPE_CHECKING:
     from lemonfiber.credential import Credential
+    from lemonfiber.keys import Minting
     from lemonfiber.reads import Read
 
 type Scalar = str | int | bool
@@ -177,9 +178,7 @@ def picture_call(template: str, title: str, query: Query | None) -> Call:
 
 def action_call(name: str, arguments: Mapping[str, Json] | None) -> Call:
     """Tell lemonfiber to do something the command line could also do."""
-    body = json.dumps(dict(arguments or {})).encode()
-    headers = {"Accept": JSON_TYPE, "Content-Type": JSON_TYPE}
-    return Call(HTTPMethod.POST, f"{ACTIONS}/{segment(name)}", headers, body)
+    return posted(f"{ACTIONS}/{segment(name)}", arguments or {})
 
 
 def job_call(job: str, method: HTTPMethod) -> Call:
@@ -190,5 +189,39 @@ def job_call(job: str, method: HTTPMethod) -> Call:
 def session_call(password: str, name: str | None) -> Call:
     """Offer a password, and a household member's name where it is one, for a session."""
     offer = {"password": password} if name is None else {"name": name, "password": password}
+    return posted(SESSION, offer)
+
+
+def keys_call() -> Call:
+    """Ask for the integration keys the credential may see, without their secrets."""
+    return Call(HTTPMethod.GET, KEYS, {"Accept": JSON_TYPE})
+
+
+def mint_call(minting: Minting, **more: Json) -> Call:
+    """Mint one integration key, giving the minter's password again, with `more` beside it in the body."""
+    asked: dict[str, Json] = {
+        "name": minting.name,
+        "scope": minting.scope,
+        "purpose": minting.purpose,
+        "password": minting.password,
+    }
+    return posted(KEYS, {**asked, **more})
+
+
+def revoke_call(name: str) -> Call:
+    """Revoke one integration key, by its name as one path segment, refusing a name a URL would resolve away."""
+    if name in UNKEPT_SEGMENTS:
+        sentence = "A key is revoked by its name, and what was given is not a name that can be sent."
+        raise MisaskedError(sentence, status=HTTPStatus.BAD_REQUEST)
+    return Call(HTTPMethod.DELETE, f"{KEYS}/{segment(name)}", {"Accept": JSON_TYPE})
+
+
+def collect_call(claim: str) -> Call:
+    """Collect the key a claim was minted for, with the claim alone."""
+    return posted(KEY_CLAIMS, {"claim": claim})
+
+
+def posted(path: str, body: Mapping[str, Json]) -> Call:
+    """Send a JSON body to a door that takes one, asking to be answered in JSON."""
     headers = {"Accept": JSON_TYPE, "Content-Type": JSON_TYPE}
-    return Call(HTTPMethod.POST, SESSION, headers, json.dumps(offer).encode())
+    return Call(HTTPMethod.POST, path, headers, json.dumps(dict(body)).encode())

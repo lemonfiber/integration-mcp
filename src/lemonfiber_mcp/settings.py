@@ -3,7 +3,7 @@
 
 Read from the environment, never from the command line, which any process
 listing shows. A key is taken only as an integration key, shaped as the core
-mints one; nothing here takes a password.
+mints one, or collected once with a key link; nothing here takes a password.
 """
 
 import pathlib
@@ -11,7 +11,7 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Final
 
-from lemonfiber import Address, AddressRefusedError, CertificatePin, Credential
+from lemonfiber import Address, AddressRefusedError, CertificatePin, Credential, KeyLink, KeyLinkRefusedError
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -20,6 +20,7 @@ ADDRESS: Final = "LEMONFIBER_ADDRESS"
 PIN: Final = "LEMONFIBER_PIN"
 KEY: Final = "LEMONFIBER_KEY"
 KEY_FILE: Final = "LEMONFIBER_KEY_FILE"
+KEY_LINK: Final = "LEMONFIBER_KEY_LINK"
 KEY_SHAPE: Final = re.compile(r"lfk_[0-9a-f]+")
 """An integration key as the core mints one: its prefix and lower-case hexadecimal."""
 
@@ -82,3 +83,29 @@ def key_of(environment: Mapping[str, str]) -> tuple[Credential, str]:
         msg = f"Neither {KEY} nor {KEY_FILE} is set: give the integration key minted for this server."
         raise SettingsError(msg)
     return key_from(given, KEY), given.strip()
+
+
+def link_from(environment: Mapping[str, str]) -> KeyLink:
+    """Read the key link a key minted as a claim is collected with, refusing anything that is not one."""
+    written = environment.get(KEY_LINK, "").strip()
+    if not written:
+        msg = f"{KEY_LINK} is not set: give the key link the stack showed when the key was minted as a claim."
+        raise SettingsError(msg)
+    try:
+        return KeyLink(written)
+    except KeyLinkRefusedError as refused:
+        msg = f"{KEY_LINK} was refused: {refused}"
+        raise SettingsError(msg) from None
+
+
+def collected_into(environment: Mapping[str, str]) -> pathlib.Path:
+    """Return the new file a collected key is written to, refusing a setting that names none or names a file already there."""
+    named = environment.get(KEY_FILE, "").strip()
+    if not named:
+        msg = f"{KEY_FILE} is not set: name the new file the collected key is written to, which only you can read."
+        raise SettingsError(msg)
+    path = pathlib.Path(named)
+    if path.exists():
+        msg = f"{KEY_FILE} names a file that is already there; a collected key is written to a new file, never over one."
+        raise SettingsError(msg)
+    return path

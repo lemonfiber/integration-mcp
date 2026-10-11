@@ -13,14 +13,25 @@ from lemonfiber.credential import Credential, Session
 from lemonfiber.envelope import expect, parse_envelope
 from lemonfiber.files import PICTURE_MOST, PICTURE_TYPES, BundleFile, Picture
 from lemonfiber.jobs import Ended, Finished, JobStanding, Running
-from lemonfiber.problems import NoSuchJobError, PasswordRefusedError, UnreadableResponseError
+from lemonfiber.problems import (
+    ClaimRefusedError,
+    NoSuchJobError,
+    PasswordRefusedError,
+    UnreadableResponseError,
+)
 
 if TYPE_CHECKING:
-    from lemonfiber._generated import CapabilityState, Envelope, LogEnvelope
+    from lemonfiber._generated import CapabilityState, Envelope, LogEnvelope, MintedKey
     from lemonfiber._protocol.calls import Answer
 
 REFUSED_AT_THE_DOOR: Final = "That is not the password, or none is configured."
 """What a refused password is told where the stack said nothing readable."""
+
+CLAIM_REFUSED: Final = (
+    "That key link collects no key: it may have collected its key already, or its claim may have lapsed. "
+    "Ask for the key to be minted as a claim again."
+)
+"""What a refused claim is told where the stack said nothing readable."""
 
 
 def succeeded(answer: Answer) -> bool:
@@ -123,6 +134,22 @@ def session_of(answer: Answer) -> Session:
         )
     data = expect(envelope_of(answer), "admission")["data"]
     return Session(Credential(data["token"]), instant(data["until"]), data.get("member"))
+
+
+def collected_of(answer: Answer) -> MintedKey:
+    """Read the collection door's answer as the key it collected, or raise why it collected none.
+
+    The door takes no credential, so a request it turns away at 401 was turned
+    away for its claim.
+    """
+    if answer.status == HTTPStatus.UNAUTHORIZED:
+        raise ClaimRefusedError(
+            sentence_in(answer.body) or CLAIM_REFUSED,
+            status=answer.status,
+            code=code_in(answer.body),
+            problem=problem_in(answer.body),
+        )
+    return expect(envelope_of(answer), "minted-key")["data"]
 
 
 def instant(written: str) -> datetime.datetime:
