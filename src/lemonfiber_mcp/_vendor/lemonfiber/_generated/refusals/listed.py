@@ -122,6 +122,19 @@ type RefusalCode = typing.Literal[
     "WIRE-5",
     "WIRE-6",
     "WIRE-7",
+    "WISH-1",
+    "WISH-10",
+    "WISH-11",
+    "WISH-12",
+    "WISH-13",
+    "WISH-2",
+    "WISH-3",
+    "WISH-4",
+    "WISH-5",
+    "WISH-6",
+    "WISH-7",
+    "WISH-8",
+    "WISH-9",
 ]
 """Every code a refusal may carry."""
 

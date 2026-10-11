@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Every tool the server offers, as the contract describes it.
 
-Generated from the contract lemonfiber 2ae81f95af0fca165fc17987c1dcf16cbbf675e8 published, vendored in `contract/web-api/`.
+Generated from the contract lemonfiber 0096a0b5bf8bbfdf25a9a5b82a8aeb10f64ef021 published, vendored in `contract/web-api/`.
 Do not edit: `just generate` rewrites it, and CI fails on any difference.
 """
 
@@ -12,7 +12,7 @@ from lemonfiber_mcp.shapes import Reach, ToolShape
 API_VERSION: Final = 1
 """The `api_version` the tools were generated for."""
 
-CONTRACT: Final = '2ae81f95af0fca165fc17987c1dcf16cbbf675e8'
+CONTRACT: Final = '0096a0b5bf8bbfdf25a9a5b82a8aeb10f64ef021'
 """The lemonfiber revision whose contract the tools were generated from."""
 
 TOOLS: Final[tuple[ToolShape, ...]] = (
@@ -149,6 +149,22 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
                       'properties': {'member': {'type': 'string'}, 'most': {'type': 'string'}},
                       'additionalProperties': False},
         resource='lemonfiber://read/watching{?member,most}',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_askable',
+        reach=Reach.READ,
+        target='askable',
+        capability='/api/askable',
+        parameters=('member', 'term', 'after'),
+        input_schema={'type': 'object',
+                      'properties': {'member': {'type': 'string'},
+                                     'term': {'type': 'string'},
+                                     'after': {'type': 'string'}},
+                      'additionalProperties': False},
+        resource='lemonfiber://read/askable{?member,term,after}',
         read_only=True,
         destructive=False,
         idempotent=True,
@@ -518,6 +534,21 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
                       'required': ['id'],
                       'additionalProperties': False},
         resource='lemonfiber://held/{id}/backdrop{?member,defaults}',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_askable_poster',
+        reach=Reach.FILE,
+        target='askable/{id}/poster',
+        capability='/api/askable/{id}/poster',
+        parameters=('id', 'member', 'kind'),
+        input_schema={'type': 'object',
+                      'properties': {'id': {'type': 'string'}, 'member': {'type': 'string'}, 'kind': {'type': 'string'}},
+                      'required': ['id'],
+                      'additionalProperties': False},
+        resource='lemonfiber://askable/{id}/poster{?member,kind}',
         read_only=True,
         destructive=False,
         idempotent=True,

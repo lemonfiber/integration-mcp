@@ -11,6 +11,8 @@ from . import (
 from . import adoption__migration as _adoption__migration
 from . import alert__dashboard as _alert__dashboard
 from . import alert__dashboard__doctor__error__plugins as _alert__dashboard__doctor__error__plugins
+from . import askable__asked as _askable__asked
+from . import askable__dashboard__household as _askable__dashboard__household
 from . import backup__restore as _backup__restore
 from . import bandwidth__pausing as _bandwidth__pausing
 from . import beside__migration as _beside__migration
@@ -51,6 +53,8 @@ from .adoption__beside__config__import___replacement import *
 from .adoption__migration import *
 from .alert__dashboard import *
 from .alert__dashboard__doctor__error__plugins import *
+from .askable__asked import *
+from .askable__dashboard__household import *
 from .backup__restore import *
 from .bandwidth__pausing import *
 from .beside__migration import *
@@ -90,6 +94,8 @@ __all__ += _adoption__beside__config__import___replacement.__all__
 __all__ += _adoption__migration.__all__
 __all__ += _alert__dashboard.__all__
 __all__ += _alert__dashboard__doctor__error__plugins.__all__
+__all__ += _askable__asked.__all__
+__all__ += _askable__dashboard__household.__all__
 __all__ += _backup__restore.__all__
 __all__ += _bandwidth__pausing.__all__
 __all__ += _beside__migration.__all__

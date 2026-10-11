@@ -13,6 +13,8 @@ from .kinds import (
     AlertEnvelope,
     AlertsEnvelope,
     ArchivesEnvelope,
+    AskableEnvelope,
+    AskedEnvelope,
     BackupEnvelope,
     BandwidthEnvelope,
     BesideEnvelope,
@@ -96,6 +98,8 @@ type Kind = typing.Literal[
     "alert",
     "alerts",
     "archives",
+    "askable",
+    "asked",
     "backup",
     "bandwidth",
     "beside",
@@ -180,6 +184,8 @@ type Envelope = (
     | AlertEnvelope
     | AlertsEnvelope
     | ArchivesEnvelope
+    | AskableEnvelope
+    | AskedEnvelope
     | BackupEnvelope
     | BandwidthEnvelope
     | BesideEnvelope

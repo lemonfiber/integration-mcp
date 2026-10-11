@@ -383,6 +383,8 @@ class PluginPlaced(typing.TypedDict):
     """
     reached: typing.NotRequired[PluginReached | None]
     """How it is reached, or nothing where it has no listener."""
+    replaces: typing.NotRequired[str | None]
+    """The stack's own service it moves in place of, where it names one."""
     service: str
     """The service's id, which is the name its container is written under."""
     shape: typing.NotRequired[PluginShape | None]

@@ -18,6 +18,7 @@ from lemonfiber import (
     NoSuchJobError,
     NotAdmittedError,
     PasswordRefusedError,
+    RefusedError,
     TooManyAttemptsError,
     UnreachableError,
     UnreadableResponseError,
@@ -89,6 +90,26 @@ def test_a_refusal_is_told_in_the_servers_words_with_the_stacks_as_data(
 def test_a_refusal_carries_its_codes_registry_name() -> None:
     failure = outcome.failure_of(MisaskedError("Asked wrong.", status=400, code="READ-4"))
     assert failure.refusal == {"status": 400, "code": "READ-4", "name": "NO_TERM", "sentence": "Asked wrong."}
+
+
+@pytest.mark.parametrize(
+    ("error", "name"),
+    [
+        (MisaskedError("Say a few more words.", status=400, code="WISH-1"), "NOT_A_SEARCH"),
+        (MissingError("You cannot ask for that one.", status=404, code="WISH-3"), "NOT_ASKABLE"),
+        (BusyError("You have asked for all you can for now.", status=409, code="WISH-6"), "NOTHING_LEFT"),
+        (MissingError("There is no poster for that one.", status=404, code="WISH-13"), "NO_PICTURE"),
+    ],
+)
+def test_a_members_search_or_ask_refused_hands_on_the_cores_sentence(error: RefusedError, name: str) -> None:
+    failure = outcome.failure_of(error)
+    assert failure.state is None
+    assert failure.refusal == {
+        "status": error.status,
+        "code": error.code,
+        "name": name,
+        "sentence": str(error),
+    }
 
 
 def test_a_refusal_with_no_code_carries_none() -> None:

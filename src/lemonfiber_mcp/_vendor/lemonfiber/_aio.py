@@ -28,7 +28,7 @@ from lemonfiber.problems import (
     LemonfiberError,
     UnreachableError,
 )
-from lemonfiber.reads import HELD_ID_BACKDROP, HELD_ID_POSTER
+from lemonfiber.reads import ASKABLE_ID_POSTER, HELD_ID_BACKDROP, HELD_ID_POSTER
 from lemonfiber.stream import FIRST_WAIT, OPENED, RECONNECTS_ALLOWED, SILENCE_ALLOWED, Break, Following
 
 if TYPE_CHECKING:
@@ -275,6 +275,14 @@ class AsyncClient:
     async def backdrop(self, title: str, query: Query | None = None) -> Picture:
         """Fetch a title's backdrop, as `poster` fetches its poster."""
         return await self._run(operation.picture(HELD_ID_BACKDROP, title, query))
+
+    async def askable_poster(self, title: str, query: Query | None = None) -> Picture:
+        """Fetch the poster of a title a member may ask for, by the id their search lists it under.
+
+        `query` takes `member` and `kind`. A title the member may not ask for is `WISH-3`,
+        and one with no poster is `WISH-13`.
+        """
+        return await self._run(operation.picture(ASKABLE_ID_POSTER, title, query))
 
     async def act(self, action: str, arguments: Mapping[str, Json] | None = None) -> Envelope:
         """Tell lemonfiber to do something the command line could also do. Sent once, never retried."""
