@@ -7,7 +7,7 @@ on:
     branches: [main]
   pull_request:
   schedule:
-    - cron: "0 6 * * 2"
+    - cron: "31 6 * * 2"
 permissions:
   contents: read
 # A pull request pushed again cancels the run on its old head, which nobody
