@@ -147,7 +147,15 @@ PLUGIN: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
         400,
         "Raised when a recipe's call was not sent because a value it carries may not go where it was going: not where its pairs say, not back to the service a credential belongs to, or outside without its approval; the install or update was put back.",
     ),
+    "PLUGIN-39": ListedRefusal(
+        "NOTHING_TO_PROVE", 404, "Nothing by that id is installed, so there is nothing to prove again."
+    ),
     "PLUGIN-4": ListedRefusal("UNRECORDED", 500, "The record of what is installed cannot be read."),
+    "PLUGIN-40": ListedRefusal(
+        "STRANGER_REPLACING",
+        403,
+        "Raised when a plugin that is not first-party declares a service replacing one the stack ships.",
+    ),
     "PLUGIN-5": ListedRefusal("ALREADY", 400, "The plugin is installed already."),
     "PLUGIN-6": ListedRefusal(
         "NOWHERE", 500, "There is no stack on this machine to put a plugin's container in."
