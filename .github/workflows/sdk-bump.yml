@@ -44,13 +44,18 @@ env:
 jobs:
   bump:
     runs-on: ubuntu-latest
+    outputs:
+      branch: ${{ env.BRANCH }}
+      head: ${{ steps.commit.outputs.built }}
+      clean: ${{ steps.build.outcome }}
+      title: ${{ steps.said.outputs.title }}
+      body: ${{ steps.said.outputs.body }}
     timeout-minutes: 20
     steps:
-      # `main` requires signed commits, and only commits GitHub itself makes are
-      # signed here; a pull request opened with `GITHUB_TOKEN` triggers no
-      # workflows, so its required checks would never report. An app token
-      # answers both.
-      - name: Mint a token that can open a pull request here
+      # `main` requires signed commits, and only a commit GitHub makes for an
+      # app is signed. This token writes that commit and nothing else; the pull
+      # request is opened in the next job, with a token of its own.
+      - name: Mint a token that can commit here
         id: token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
@@ -61,7 +66,6 @@ jobs:
           # The commit and the branch it moves, and the pull request it opens
           # and arms; nothing the installation grants beyond that.
           permission-contents: write
-          permission-pull-requests: write
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -213,15 +217,15 @@ jobs:
               -f ref="refs/heads/${BRANCH}" -f sha="${built}" >/dev/null
           fi
           gh api --method DELETE "repos/${REPO}/git/refs/heads/${staging}" >/dev/null 2>&1 || true
+          echo "built=${built}" >> "$GITHUB_OUTPUT"
 
-      - name: Open the pull request, or leave the open one updated
+      - name: What the pull request says
+        id: said
         if: steps.behind.outputs.moved == 'yes'
         env:
-          GH_TOKEN: ${{ steps.token.outputs.token }}
           PIN: ${{ steps.behind.outputs.pin }}
           HEAD_SHA: ${{ steps.behind.outputs.head }}
           CLEAN: ${{ steps.build.outcome }}
-          REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
           title="chore(vendor): take sdk-python ${HEAD_SHA:0:7}"
@@ -243,25 +247,34 @@ jobs:
             "" \
             "Spec: Q-R68")"
 
-          # The title, the revision and the verdict belong to the latest run, so
-          # an open pull request has all three rewritten.
-          existing="$(gh api "repos/${REPO}/pulls?head=${GITHUB_REPOSITORY_OWNER}:${BRANCH}&state=open" --jq '.[0].number // ""')"
-          if [ -n "$existing" ]; then
-            gh api --method PATCH "repos/${REPO}/pulls/${existing}" -f title="${title}" -f body="${body}" >/dev/null
-            echo "::notice::#${existing} updated to ${HEAD_SHA}"
-          else
-            existing="$(gh api --method POST "repos/${REPO}/pulls" -f title="${title}" -f head="${BRANCH}" \
-              -f base=main -f body="${body}" --jq .number)"
-            echo "::notice::opened #${existing}"
-          fi
+          # Handed to the next job, which opens or edits the pull request and
+          # rewrites the title, the revision and the verdict on an open one. The
+          # delimiter is random, so no line of the body can end the value.
+          delimiter="body_$(openssl rand -hex 16)"
+          {
+            echo "title=${title}"
+            echo "body<<${delimiter}"
+            printf '%s\n' "$body"
+            echo "${delimiter}"
+          } >> "$GITHUB_OUTPUT"
 
-          if [ "$CLEAN" = "success" ]; then
-            gh pr merge "${existing}" --repo "${REPO}" --squash --auto \
-              && echo "auto-merge armed on #${existing}." \
-              || echo "::warning::could not arm auto-merge on #${existing}; merge it by hand."
-          else
-            # An earlier clean run may have armed it; a take that is not clean
-            # waits for a person.
-            gh pr merge "${existing}" --repo "${REPO}" --disable-auto >/dev/null 2>&1 || true
-            echo "::warning::#${existing} needs reading: the client did not come out clean."
-          fi
+  # The pull request is opened, or the open one edited, only where it is this
+  # bump's own: the release app opened it from this repository's branch and it
+  # is at the commit above (OPS-R87). It merges itself only where the take came
+  # out clean; otherwise any arming is switched off and it waits for a
+  # person.
+  pull-request:
+    needs: bump
+    if: needs.bump.outputs.head != ''
+    permissions:
+      contents: read
+    uses: lemonfiber/spec/.github/workflows/rolling-pull-request.yml@be0b484aa5c2a7e2a6cee4b33866143634e6e1df # v1.0.70
+    with:
+      branch: ${{ needs.bump.outputs.branch }}
+      head: ${{ needs.bump.outputs.head }}
+      title: ${{ needs.bump.outputs.title }}
+      body: ${{ needs.bump.outputs.body }}
+      auto-merge: ${{ needs.bump.outputs.clean == 'success' }}
+      disarm: ${{ needs.bump.outputs.clean != 'success' }}
+    secrets:
+      RELEASE_APP_KEY: ${{ secrets.RELEASE_APP_KEY }}
