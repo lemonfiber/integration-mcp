@@ -17,12 +17,12 @@ from .api_kind import (
     PluginEvidence,
     PluginFailingAsDeclared,
     PluginOverriding,
-    PluginPair,
     PluginPlaced,
     PluginShape,
 )
 from ...shared.doctor__error__plugins import StepCame
 from ...shared.plugins__undo import UndoReversal
+from ...shared.plugins__wiring import Wired
 
 
 class PluginInstall(typing.TypedDict):
@@ -45,6 +45,10 @@ class PluginInstall(typing.TypedDict):
     install asks the service running on this machine. The weaker must not be
     readable as the stronger, and a reader handed a verdict has nothing else in
     the document to tell them apart.
+    """
+    asks: list[Wired]
+    """Every ask its services would make, each with what it would reach and how that
+    would be settled.
     """
     changes: list[PluginChange]
     """Every change it makes to the machine, in the order it makes them."""
@@ -485,6 +489,20 @@ PluginInstalled = typing.TypedDict(
 """One plugin's install, as it was decided."""
 
 
+PluginPair = typing.TypedDict(
+    "PluginPair",
+    {
+        "approval": typing.NotRequired[str],
+        "from": typing.NotRequired[str],
+        "origin": str,
+        "release": typing.NotRequired[str],
+        "to": str,
+        "value": str,
+    },
+)
+"""One value a recipe could carry to one destination, as the operator agrees to it."""
+
+
 PluginSource = typing.TypedDict(
     "PluginSource",
     {
@@ -500,6 +518,7 @@ __all__ = [
     "PluginInstall",
     "PluginInstalled",
     "PluginNonconforming",
+    "PluginPair",
     "PluginProving",
     "PluginRecipe",
     "PluginRecipeRan",

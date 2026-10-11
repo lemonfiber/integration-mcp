@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from .plugin_step_adapter import (
+from .plugin_pair import (
     PluginInstall,
     PluginInstalled,
     PluginNonconforming,

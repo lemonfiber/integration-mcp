@@ -52,7 +52,7 @@ class QualityReport(typing.TypedDict):
     choices: list[PresetChoice]
     """The global choice first, then each media type set apart from it."""
     customised: bool
-    """Whether the Recyclarr config has been hand-edited since lemonfiber wrote it —
+    """Whether the quality sync config has been hand-edited since lemonfiber wrote it —
     the `customised` state, in which the preset is no longer authoritative until
     it is deliberately re-asserted. For a reapply, whether an edit was overwritten.
     """

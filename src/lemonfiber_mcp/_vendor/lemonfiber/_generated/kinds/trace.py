@@ -83,7 +83,7 @@ class TraceEnvelope(typing.TypedDict):
 
 class TraceMoment(typing.TypedDict):
     """One moment in a traced item's history: what happened and when. Where [`TraceStage`]
-    is the linear progress, this is the log an \\*arr kept — the grabs, the failed
+    is the linear progress, this is the log a curator kept — the grabs, the failed
     downloads, the import and any later removal — so a repeated attempt is seen as the
     pattern it is rather than flattened to a single furthest stage.
     """
