@@ -46,7 +46,7 @@ class UpgradeReport(typing.TypedDict):
 
     Upgrading re-acquires the existing library at the chosen quality, which is a
     large, bandwidth-expensive operation, so it is a separate explicit action whose
-    cost is stated before it runs and which does nothing until confirmed. Each *arr
+    cost is stated before it runs and which does nothing until confirmed. Each curator
     re-searches against its own current cutoff, so the report speaks per media type
     rather than asserting one preset across the library.
     """

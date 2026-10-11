@@ -371,7 +371,7 @@ class PanelVpnUnavailableData(typing.TypedDict):
 
 
 class Queue(typing.TypedDict):
-    """One `*arr`'s queue, and how much of it is stuck."""
+    """One curator's queue, and how much of it is stuck."""
 
     depth: int
     """How many items are queued."""

@@ -21,6 +21,12 @@ ADMIT: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
     "ADMIT-12": ListedRefusal(
         "NOT_FOR_A_KEY", 403, "Raised when a key asked for something its scope does not reach."
     ),
+    "ADMIT-13": ListedRefusal("NOT_OPEN", 401, "Raised when a claim names an invitation that is not open."),
+    "ADMIT-14": ListedRefusal(
+        "SHORT_CHOICE",
+        400,
+        "Raised when the password chosen at a claim is shorter than the least this takes.",
+    ),
     "ADMIT-4": ListedRefusal(
         "NOT_ADMITTED", 403, "Raised when a request carried no token, session or key this run admits."
     ),

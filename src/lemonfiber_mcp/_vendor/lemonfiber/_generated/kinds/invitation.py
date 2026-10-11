@@ -13,9 +13,10 @@ from ..shared.dashboard__household__invitation import Unrated
 class Invitation(typing.TypedDict):
     """One invitation, as it was just made.
 
-    Carries what the operator has to pass on and nothing else — a name to sign in
-    with, one address, and how long it stands. The address is the media server's,
-    because setting a first password happens there.
+    Carries what the operator has to pass on and nothing else: a name to sign in with,
+    the address to sign in at, the link the app opens, the address that declines it, and
+    how long it stands. The address is the media server's, where a first password is set
+    in a browser; the link sets it through the core instead.
     """
 
     address: str
@@ -52,6 +53,12 @@ class Invitation(typing.TypedDict):
     What happens at the end depends on the account: one nobody has been in is
     removed, and one somebody has is switched off and kept.
     """
+    join: typing.NotRequired[str | None]
+    """The link the companion app opens this invitation at, `lemonfiber://join` with the
+    address, certificate fingerprint and identifier pairing names, the name to sign in
+    as, when it lapses in seconds since the Unix epoch, and a claim token where there is
+    an account to claim. Absent on a rehearsal, and where `unjoinable` says why.
+    """
     linked: Linked
     """Whether the request service knows about the household yet.
 
@@ -78,6 +85,10 @@ class Invitation(typing.TypedDict):
     an account with no password that anybody may still claim is the thing a window
     exists to close. Offering it again, or reissuing it, switches it back on. On a
     rehearsal these are the ones that *would* be switched off.
+    """
+    unjoinable: typing.NotRequired[str | None]
+    """Why there is no join link, in words every surface can show. Absent where there is
+    one, and on a rehearsal.
     """
     withdrawn: list[str]
     """Invitations nobody claimed in time, removed on the way past.

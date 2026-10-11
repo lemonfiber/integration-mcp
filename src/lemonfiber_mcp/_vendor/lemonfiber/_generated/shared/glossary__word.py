@@ -14,7 +14,7 @@ class Term(typing.TypedDict):
     also_called: list[str]
     """What other services in this stack call the same thing.
 
-    Sonarr and `SABnzbd` do not agree on words, and an operator moving between
+    A curator and a Usenet client do not agree on words, and an operator moving between
     their screens should not have to work out that two of them are one.
     """
     deep: typing.NotRequired[str | None]
