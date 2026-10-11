@@ -15,5 +15,9 @@ LIFE: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
         400,
         "Raised where a restart names an offer that is not the one a fresh look at the stack builds.",
     ),
+    "LIFE-3": ListedRefusal("ALREADY_WORKING", 409, "Another run is already working on this stack."),
+    "LIFE-4": ListedRefusal(
+        "REGISTRY_REFUSED", 400, "Fetching images is switched off, so there was nothing to fetch with."
+    ),
 }
 """What the contract says of each `LIFE` code."""

@@ -10,42 +10,56 @@ import typing
 
 from .admit_codes import ADMIT
 from .ask_codes import ASK
+from .bundle_codes import BUNDLE
+from .form_codes import FORM
 from .gone_codes import GONE
+from .key_codes import KEY
 from .life_codes import LIFE
 from .listed import ListedRefusal, RefusalCode
 from .migrate_codes import MIGRATE
 from .play_codes import PLAY
 from .plugin_codes import PLUGIN
+from .quota_codes import QUOTA
 from .rate_codes import RATE
 from .read_codes import READ
+from .rehearse_codes import REHEARSE
 from .repair_codes import REPAIR
 from .restore_codes import RESTORE
 from .serve_codes import SERVE
+from .setup_codes import SETUP
 from .space_codes import SPACE
 from .stack_codes import STACK
 from .update_codes import UPDATE
 from .wire_codes import WIRE
 from .wish_codes import WISH
+from .word_codes import WORD
 
 REFUSAL_CODES: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = types.MappingProxyType(
     {
         **ADMIT,
         **ASK,
+        **BUNDLE,
+        **FORM,
         **GONE,
+        **KEY,
         **LIFE,
         **MIGRATE,
         **PLAY,
         **PLUGIN,
+        **QUOTA,
         **RATE,
         **READ,
+        **REHEARSE,
         **REPAIR,
         **RESTORE,
         **SERVE,
+        **SETUP,
         **SPACE,
         **STACK,
         **UPDATE,
         **WIRE,
         **WISH,
+        **WORD,
     },
 )
 """What the contract says of each refusal code."""
