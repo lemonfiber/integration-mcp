@@ -3,7 +3,9 @@
 # it, so a pull request cannot rewrite it; the reusable checks nothing of the
 # pull request out and reads its trees through the API. A change under
 # `.github/workflows/` or `.github/actions/` other than spec's pins moving
-# forward fails it, and is merged by a maintainer by choice.
+# forward fails it, unless a maintainer approved it with the
+# `workflows-approved` label after its last push; `labeled` and `unlabeled`
+# run it again when the approval is given or taken away.
 #
 # The verdict is a check on the head commit the event names, so every new head
 # gets its own run. Under `pull_request_target` `github.ref` is the base branch
@@ -12,7 +14,7 @@
 name: pin-only
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
 permissions: {}
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
