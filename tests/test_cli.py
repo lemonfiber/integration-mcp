@@ -26,17 +26,7 @@ from tests.stack import Reply, Stack, envelope
 
 if TYPE_CHECKING:
     import pathlib
-    from collections.abc import AsyncGenerator, Callable, Iterator
-
-
-@pytest.fixture(autouse=True)
-def logging_kept() -> Iterator[None]:
-    """Put the root logger back as it was, since starting replaces its handlers."""
-    root = logging.getLogger()
-    kept = list(root.handlers), root.level
-    yield
-    root.handlers[:] = kept[0]
-    root.setLevel(kept[1])
+    from collections.abc import AsyncGenerator, Callable
 
 
 @contextlib.asynccontextmanager

@@ -1,6 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Setting the server up with a key link: its claim collects the key once into a new file, and nothing else is kept."""
 
+import logging
 import stat
 import urllib.parse
 from typing import TYPE_CHECKING, Final
@@ -8,6 +9,7 @@ from typing import TYPE_CHECKING, Final
 import pytest
 
 from lemonfiber_mcp import cli, settings
+from lemonfiber_mcp.withheld import WITHHELD
 from tests.conftest import KEY
 from tests.stack import Reply, envelope, problem
 
@@ -55,6 +57,7 @@ def asked(written: str, file: pathlib.Path) -> dict[str, str]:
 async def test_a_key_link_collects_its_key_once_into_a_new_file_only_its_owner_reads(
     stack: Stack,
     tmp_path: pathlib.Path,
+    capsys: pytest.CaptureFixture[str],
 ) -> None:
     stack.reply("/api/keys/claim", Reply(body=minted(stack)))
     file = tmp_path / "keys" / "assistant.key"
@@ -67,6 +70,8 @@ async def test_a_key_link_collects_its_key_once_into_a_new_file_only_its_owner_r
     )
     assert KEY not in said
     assert CLAIM not in said
+    logging.getLogger("t").info("claim %s key %s", CLAIM, KEY)
+    assert f"claim {WITHHELD} key {WITHHELD}" in capsys.readouterr().err
     collecting = stack.asked("/api/keys/claim")
     assert [arrival.body for arrival in collecting] == [{"claim": CLAIM}]
     assert "X-Lemonfiber-Token" not in collecting[0].headers
