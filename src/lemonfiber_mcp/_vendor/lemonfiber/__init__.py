@@ -9,7 +9,7 @@ its kind (`lemonfiber.contract` holds each shape), and every failure is a
 `LemonfiberError`.
 """
 
-from lemonfiber._aio import AsyncClient, AsyncStream, admit_async
+from lemonfiber._aio import AsyncClient, AsyncStream, admit_async, collect_async
 from lemonfiber._generated import (
     KEY_CALLABLE,
     KINDS,
@@ -24,22 +24,26 @@ from lemonfiber._generated import (
     is_refusal_code,
 )
 from lemonfiber._protocol.calls import Json, Query
-from lemonfiber._sync import SyncClient, SyncStream, admit
+from lemonfiber._sync import SyncClient, SyncStream, admit, collect
 from lemonfiber.address import Address, CertificatePin, Route
 from lemonfiber.capabilities import CapabilitySet
 from lemonfiber.credential import CREDENTIAL_HEADER, Credential, Session
 from lemonfiber.envelope import SPOKEN_API_VERSION, expect, parse_envelope, read_envelope
 from lemonfiber.files import PICTURE_MOST, PICTURE_TYPES, BundleFile, Picture
 from lemonfiber.jobs import Ended, Finished, JobStanding, Running
+from lemonfiber.keys import KeyLink, Minting
 from lemonfiber.problems import (
     AddressRefusedError,
     ApiVersionMismatchError,
     BusyError,
     CertificateRefusedError,
+    ClaimLapsedError,
+    ClaimRefusedError,
     ConfigurationError,
     CredentialRefusedError,
     DeclinedError,
     FailedError,
+    KeyLinkRefusedError,
     LemonfiberError,
     MisaskedError,
     MissingError,
@@ -80,6 +84,8 @@ __all__ = [
     "CapabilitySet",
     "CertificatePin",
     "CertificateRefusedError",
+    "ClaimLapsedError",
+    "ClaimRefusedError",
     "ConfigurationError",
     "Credential",
     "CredentialRefusedError",
@@ -93,10 +99,13 @@ __all__ = [
     "Json",
     "KeyCallable",
     "KeyCallableAction",
+    "KeyLink",
+    "KeyLinkRefusedError",
     "Kind",
     "LemonfiberError",
     "ListedRefusal",
     "Live",
+    "Minting",
     "MisaskedError",
     "MissingError",
     "NoSuchJobError",
@@ -123,6 +132,8 @@ __all__ = [
     "Unrecognised",
     "admit",
     "admit_async",
+    "collect",
+    "collect_async",
     "expect",
     "is_key_callable",
     "is_refusal_code",

@@ -29,6 +29,14 @@ class CredentialRefusedError(ConfigurationError):
     """A credential is not one a header can carry."""
 
 
+class KeyLinkRefusedError(ConfigurationError):
+    """A key link is not one a key can be collected with, and nothing was sent."""
+
+
+class ClaimLapsedError(ConfigurationError):
+    """A key link's claim had lapsed before it could be sent, and nothing was sent."""
+
+
 class UnreachableError(LemonfiberError):
     """Nothing answered at the address, or what answered was not lemonfiber."""
 
@@ -152,6 +160,10 @@ class TooManyAttemptsError(RefusedError):
 
 class PasswordRefusedError(RefusedError):
     """The password offered at the door was wrong, or none is configured."""
+
+
+class ClaimRefusedError(RefusedError):
+    """The claim a key link carried collects no key: none waits on it, it was collected, or it lapsed."""
 
 
 class NoSuchJobError(LemonfiberError):

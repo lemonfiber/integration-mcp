@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.keys__minted_key import KeyPurpose
+from ..shared.key_claim__keys__minted_key import KeyPurpose
 
 
 class KeyListing(typing.TypedDict):
@@ -23,7 +23,7 @@ class KeyListing(typing.TypedDict):
     """The key this run revoked, where it revoked one."""
 
 
-type KeyState = typing.Literal["active", "revoked", "orphaned", "unconfirmed"]
+type KeyState = typing.Literal["active", "waiting", "revoked", "orphaned", "unconfirmed"]
 """Where a key stands."""
 
 

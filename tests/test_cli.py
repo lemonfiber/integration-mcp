@@ -26,17 +26,7 @@ from tests.stack import Reply, Stack, envelope
 
 if TYPE_CHECKING:
     import pathlib
-    from collections.abc import AsyncGenerator, Callable, Iterator
-
-
-@pytest.fixture(autouse=True)
-def logging_kept() -> Iterator[None]:
-    """Put the root logger back as it was, since starting replaces its handlers."""
-    root = logging.getLogger()
-    kept = list(root.handlers), root.level
-    yield
-    root.handlers[:] = kept[0]
-    root.setLevel(kept[1])
+    from collections.abc import AsyncGenerator, Callable
 
 
 @contextlib.asynccontextmanager
@@ -106,7 +96,7 @@ def test_the_help_says_what_the_command_is_and_how_it_serves(capsys: pytest.Capt
         cli.main(["--help"], {})
     said = capsys.readouterr().out
     assert said.startswith(
-        "usage: lemonfiber-mcp [-h] {stdio,http,ca,pinned,health} ...\n\nlemonfiber for AI assistants.\n",
+        "usage: lemonfiber-mcp [-h] {stdio,http,ca,pinned,health,collect} ...\n\nlemonfiber for AI assistants.\n",
     )
     words = " ".join(said.split())
     for line in (

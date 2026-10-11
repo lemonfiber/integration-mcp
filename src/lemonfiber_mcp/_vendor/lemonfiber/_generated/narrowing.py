@@ -41,6 +41,7 @@ from .kinds import (
     ImportEnvelope,
     InvitationEnvelope,
     JobEnvelope,
+    KeyClaimEnvelope,
     KeysEnvelope,
     LifecycleEnvelope,
     LogEnvelope,
@@ -160,6 +161,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["invitation"], /) -> InvitationEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["job"], /) -> JobEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["key-claim"], /) -> KeyClaimEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["keys"], /) -> KeysEnvelope: ...
     @typing.overload

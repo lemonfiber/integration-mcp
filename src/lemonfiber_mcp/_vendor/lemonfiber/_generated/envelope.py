@@ -40,6 +40,7 @@ from .kinds import (
     ImportEnvelope,
     InvitationEnvelope,
     JobEnvelope,
+    KeyClaimEnvelope,
     KeysEnvelope,
     LifecycleEnvelope,
     LogEnvelope,
@@ -125,6 +126,7 @@ type Kind = typing.Literal[
     "import",
     "invitation",
     "job",
+    "key-claim",
     "keys",
     "lifecycle",
     "log",
@@ -211,6 +213,7 @@ type Envelope = (
     | ImportEnvelope
     | InvitationEnvelope
     | JobEnvelope
+    | KeyClaimEnvelope
     | KeysEnvelope
     | LifecycleEnvelope
     | LogEnvelope

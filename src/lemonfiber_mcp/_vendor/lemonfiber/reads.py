@@ -4,7 +4,8 @@
 `Read`, `LOGS`, `BUNDLE` and the picture paths are generated from the reads the contract lists, so
 a read the core serves is one this client names. The paths below are those the
 contract lists no read for: the live stream, the stack's capabilities, the doors
-actions and jobs are asked through, and the door a session is opened at.
+actions and jobs are asked through, the door a session is opened at, and the
+doors integration keys are kept and collected through.
 """
 
 from typing import Final
@@ -21,6 +22,8 @@ __all__ = [
     "HELD_ID_BACKDROP",
     "HELD_ID_POSTER",
     "JOBS",
+    "KEYS",
+    "KEY_CLAIMS",
     "LOGS",
     "SESSION",
     "Read",
@@ -40,3 +43,9 @@ SESSION: Final = "/api/session"
 
 CAPABILITIES: Final = "/api/capabilities"
 """What the stack says it can do, for the credential that asked."""
+
+KEYS: Final = "/api/keys"
+"""Where integration keys are listed and minted, and each revoked by its name."""
+
+KEY_CLAIMS: Final = "/api/keys/claim"
+"""Where a key minted as a claim is collected, with the claim alone."""

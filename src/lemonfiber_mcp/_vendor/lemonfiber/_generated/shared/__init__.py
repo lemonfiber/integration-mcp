@@ -32,7 +32,7 @@ from . import glossary__word as _glossary__word
 from . import held__part_way__playing__title as _held__part_way__playing__title
 from . import held__part_way__title as _held__part_way__title
 from . import import___migration__seed__status__stuck as _import___migration__seed__status__stuck
-from . import keys__minted_key as _keys__minted_key
+from . import key_claim__keys__minted_key as _key_claim__keys__minted_key
 from . import lifecycle__migration as _lifecycle__migration
 from . import lifecycle__preview as _lifecycle__preview
 from . import lifecycle__preview__status as _lifecycle__preview__status
@@ -72,7 +72,7 @@ from .glossary__word import *
 from .held__part_way__playing__title import *
 from .held__part_way__title import *
 from .import___migration__seed__status__stuck import *
-from .keys__minted_key import *
+from .key_claim__keys__minted_key import *
 from .lifecycle__migration import *
 from .lifecycle__preview import *
 from .lifecycle__preview__status import *
@@ -113,7 +113,7 @@ __all__ += _glossary__word.__all__
 __all__ += _held__part_way__playing__title.__all__
 __all__ += _held__part_way__title.__all__
 __all__ += _import___migration__seed__status__stuck.__all__
-__all__ += _keys__minted_key.__all__
+__all__ += _key_claim__keys__minted_key.__all__
 __all__ += _lifecycle__migration.__all__
 __all__ += _lifecycle__preview.__all__
 __all__ += _lifecycle__preview__status.__all__

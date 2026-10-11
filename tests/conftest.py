@@ -1,6 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """The stand-in stack, what it answers with, and a server reaching it through the vendored client."""
 
+import logging
 from typing import TYPE_CHECKING, Final
 
 import pytest
@@ -14,7 +15,7 @@ from lemonfiber_mcp.withheld import Withholding
 from tests.stack import Reply, Stack, envelope
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
+    from collections.abc import AsyncIterator, Iterator
 
 
 KEY: Final = "lfk_" + "0123456789abcdef" * 4
@@ -48,6 +49,16 @@ def capabilities(scope: str, **overrides: str) -> dict[str, object]:
             "stack": STACK_ID,
         },
     )
+
+
+@pytest.fixture(autouse=True)
+def logging_kept() -> Iterator[None]:
+    """Put the root logger back as it was, since starting replaces its handlers."""
+    root = logging.getLogger()
+    kept = list(root.handlers), root.level
+    yield
+    root.handlers[:] = kept[0]
+    root.setLevel(kept[1])
 
 
 @pytest.fixture

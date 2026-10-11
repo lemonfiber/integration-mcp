@@ -37,6 +37,7 @@ from . import household as _household
 from . import import_ as _import_
 from . import invitation as _invitation
 from . import job as _job
+from . import key_claim as _key_claim
 from . import keys as _keys
 from . import lifecycle as _lifecycle
 from . import log as _log
@@ -117,6 +118,7 @@ from .household import *
 from .import_ import *
 from .invitation import *
 from .job import *
+from .key_claim import *
 from .keys import *
 from .lifecycle import *
 from .log import *
@@ -198,6 +200,7 @@ __all__ += _household.__all__
 __all__ += _import_.__all__
 __all__ += _invitation.__all__
 __all__ += _job.__all__
+__all__ += _key_claim.__all__
 __all__ += _keys.__all__
 __all__ += _lifecycle.__all__
 __all__ += _log.__all__

@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 from lemonfiber._protocol.answers import (
     bundle_of,
     capabilities_of,
+    collected_of,
     envelope_of,
     log_lines_of,
     picture_of,
@@ -20,22 +21,35 @@ from lemonfiber._protocol.calls import (
     action_call,
     bundle_call,
     capabilities_call,
+    collect_call,
     job_call,
+    keys_call,
     logs_call,
+    mint_call,
     picture_call,
     read_call,
+    revoke_call,
     session_call,
 )
+from lemonfiber.envelope import expect
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
 
-    from lemonfiber._generated import Envelope, LogEnvelope
+    from lemonfiber._generated import (
+        Envelope,
+        KeyClaimEnvelope,
+        KeysEnvelope,
+        LogEnvelope,
+        MintedKey,
+        MintedKeyEnvelope,
+    )
     from lemonfiber._protocol.calls import Json, Query
     from lemonfiber.capabilities import CapabilitySet
     from lemonfiber.credential import Session
     from lemonfiber.files import BundleFile, Picture
     from lemonfiber.jobs import JobStanding
+    from lemonfiber.keys import Minting
     from lemonfiber.reads import Read
 
 
@@ -92,3 +106,31 @@ def release(name: str) -> Operation[JobStanding]:
 def admission(password: str, name: str | None) -> Operation[Session]:
     """Offer a password, and a household member's name where it is one, for a session."""
     return Operation(session_call(password, name), session_of)
+
+
+def keys() -> Operation[KeysEnvelope]:
+    """Ask for the integration keys the credential may see, without their secrets."""
+    return Operation(keys_call(), lambda answer: expect(envelope_of(answer), "keys"), again=True)
+
+
+def mint(minting: Minting) -> Operation[MintedKeyEnvelope]:
+    """Mint one integration key, its secret in this answer and in no other."""
+    return Operation(
+        mint_call(minting),
+        lambda answer: expect(envelope_of(answer), "minted-key"),
+    )
+
+
+def mint_claim(minting: Minting) -> Operation[KeyClaimEnvelope]:
+    """Mint one integration key as a claim, answered with the key link that collects it and no secret."""
+    return Operation(mint_call(minting, claim=True), lambda answer: expect(envelope_of(answer), "key-claim"))
+
+
+def revoke(name: str) -> Operation[KeysEnvelope]:
+    """Revoke one integration key by its name, answered with the keys as they now stand."""
+    return Operation(revoke_call(name), lambda answer: expect(envelope_of(answer), "keys"))
+
+
+def collection(claim: str) -> Operation[MintedKey]:
+    """Collect the key a claim was minted for, its secret in this answer and in no other."""
+    return Operation(collect_call(claim), collected_of)

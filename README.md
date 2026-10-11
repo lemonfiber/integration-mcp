@@ -54,6 +54,30 @@ for assistants elsewhere on your network or beyond it.
 The key is never taken on the command line, where any process listing would show it, and
 nothing but an integration key is accepted.
 
+### With a key link
+
+Mint the key as a claim instead, and the reply shows a key link and its code in place of the
+key, the address and the pin:
+
+```
+$ lemonfiber key mint assistant --scope read --purpose mcp --claim
+```
+
+Within ten minutes, collect the key with the link, naming a new file for it:
+
+```
+$ export LEMONFIBER_KEY_LINK='lemonfiber://key?...'
+$ LEMONFIBER_KEY_FILE=/home/you/.config/lemonfiber/assistant.key \
+    uvx --from git+https://github.com/lemonfiber/integration-mcp lemonfiber-mcp collect
+```
+
+The claim is sent once, over the TLS the link's certificate fingerprint verifies, and collects
+the key. The key is written to the new file, readable by you alone, and the command says the
+`LEMONFIBER_ADDRESS` and `LEMONFIBER_PIN` to give the server beside `LEMONFIBER_KEY_FILE`.
+Neither the link nor the claim is kept; unset `LEMONFIBER_KEY_LINK` afterwards. A link whose ten
+minutes are over, or whose claim collected its key already, is refused with the reason, and
+nothing is written.
+
 ## Serve it over HTTP
 
 The HTTP mode serves assistants anywhere, from the image each release publishes for amd64 and
