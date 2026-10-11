@@ -94,6 +94,30 @@ description = "The wide picture behind one thing you can watch."
 [read_held_backdrop.household.parameters]
 id = "Which title, as your list of what you can watch shows it."
 
+[read_askable]
+operator = "Search for titles one member may ask for, under their own limits: each title found and where it stands in the house, what their allowance has left of each kind, and whether what they ask for waits for approval."
+[read_askable.parameters]
+member = "Who is searching, by the name they are known by."
+term = "The words to search for."
+after = "Where the next page begins, as the previous page's `next` gave it. Leave out for the first page."
+[read_askable.household]
+description = "Search for something to ask for: each title found, whether the house already has it or it is on its way, and how much more you can ask for right now."
+[read_askable.household.parameters]
+term = "What to search for."
+after = "Where the next page begins, as the last page said. Leave out for the first page."
+
+[read_askable_poster]
+operator = "The poster of a title one member's search found, by the id the search lists it under, as the image it is."
+[read_askable_poster.parameters]
+id = "The title's id, as the search lists it."
+member = "Whose search, by the name they are known by."
+kind = "Whether the title is a series or a film, as the search names it: `tv` or `movies`."
+[read_askable_poster.household]
+description = "The poster of a title your search found."
+[read_askable_poster.household.parameters]
+id = "Which title, as your search shows it."
+kind = "Whether it is a series or a film, as your search shows it: `tv` or `movies`."
+
 [read_playing]
 operator = "What is playing now: who is watching what, and on which device."
 [read_playing.parameters]

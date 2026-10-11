@@ -25,6 +25,7 @@ from .space_codes import SPACE
 from .stack_codes import STACK
 from .update_codes import UPDATE
 from .wire_codes import WIRE
+from .wish_codes import WISH
 
 REFUSAL_CODES: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = types.MappingProxyType(
     {
@@ -44,6 +45,7 @@ REFUSAL_CODES: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = types.
         **STACK,
         **UPDATE,
         **WIRE,
+        **WISH,
     },
 )
 """What the contract says of each refusal code."""

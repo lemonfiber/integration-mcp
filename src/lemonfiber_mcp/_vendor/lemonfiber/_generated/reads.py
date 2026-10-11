@@ -41,6 +41,8 @@ class Read(enum.StrEnum):
     """Answers with `title`, for the `id` in its path; takes `member` and `defaults`."""
     WATCHING = "watching"
     """Answers with `part-way`; takes `member` and `most`."""
+    ASKABLE = "askable"
+    """Answers with `askable`; takes `member`, `term` and `after`."""
     PLAYING = "playing"
     """Answers with `playing`; takes `member`."""
     HOSTING = "hosting"
@@ -110,6 +112,9 @@ HELD_ID_POSTER: typing.Final = "/api/held/{id}/poster"
 HELD_ID_BACKDROP: typing.Final = "/api/held/{id}/backdrop"
 """Answers with a file, for the `id` in its path; takes `member` and `defaults`."""
 
+ASKABLE_ID_POSTER: typing.Final = "/api/askable/{id}/poster"
+"""Answers with a file, for the `id` in its path; takes `member` and `kind`."""
+
 
 class ReadParameter(typing.NamedTuple):
     """One query parameter a read takes."""
@@ -152,6 +157,10 @@ READS: typing.Final[typing.Mapping[Read, Readable]] = types.MappingProxyType(
         Read.WATCHING: Readable(
             ("part-way",), (ReadParameter("member", False), ReadParameter("most", False))
         ),
+        Read.ASKABLE: Readable(
+            ("askable",),
+            (ReadParameter("member", False), ReadParameter("term", False), ReadParameter("after", False)),
+        ),
         Read.PLAYING: Readable(("playing",), (ReadParameter("member", False),)),
         Read.HOSTING: Readable(("hosting",), ()),
         Read.FRONT_DOOR: Readable(("front-door",), ()),
@@ -186,6 +195,7 @@ READS: typing.Final[typing.Mapping[Read, Readable]] = types.MappingProxyType(
 
 __all__ = [
     "API",
+    "ASKABLE_ID_POSTER",
     "BUNDLE",
     "HELD_ID_BACKDROP",
     "HELD_ID_POSTER",

@@ -36,7 +36,7 @@ UNKEPT_SEGMENTS: Final = frozenset({"", ".", ".."})
 """Values a URL does not keep as a segment: the folder itself, the path's own folder, the one above it."""
 
 TITLE: Final = "id"
-"""The segment a title's picture is read under: the id the shelf lists it by."""
+"""The segment a title's picture is read under: the id the title is listed by."""
 
 ANY_TYPE: Final = "*/*"
 """What a request for a file takes, whatever it is served as."""
@@ -170,7 +170,7 @@ def bundle_call(name: str) -> Call:
 
 
 def picture_call(template: str, title: str, query: Query | None) -> Call:
-    """Ask for one of a title's pictures, by the id its shelf lists it under."""
+    """Ask for one of a title's pictures, by the id it is listed under."""
     path = placed(template, TITLE, title)
     return Call(HTTPMethod.GET, path + search(query), {"Accept": ", ".join(PICTURE_TYPES)}, most=PICTURE_MOST)
 

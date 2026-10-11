@@ -90,7 +90,14 @@ async def test_a_member_key_is_offered_no_technical_tool_and_reads_the_household
     stack.reply("/api/capabilities", Reply(body=capabilities("member")))
     listed = await mcp_client.list_tools()
     written = catalogue.words()
-    assert names(listed) == {"read_requests", "read_held", "read_held_by_id", "read_watching", "read_playing"}
+    assert names(listed) == {
+        "read_requests",
+        "read_held",
+        "read_held_by_id",
+        "read_watching",
+        "read_playing",
+        "read_askable",
+    }
     assert {tool.name: tool.description for tool in listed.tools} == {
         name: written[name].household for name in names(listed)
     }
@@ -282,6 +289,26 @@ async def test_a_backdrop_is_fetched_as_a_poster_is(stack: Stack, mcp_client: Cl
     assert isinstance(embedded, types.EmbeddedResource)
     assert embedded.resource.uri == "lemonfiber://held/t1/backdrop"
     assert stack.asked("/api/held/t1/backdrop")[-1].query == {}
+
+
+async def test_a_found_titles_poster_is_fetched_where_the_search_lists_it(
+    stack: Stack,
+    mcp_client: Client,
+) -> None:
+    stack.reply(
+        "/api/capabilities",
+        Reply(body=capabilities("act", **{"/api/askable/{id}/poster": "available"})),
+    )
+    stack.reply("/api/askable/603/poster", Reply(raw=b"poster", content_type="image/webp"))
+    await mcp_client.list_tools()
+    result = await mcp_client.call_tool(
+        "read_askable_poster",
+        {"id": "603", "member": "ana", "kind": "movies"},
+    )
+    _, embedded = result.content
+    assert isinstance(embedded, types.EmbeddedResource)
+    assert embedded.resource.uri == "lemonfiber://askable/603/poster"
+    assert stack.asked("/api/askable/603/poster")[-1].query == {"member": ["ana"], "kind": ["movies"]}
 
 
 async def test_a_rehearsal_asks_the_action_to_write_nothing(stack: Stack, mcp_client: Client) -> None:
