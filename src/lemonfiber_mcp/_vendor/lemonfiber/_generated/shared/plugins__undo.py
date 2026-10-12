@@ -18,6 +18,8 @@ type Action = (
     | ActionReconfigure
     | ActionRevoke
     | ActionReinstate
+    | ActionResettle
+    | ActionRehold
 )
 """What an undo does.
 
@@ -51,6 +53,20 @@ class ActionReconfigure(typing.TypedDict):
     """The kind of resource."""
     value: typing.NotRequired[str | None]
     """What to put back, or `None` where it held nothing."""
+
+
+class ActionRehold(typing.TypedDict):
+    """Put a secret in the secret store back to the value it held."""
+
+    does: typing.Literal["rehold"]
+    earlier: typing.NotRequired[str | None]
+    """The fingerprint of the value to put back, or `None` to forget it."""
+    filed: typing.NotRequired[str | None]
+    """The environment file's setting it goes back to, where it was moved out of one."""
+    kept: typing.NotRequired[str | None]
+    """The fingerprint of what lemonfiber kept, which has to still be there."""
+    name: str
+    """The secret's name."""
 
 
 class ActionReinstate(typing.TypedDict):
@@ -93,6 +109,18 @@ class ActionRepin(typing.TypedDict):
     does: typing.Literal["repin"]
     previous: str
     """The version to put back."""
+
+
+class ActionResettle(typing.TypedDict):
+    """Put a setting in the settings store back to what it held."""
+
+    does: typing.Literal["resettle"]
+    name: str
+    """The setting's name."""
+    recorded: typing.NotRequired[str | None]
+    """What lemonfiber recorded, which has to still be there."""
+    value: typing.NotRequired[str | None]
+    """What to put back, or `None` to clear it."""
 
 
 class ActionRestore(typing.TypedDict):
@@ -238,9 +266,11 @@ __all__ = [
     "Action",
     "ActionDelete",
     "ActionReconfigure",
+    "ActionRehold",
     "ActionReinstate",
     "ActionRemove",
     "ActionRepin",
+    "ActionResettle",
     "ActionRestore",
     "ActionRevoke",
     "ActionRewind",
