@@ -6,14 +6,14 @@ and CI fails on any difference.
 """
 
 from . import api_kind as _api_kind
-from . import plugin_pair as _plugin_pair
-from . import plugin_update as _plugin_update
+from . import service_value as _service_value
+from . import plugin_removal as _plugin_removal
 
 from .api_kind import *
-from .plugin_pair import *
-from .plugin_update import *
+from .service_value import *
+from .plugin_removal import *
 
 __all__: list[str] = []
 __all__ += _api_kind.__all__
-__all__ += _plugin_pair.__all__
-__all__ += _plugin_update.__all__
+__all__ += _service_value.__all__
+__all__ += _plugin_removal.__all__
