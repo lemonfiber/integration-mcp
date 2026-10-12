@@ -7,16 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from .plugin_pair import (
-    PluginInstall,
-    PluginInstalled,
-    PluginNonconforming,
-    PluginRemoval,
-    PluginReproof,
-    PluginRestored,
-    PluginSource,
-    PluginSubstituted,
-)
+from .service_value import PluginInstall, PluginInstalled, PluginNonconforming, PluginProving, PluginUnfilled
 from ...shared.plugins__undo import UndoReversal
 
 
@@ -96,6 +87,127 @@ class PluginInstalls(typing.TypedDict):
     """
 
 
+class PluginRemoval(typing.TypedDict):
+    """What taking a plugin off the machine came to, or would come to."""
+
+    interrupts: list[str]
+    """Every service that stops when it goes, named before any of them does.
+
+    By service rather than by plugin, because a service is what an operator notices
+    stopping: a plugin that brought two containers takes two things away, and the
+    plugin's name alone would not say which of the addresses they use goes quiet.
+    None of them comes back — a removal is not a restart — which is why this is
+    stated before the run rather than discovered after it.
+    """
+    leaves: list[PluginUnfilled]
+    """Every capability that would have nothing filling it afterwards.
+
+    Stated before it happens rather than reported after, which is the requirement
+    and also the only useful order: an operator told afterwards that their requests
+    no longer reach anything has been informed rather than asked.
+    """
+    plugin: str
+    """The plugin this is about."""
+    removed: bool
+    """Whether the record of what is installed was written without it.
+
+    False on a rehearsal and on a run that got as far as putting the files back and
+    no further, which are two different machines and are told apart by what the
+    reversal says rather than by a second flag here.
+    """
+    went_back: UndoReversal
+    """What putting its changes back came to, or would come to.
+
+    The rollback layer's own report rather than a shape of this verb's: a removal is
+    a reversal with a name on it, and an account of its own would be a second
+    description of the same work.
+    """
+
+
+class PluginReproof(typing.TypedDict):
+    """What asking an installed plugin's adapters again came to."""
+
+    asked: bool
+    """Whether its adapters were asked, rather than only said to be."""
+    cleared: bool
+    """Whether every answer kept against the plugin was cleared, which a proof that did
+    not hold never does.
+    """
+    kept: list[PluginNonconforming]
+    """Every answer kept against the plugin when it was proved, which a pass clears."""
+    plugin: str
+    """The plugin proved."""
+    proofs: list[PluginProving]
+    """Each proof asked, or that would be asked, with what it came to."""
+
+
+class PluginRestored(typing.TypedDict):
+    """Where an update did not hold: what putting the version it replaced back came to."""
+
+    placed: bool
+    """Whether everything its record says it placed is on the machine again."""
+    running: bool
+    """Whether its containers are running again.
+
+    Apart from `placed`, because the two fail differently: a document that would not
+    land is a disk, and a container that would not start is the engine — and an
+    operator fixes them in different places.
+    """
+    version: str
+    """The version put back, which is the one the record still names."""
+
+
+type PluginSourceStanding = (
+    PluginSourceStandingReachable | PluginSourceStandingUnreachable | PluginSourceStandingUnasked
+)
+"""What asking a plugin's source came to.
+
+**Unreachable is not untrusted.** A plugin whose source has gone keeps running as it
+was installed; what it loses is the way to a newer version, and that is said now
+rather than found out at the next update.
+"""
+
+
+class PluginSourceStandingReachable(typing.TypedDict):
+    """It answered, so the plugin can be updated from it."""
+
+    standing: typing.Literal["reachable"]
+
+
+class PluginSourceStandingUnasked(typing.TypedDict):
+    """Nothing was asked, so nothing is known either way."""
+
+    standing: typing.Literal["unasked"]
+    why: str
+    """Why nothing was asked."""
+
+
+class PluginSourceStandingUnreachable(typing.TypedDict):
+    """It did not answer, or is no longer there, so the plugin cannot be updated from it."""
+
+    standing: typing.Literal["unreachable"]
+    why: str
+    """What asking it said."""
+
+
+class PluginSubstituted(typing.TypedDict):
+    """A capability the operator chose one of a plugin's services to fill.
+
+    The only way anything a plugin brought comes to fill what the stack asks for in
+    place of the stack's own: a plugin cannot choose, and wiring by name is not
+    something a plugin can introduce. So what a plugin substituted is what the operator
+    substituted with it, and it is read off the recorded choices rather than off the
+    plugin.
+    """
+
+    capability: str
+    """The capability it fills."""
+    plugin: str
+    """The plugin whose service it is."""
+    service: str
+    """The service chosen."""
+
+
 class PluginsEnvelope(typing.TypedDict):
     """The envelope carrying `plugins`."""
 
@@ -104,6 +216,17 @@ class PluginsEnvelope(typing.TypedDict):
     host: typing.NotRequired[str | None]
     job: typing.NotRequired[str | None]
     kind: typing.Literal["plugins"]
+
+
+PluginSource = typing.TypedDict(
+    "PluginSource",
+    {
+        "from": str,
+        "plugin": str,
+        "standing": PluginSourceStanding,
+    },
+)
+"""Whether one installed plugin's source can still be fetched."""
 
 
 PluginUpdate = typing.TypedDict(
@@ -133,6 +256,15 @@ of.
 
 __all__ = [
     "PluginInstalls",
+    "PluginRemoval",
+    "PluginReproof",
+    "PluginRestored",
+    "PluginSource",
+    "PluginSourceStanding",
+    "PluginSourceStandingReachable",
+    "PluginSourceStandingUnasked",
+    "PluginSourceStandingUnreachable",
+    "PluginSubstituted",
     "PluginUpdate",
     "PluginsEnvelope",
 ]
