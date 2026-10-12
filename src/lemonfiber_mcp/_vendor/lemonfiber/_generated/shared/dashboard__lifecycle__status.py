@@ -16,7 +16,7 @@ class Service(typing.TypedDict):
     criticality: Criticality
     """How much its absence costs, so a summary can weigh it."""
     depends_on: list[str]
-    """The services it needs before it can work, as the manifest declares them.
+    """The services it needs before it can work: the one whose network it runs inside.
     Carried so a failure can be attributed to the thing underneath it rather
     than counted as one more independent thing wrong.
     """

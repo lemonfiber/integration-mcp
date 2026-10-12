@@ -322,81 +322,6 @@ class PluginOverriding(typing.TypedDict):
     """What changing it is for."""
 
 
-class PluginPlaced(typing.TypedDict):
-    """One service of an installed plugin, as it was placed."""
-
-    api: typing.NotRequired[Api | None]
-    """The adapter lemonfiber reaches it through, where the plugin named one.
-
-    Defaulted for a record written before this was kept, which reads as naming
-    none: a service operated generically, as it was when installed.
-    """
-    asks: typing.NotRequired[list[PluginAsking]]
-    """Every capability it asks for."""
-    config_path: str
-    """Where inside the container its one configuration directory is mounted.
-
-    Resolved rather than optional. The record answers where the directory is, and
-    a run that re-derived the fallback would answer for a container it did not
-    write the day that fallback moved.
-    """
-    description: typing.NotRequired[str]
-    """What the plugin says it does for the operator, which is what its dashboard entry
-    says beside it.
-    """
-    digest: str
-    """The digest that fixes what runs."""
-    fronts: typing.NotRequired[str | None]
-    """The service of the same plugin it stands in front of, as an adapter."""
-    image: str
-    """The registry path, carrying no pin of its own."""
-    listens: typing.NotRequired[int | None]
-    """The port it answers on inside the stack's network, where it declared one."""
-    media_types: typing.NotRequired[list[str]]
-    """The media it files, in the stack manifest's vocabulary, which decides what it
-    comes to in each service that asks for what it provides; none in an older record.
-    """
-    name: typing.NotRequired[str]
-    """What it is called, for a reader, which is what its dashboard entry is listed as;
-    a record written before this was kept lists it by its id.
-    """
-    native: typing.NotRequired[str | None]
-    """The API it answers the stack's other services in, where it names one."""
-    networks: typing.NotRequired[list[str]]
-    """The stack's own networks it joins beside the default one, because a stack service
-    it stands in for is on them.
-
-    Settled at install from the stack it was installed beside and written down, so
-    the container lemonfiber writes for it stays a function of this record alone.
-    Defaulted for a record written before this was kept, which reads as joining none
-    and staying on the default network.
-    """
-    provides: typing.NotRequired[list[str]]
-    """Every core capability this one service fills, which is what makes it a candidate
-    when the stack asks for one.
-
-    Per service rather than read off the plugin's whole list, because a wiring
-    reaches a service and not a plugin: of a plugin's two services, the one that
-    fills a capability is the one an ask for it would reach. Defaulted for a record
-    written before this was kept, which reads as filling nothing — a service nothing
-    is wired to, rather than one wired to on a guess.
-    """
-    reached: typing.NotRequired[PluginReached | None]
-    """How it is reached, or nothing where it has no listener."""
-    replaces: typing.NotRequired[str | None]
-    """The stack's own service it moves in place of, where it names one."""
-    service: str
-    """The service's id, which is the name its container is written under."""
-    shape: typing.NotRequired[PluginShape | None]
-    """The privileged shape lemonfiber writes for it, where it took one."""
-    speaks: typing.NotRequired[list[str]]
-    """Each capability contract it answers as an adapter, as `capability@major`."""
-    tag: str
-    """The readable name that digest went by when it was installed."""
-    takes_data: bool
-    """Whether the library is mounted for it."""
-
-
 type PluginPuts = typing.Literal["directory", "document", "key", "region"]
 """What an install puts at one path."""
 
@@ -485,8 +410,63 @@ class PluginSecret(typing.TypedDict):
     """What holding it is for."""
 
 
-type PluginShape = typing.Literal["egress-guard"]
-"""A privileged shape lemonfiber writes for a plugin's service."""
+type PluginShape = typing.Literal["egress-guard", "render"]
+"""A privileged shape lemonfiber writes for a service."""
+
+
+type ServiceConstant = str | int | bool
+"""A value written exactly as declared."""
+
+
+class ServiceNetwork(typing.TypedDict):
+    """The network a service runs inside instead of its own."""
+
+    via: str
+    """The capability whose filler's network it runs inside."""
+
+
+type ServicePosture = typing.Literal["standard", "confined"]
+"""How tightly the container is held."""
+
+
+class ServicePublish(typing.TypedDict):
+    """A further port a service publishes on its tier."""
+
+    listens: typing.NotRequired[int | None]
+    """Where it answers inside the container, `port` where absent."""
+    port: int
+    """Where it is published on the host."""
+
+
+class ServiceSecretOf(typing.TypedDict):
+    """A secret the manifest declares."""
+
+    secret: str
+    """The declared secret's name."""
+
+
+class ServiceSetting(typing.TypedDict):
+    """An operator setting, with what is written while none is recorded."""
+
+    default: ServiceConstant
+    """What is written while the operator has recorded no value."""
+    setting: str
+    """The setting's name."""
+
+
+class ServiceUrlOf(typing.TypedDict):
+    """The address of a capability's filler."""
+
+    files: typing.NotRequired[str | None]
+    """The medium the filler asked for files."""
+    native: typing.NotRequired[str | None]
+    """The upstream's own API, where the ask reaches the upstream an adapter fronts."""
+    url_of: str
+    """The capability asked for."""
+
+
+type ServiceUserMode = typing.Literal["image", "puid-env", "uid"]
+"""Who the container runs as."""
 
 
 Contribution = typing.TypedDict(
@@ -518,6 +498,17 @@ it carries nothing outside the union of the rows the published points take.
 """
 
 
+ServiceMount = typing.TypedDict(
+    "ServiceMount",
+    {
+        "from": str,
+        "ro": typing.NotRequired[bool],
+        "to": str,
+    },
+)
+"""A further path mounted from the service's own mount tree."""
+
+
 __all__ = [
     "Api",
     "ApiKind",
@@ -537,7 +528,6 @@ __all__ = [
     "PluginExpectedFailure",
     "PluginFailingAsDeclared",
     "PluginOverriding",
-    "PluginPlaced",
     "PluginPuts",
     "PluginReached",
     "PluginReachedHousehold",
@@ -545,4 +535,13 @@ __all__ = [
     "PluginRequest",
     "PluginSecret",
     "PluginShape",
+    "ServiceConstant",
+    "ServiceMount",
+    "ServiceNetwork",
+    "ServicePosture",
+    "ServicePublish",
+    "ServiceSecretOf",
+    "ServiceSetting",
+    "ServiceUrlOf",
+    "ServiceUserMode",
 ]

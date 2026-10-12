@@ -8,17 +8,28 @@ and CI fails on any difference.
 import typing
 
 from .api_kind import (
+    Api,
     ApiKind,
     Contribution,
     PluginAdapterOwner,
+    PluginAsking,
     PluginChange,
     PluginChangedCheck,
     PluginDeclaration,
     PluginEvidence,
     PluginFailingAsDeclared,
     PluginOverriding,
-    PluginPlaced,
+    PluginReached,
     PluginShape,
+    ServiceConstant,
+    ServiceMount,
+    ServiceNetwork,
+    ServicePosture,
+    ServicePublish,
+    ServiceSecretOf,
+    ServiceSetting,
+    ServiceUrlOf,
+    ServiceUserMode,
 )
 from ...shared.doctor__error__plugins import StepCame
 from ...shared.plugins__undo import UndoReversal
@@ -121,6 +132,87 @@ class PluginNonconforming(typing.TypedDict):
     """What was outside the contract."""
 
 
+class PluginPlaced(typing.TypedDict):
+    """One service of an installed plugin, as it was placed."""
+
+    api: typing.NotRequired[Api | None]
+    """The adapter lemonfiber reaches it through, where the plugin named one.
+
+    Defaulted for a record written before this was kept, which reads as naming
+    none: a service operated generically, as it was when installed.
+    """
+    asks: typing.NotRequired[list[PluginAsking]]
+    """Every capability it asks for."""
+    asks_for: typing.NotRequired[str | None]
+    """What it asks for there, where it says."""
+    config_path: str
+    """Where inside the container its one configuration directory is mounted.
+
+    Resolved rather than optional. The record answers where the directory is, and
+    a run that re-derived the fallback would answer for a container it did not
+    write the day that fallback moved.
+    """
+    description: typing.NotRequired[str]
+    """What the plugin says it does for the operator, which is what its dashboard entry
+    says beside it.
+    """
+    digest: str
+    """The digest that fixes what runs."""
+    fields: typing.NotRequired[ServiceFields]
+    """Its container fields beyond those above."""
+    fronts: typing.NotRequired[str | None]
+    """The service of the same plugin it stands in front of, as an adapter."""
+    image: str
+    """The registry path, carrying no pin of its own."""
+    listens: typing.NotRequired[int | None]
+    """The port it answers on inside the stack's network, where it declared one."""
+    media_types: typing.NotRequired[list[str]]
+    """The media it files, in the stack manifest's vocabulary, which decides what it
+    comes to in each service that asks for what it provides; none in an older record.
+    """
+    name: typing.NotRequired[str]
+    """What it is called, for a reader, which is what its dashboard entry is listed as;
+    a record written before this was kept lists it by its id.
+    """
+    native: typing.NotRequired[str | None]
+    """The API it answers the stack's other services in, where it names one."""
+    networks: typing.NotRequired[list[str]]
+    """The stack's own networks it joins beside the default one, because a stack service
+    it stands in for is on them.
+
+    Settled at install from the stack it was installed beside and written down, so
+    the container lemonfiber writes for it stays a function of this record alone.
+    Defaulted for a record written before this was kept, which reads as joining none
+    and staying on the default network.
+    """
+    provides: typing.NotRequired[list[str]]
+    """Every core capability this one service fills, which is what makes it a candidate
+    when the stack asks for one.
+
+    Per service rather than read off the plugin's whole list, because a wiring
+    reaches a service and not a plugin: of a plugin's two services, the one that
+    fills a capability is the one an ask for it would reach. Defaulted for a record
+    written before this was kept, which reads as filling nothing — a service nothing
+    is wired to, rather than one wired to on a guess.
+    """
+    reached: typing.NotRequired[PluginReached | None]
+    """How it is reached, or nothing where it has no listener."""
+    reaches: typing.NotRequired[str | None]
+    """Where it reaches outside the machine, where it says."""
+    replaces: typing.NotRequired[str | None]
+    """The stack's own service it moves in place of, where it names one."""
+    service: str
+    """The service's id, which is the name its container is written under."""
+    shape: typing.NotRequired[PluginShape | None]
+    """The privileged shape lemonfiber writes for it, where it took one."""
+    speaks: typing.NotRequired[list[str]]
+    """Each capability contract it answers as an adapter, as `capability@major`."""
+    tag: str
+    """The readable name that digest went by when it was installed."""
+    takes_data: bool
+    """Whether the library is mounted for it."""
+
+
 class PluginProving(typing.TypedDict):
     """One proof that has to hold before a plugin is reported installed."""
 
@@ -178,76 +270,6 @@ class PluginRecipeRan(typing.TypedDict):
     """Why it did not, where it did not."""
 
 
-class PluginRemoval(typing.TypedDict):
-    """What taking a plugin off the machine came to, or would come to."""
-
-    interrupts: list[str]
-    """Every service that stops when it goes, named before any of them does.
-
-    By service rather than by plugin, because a service is what an operator notices
-    stopping: a plugin that brought two containers takes two things away, and the
-    plugin's name alone would not say which of the addresses they use goes quiet.
-    None of them comes back — a removal is not a restart — which is why this is
-    stated before the run rather than discovered after it.
-    """
-    leaves: list[PluginUnfilled]
-    """Every capability that would have nothing filling it afterwards.
-
-    Stated before it happens rather than reported after, which is the requirement
-    and also the only useful order: an operator told afterwards that their requests
-    no longer reach anything has been informed rather than asked.
-    """
-    plugin: str
-    """The plugin this is about."""
-    removed: bool
-    """Whether the record of what is installed was written without it.
-
-    False on a rehearsal and on a run that got as far as putting the files back and
-    no further, which are two different machines and are told apart by what the
-    reversal says rather than by a second flag here.
-    """
-    went_back: UndoReversal
-    """What putting its changes back came to, or would come to.
-
-    The rollback layer's own report rather than a shape of this verb's: a removal is
-    a reversal with a name on it, and an account of its own would be a second
-    description of the same work.
-    """
-
-
-class PluginReproof(typing.TypedDict):
-    """What asking an installed plugin's adapters again came to."""
-
-    asked: bool
-    """Whether its adapters were asked, rather than only said to be."""
-    cleared: bool
-    """Whether every answer kept against the plugin was cleared, which a proof that did
-    not hold never does.
-    """
-    kept: list[PluginNonconforming]
-    """Every answer kept against the plugin when it was proved, which a pass clears."""
-    plugin: str
-    """The plugin proved."""
-    proofs: list[PluginProving]
-    """Each proof asked, or that would be asked, with what it came to."""
-
-
-class PluginRestored(typing.TypedDict):
-    """Where an update did not hold: what putting the version it replaced back came to."""
-
-    placed: bool
-    """Whether everything its record says it placed is on the machine again."""
-    running: bool
-    """Whether its containers are running again.
-
-    Apart from `placed`, because the two fail differently: a document that would not
-    land is a disk, and a container that would not start is the engine — and an
-    operator fixes them in different places.
-    """
-    version: str
-    """The version put back, which is the one the record still names."""
-
-
 class PluginServiceAdapter(typing.TypedDict):
     """One adapter of lemonfiber's that one of the plugin's own services names."""
 
@@ -257,39 +279,6 @@ class PluginServiceAdapter(typing.TypedDict):
     """Whose it is, which is lemonfiber's."""
     service: str
     """The service that names it."""
-
-
-type PluginSourceStanding = (
-    PluginSourceStandingReachable | PluginSourceStandingUnreachable | PluginSourceStandingUnasked
-)
-"""What asking a plugin's source came to.
-
-**Unreachable is not untrusted.** A plugin whose source has gone keeps running as it
-was installed; what it loses is the way to a newer version, and that is said now
-rather than found out at the next update.
-"""
-
-
-class PluginSourceStandingReachable(typing.TypedDict):
-    """It answered, so the plugin can be updated from it."""
-
-    standing: typing.Literal["reachable"]
-
-
-class PluginSourceStandingUnasked(typing.TypedDict):
-    """Nothing was asked, so nothing is known either way."""
-
-    standing: typing.Literal["unasked"]
-    why: str
-    """Why nothing was asked."""
-
-
-class PluginSourceStandingUnreachable(typing.TypedDict):
-    """It did not answer, or is no longer there, so the plugin cannot be updated from it."""
-
-    standing: typing.Literal["unreachable"]
-    why: str
-    """What asking it said."""
 
 
 class PluginStep(typing.TypedDict):
@@ -339,24 +328,6 @@ class PluginStepRan(typing.TypedDict):
     """How many times it was made."""
     why: typing.NotRequired[str | None]
     """Why it came to what it did, where that wants saying."""
-
-
-class PluginSubstituted(typing.TypedDict):
-    """A capability the operator chose one of a plugin's services to fill.
-
-    The only way anything a plugin brought comes to fill what the stack asks for in
-    place of the stack's own: a plugin cannot choose, and wiring by name is not
-    something a plugin can introduce. So what a plugin substituted is what the operator
-    substituted with it, and it is read off the recorded choices rather than off the
-    plugin.
-    """
-
-    capability: str
-    """The capability it fills."""
-    plugin: str
-    """The plugin whose service it is."""
-    service: str
-    """The service chosen."""
 
 
 class PluginTaking(typing.TypedDict):
@@ -453,6 +424,35 @@ class PluginVerification(typing.TypedDict):
     """
 
 
+class ServiceFields(typing.TypedDict):
+    """The container fields an install record keeps for a service, beyond those every
+    record already holds.
+    """
+
+    config_ro: typing.NotRequired[bool]
+    """Whether its configuration directory is read-only."""
+    env: typing.NotRequired[dict[str, ServiceValue]]
+    """Its environment."""
+    mem_limit_mib: typing.NotRequired[int | None]
+    """Its memory ceiling."""
+    mount: typing.NotRequired[list[ServiceMount]]
+    """Its further mounts."""
+    network: typing.NotRequired[ServiceNetwork | None]
+    """The network it runs inside."""
+    posture: typing.NotRequired[ServicePosture]
+    """How tightly it is held."""
+    publish: typing.NotRequired[list[ServicePublish]]
+    """Its further published ports."""
+    tmpfs: typing.NotRequired[list[str]]
+    """Its scratch paths in memory."""
+    user_mode: typing.NotRequired[ServiceUserMode | None]
+    """Who it runs as, where declared."""
+
+
+type ServiceValue = ServiceConstant | ServiceSetting | ServiceUrlOf | ServiceSecretOf
+"""One environment variable's value."""
+
+
 class WiringContest(typing.TypedDict):
     """An ask several services claim and nothing has chosen between, so it reaches
     nothing.
@@ -503,38 +503,19 @@ PluginPair = typing.TypedDict(
 """One value a recipe could carry to one destination, as the operator agrees to it."""
 
 
-PluginSource = typing.TypedDict(
-    "PluginSource",
-    {
-        "from": str,
-        "plugin": str,
-        "standing": PluginSourceStanding,
-    },
-)
-"""Whether one installed plugin's source can still be fetched."""
-
-
 __all__ = [
     "PluginInstall",
     "PluginInstalled",
     "PluginNonconforming",
     "PluginPair",
+    "PluginPlaced",
     "PluginProving",
     "PluginRecipe",
     "PluginRecipeRan",
-    "PluginRemoval",
-    "PluginReproof",
-    "PluginRestored",
     "PluginServiceAdapter",
-    "PluginSource",
-    "PluginSourceStanding",
-    "PluginSourceStandingReachable",
-    "PluginSourceStandingUnasked",
-    "PluginSourceStandingUnreachable",
     "PluginStep",
     "PluginStepAdapter",
     "PluginStepRan",
-    "PluginSubstituted",
     "PluginTaking",
     "PluginUnfilled",
     "PluginVerdict",
@@ -543,5 +524,7 @@ __all__ = [
     "PluginVerdictPassed",
     "PluginVerdictUnproven",
     "PluginVerification",
+    "ServiceFields",
+    "ServiceValue",
     "WiringContest",
 ]
