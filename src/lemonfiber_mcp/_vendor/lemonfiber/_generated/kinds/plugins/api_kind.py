@@ -322,7 +322,7 @@ class PluginOverriding(typing.TypedDict):
     """What changing it is for."""
 
 
-type PluginPuts = typing.Literal["directory", "document", "key", "region"]
+type PluginPuts = typing.Literal["directory", "document", "key", "region", "secrets"]
 """What an install puts at one path."""
 
 
