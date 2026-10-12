@@ -3,6 +3,7 @@
 
 import http.client
 import socket
+import socketserver
 from typing import TYPE_CHECKING, Final
 
 import pytest
@@ -17,10 +18,9 @@ KEY_AUTHORIZATION: Final = "abc.thumbprint"
 
 
 def free_port() -> int:
-    """Return a port nothing listens on."""
-    with socket.socket(socket.AF_INET6) as probe:
-        probe.bind(("::1", 0))
-        return int(probe.getsockname()[1])
+    """Return a port nothing listens on, taken by the responder's own bind."""
+    with http01.DualStack((http01.EVERYWHERE, 0), socketserver.BaseRequestHandler) as probe:
+        return int(probe.server_address[1])
 
 
 @pytest.fixture
