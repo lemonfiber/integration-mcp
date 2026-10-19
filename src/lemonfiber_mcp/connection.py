@@ -7,7 +7,7 @@ read again on every listing and before a call where the reading is older than
 key is refused nothing is sent with it again, and every tool says so.
 """
 
-import datetime
+import datetime as dt
 import urllib.parse
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Final, cast
@@ -29,16 +29,16 @@ if TYPE_CHECKING:
     from lemonfiber_mcp.shapes import ToolShape
     from lemonfiber_mcp.withheld import Withholding
 
-FRESH_FOR: Final = datetime.timedelta(seconds=30)
+FRESH_FOR: Final = dt.timedelta(seconds=30)
 """How long a reading of the capabilities is acted on before a call reads it again."""
 JSON: Final = "application/json"
 NOT_A_RESOURCE: Final = "There is no resource at that address."
 ARGUMENTS_REFUSED: Final = "The arguments were refused: "
 
 
-def utc_now() -> datetime.datetime:
+def utc_now() -> dt.datetime:
     """Return the time now, in UTC, as the client stamps a reading of the capabilities."""
-    return datetime.datetime.now(datetime.UTC)
+    return dt.datetime.now(dt.UTC)
 
 
 @dataclass(slots=True)
@@ -51,7 +51,7 @@ class Held:
     """
 
     capabilities: CapabilitySet | None = None
-    read_at: datetime.datetime | None = None
+    read_at: dt.datetime | None = None
     tools: dict[str, types.Tool] = field(default_factory=dict[str, types.Tool])
     failure: Failure | None = None
 
@@ -64,7 +64,7 @@ class Connection:
         client: AsyncClient,
         withholding: Withholding,
         held: Held | None = None,
-        clock: Callable[[], datetime.datetime] = utc_now,
+        clock: Callable[[], dt.datetime] = utc_now,
     ) -> None:
         """Hold the client the credential asks through and what is known of it; nothing is asked until a tool is listed or called."""
         self._client = client

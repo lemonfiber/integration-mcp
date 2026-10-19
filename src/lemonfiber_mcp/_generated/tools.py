@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Every tool the server offers, as the contract describes it.
 
-Generated from the contract lemonfiber 92aaa5d577c67686de2760f80c67325ec997a3f8 published, vendored in `contract/web-api/`.
+Generated from the contract lemonfiber 675430a7b93f8a4abbd859b5fe7702f836bd3207 published, vendored in `contract/web-api/`.
 Do not edit: `just generate` rewrites it, and CI fails on any difference.
 """
 
@@ -12,7 +12,7 @@ from lemonfiber_mcp.shapes import Reach, ToolShape
 API_VERSION: Final = 1
 """The `api_version` the tools were generated for."""
 
-CONTRACT: Final = '92aaa5d577c67686de2760f80c67325ec997a3f8'
+CONTRACT: Final = '675430a7b93f8a4abbd859b5fe7702f836bd3207'
 """The lemonfiber revision whose contract the tools were generated from."""
 
 TOOLS: Final[tuple[ToolShape, ...]] = (
@@ -469,6 +469,18 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
         parameters=(),
         input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
         resource='lemonfiber://read/wiring',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_settings',
+        reach=Reach.READ,
+        target='settings',
+        capability='/api/settings',
+        parameters=(),
+        input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
+        resource='lemonfiber://read/settings',
         read_only=True,
         destructive=False,
         idempotent=True,

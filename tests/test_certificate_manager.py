@@ -2,7 +2,7 @@
 """The certificate in force: started, checked, swapped, logged when renewal fails, and answered for in health."""
 
 import dataclasses
-import datetime
+import datetime as dt
 import json
 import logging
 import threading
@@ -28,7 +28,7 @@ class Clock:
         """Start at the suite's now."""
         self.now = NOW
 
-    def __call__(self) -> datetime.datetime:
+    def __call__(self) -> dt.datetime:
         """Return the time it was set to."""
         return self.now
 
@@ -43,11 +43,11 @@ class Failing:
         self._source = source
         self._asked = 0
 
-    def first(self, now: datetime.datetime) -> modes.Served:
+    def first(self, now: dt.datetime) -> modes.Served:
         """Obtain, as the first time."""
         return self.obtain(now)
 
-    def obtain(self, now: datetime.datetime) -> modes.Served:
+    def obtain(self, now: dt.datetime) -> modes.Served:
         """Obtain the first time, and fail every time after."""
         self._asked += 1
         if self._asked > 1:
@@ -59,7 +59,7 @@ class Failing:
         """Say nothing more."""
         return []
 
-    def due(self, served: modes.Served, /) -> datetime.datetime | None:
+    def due(self, served: modes.Served, /) -> dt.datetime | None:
         """Say what the wrapped source says."""
         return self._source.due(served)
 
@@ -79,11 +79,11 @@ class StandingIn:
         self._source = source
         self.issued = False
 
-    def first(self, now: datetime.datetime) -> modes.Served:
+    def first(self, now: dt.datetime) -> modes.Served:
         """Return the wrapped source's certificate, standing in."""
         return dataclasses.replace(self._source.first(now), standing_in=True)
 
-    def obtain(self, now: datetime.datetime) -> modes.Served:
+    def obtain(self, now: dt.datetime) -> modes.Served:
         """Return the certificate standing in, or the one issued once it is."""
         return self._source.obtain(now) if self.issued else self.first(now)
 
@@ -91,7 +91,7 @@ class StandingIn:
         """Say nothing more."""
         return []
 
-    def due(self, _: modes.Served, /) -> datetime.datetime | None:
+    def due(self, _: modes.Served, /) -> dt.datetime | None:
         """Say nothing is due."""
         return None
 
@@ -101,7 +101,7 @@ class StandingIn:
         return self._source.renewal
 
 
-HOUR: Final = datetime.timedelta(hours=1)
+HOUR: Final = dt.timedelta(hours=1)
 
 
 def test_starting_loads_the_first_certificate_and_says_who_can_check_it(
@@ -200,7 +200,7 @@ def test_a_certificate_nobody_renews_turns_unhealthy_inside_seven_days(
     served = certificates.start()
     assert certificates.health()[0] == manager.HEALTHY
     assert certificates.health()[1]["renewal_due"] is None
-    clock.now = served.expires - datetime.timedelta(days=3)
+    clock.now = served.expires - dt.timedelta(days=3)
     certificates.check()
     assert certificates.health()[0] == manager.UNHEALTHY
     assert "has not been renewed" in caplog.text
@@ -255,4 +255,4 @@ def test_the_tls_context_is_a_servers_answering_the_challenges_pending(tmp_path:
 
 
 def test_the_clock_is_utc() -> None:
-    assert manager.utc_now().tzinfo is datetime.UTC
+    assert manager.utc_now().tzinfo is dt.UTC

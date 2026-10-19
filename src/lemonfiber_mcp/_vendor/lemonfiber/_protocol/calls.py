@@ -1,6 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """What a request carries, and the answer a transport hands back."""
 
+import base64
 import json
 import urllib.parse
 from collections.abc import Mapping, Sequence
@@ -11,10 +12,11 @@ from typing import TYPE_CHECKING, Final
 from lemonfiber._generated import READS
 from lemonfiber.files import PICTURE_MOST, PICTURE_TYPES
 from lemonfiber.problems import MisaskedError
-from lemonfiber.reads import ACTIONS, BUNDLE, CAPABILITIES, JOBS, KEY_CLAIMS, KEYS, LOGS, SESSION
+from lemonfiber.reads import ACTIONS, BUNDLE, CAPABILITIES, DEVICE_KEYS, JOBS, KEY_CLAIMS, KEYS, LOGS, SESSION
 
 if TYPE_CHECKING:
     from lemonfiber.credential import Credential
+    from lemonfiber.device_keys import Registering
     from lemonfiber.keys import Minting
     from lemonfiber.reads import Read
 
@@ -198,14 +200,58 @@ def keys_call() -> Call:
 
 
 def mint_call(minting: Minting, **more: Json) -> Call:
-    """Mint one integration key, giving the minter's password again, with `more` beside it in the body."""
-    asked: dict[str, Json] = {
-        "name": minting.name,
-        "scope": minting.scope,
-        "purpose": minting.purpose,
-        "password": minting.password,
-    }
-    return posted(KEYS, {**asked, **more})
+    """Mint one integration key with the operator's proof, with `more` beside it in the body."""
+    asked: dict[str, Json] = {"name": minting.name, "scope": minting.scope, "purpose": minting.purpose}
+    if minting.device is None:
+        proof: dict[str, Json] = {"password": minting.password}
+    else:
+        proof = {
+            "device": minting.device.device,
+            "challenge": minting.device.challenge,
+            "signature": base64url(minting.device.signature),
+        }
+    return posted(KEYS, {**asked, **proof, **more})
+
+
+def register_device_key_call(registering: Registering) -> Call:
+    """Register a device key with its public half, its attestation and the operator's password."""
+    return posted(
+        DEVICE_KEYS,
+        {
+            "name": registering.name,
+            "public_key": base64url(registering.public_key),
+            "attestation": registering.attestation.fields(),
+            "password": registering.password,
+        },
+    )
+
+
+def device_keys_call() -> Call:
+    """Ask for the operator's device keys."""
+    return Call(HTTPMethod.GET, DEVICE_KEYS, {"Accept": JSON_TYPE})
+
+
+def device_key_challenge_call(name: str) -> Call:
+    """Ask a challenge for one device key, by its name as one path segment."""
+    return Call(HTTPMethod.POST, f"{device_key_path(name)}/challenge", {"Accept": JSON_TYPE})
+
+
+def revoke_device_key_call(name: str) -> Call:
+    """Revoke one device key, by its name as one path segment."""
+    return Call(HTTPMethod.DELETE, device_key_path(name), {"Accept": JSON_TYPE})
+
+
+def device_key_path(name: str) -> str:
+    """Return the door of one device key, refusing a name a URL would resolve away."""
+    if name in UNKEPT_SEGMENTS:
+        sentence = "A device key is named by its name, and what was given is not a name that can be sent."
+        raise MisaskedError(sentence, status=HTTPStatus.BAD_REQUEST)
+    return f"{DEVICE_KEYS}/{segment(name)}"
+
+
+def base64url(raw: bytes) -> str:
+    """Return bytes as the stack reads them in a body: base64url, unpadded."""
+    return base64.urlsafe_b64encode(raw).rstrip(b"=").decode()
 
 
 def revoke_call(name: str) -> Call:

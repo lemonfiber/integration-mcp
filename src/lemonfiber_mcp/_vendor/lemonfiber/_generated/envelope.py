@@ -26,6 +26,9 @@ from .kinds import (
     ConfigEnvelope,
     CredentialsEnvelope,
     DashboardEnvelope,
+    DeviceChallengeEnvelope,
+    DeviceKeyEnvelope,
+    DeviceKeysEnvelope,
     DoctorEnvelope,
     ErrorEnvelope,
     FormsEnvelope,
@@ -66,6 +69,7 @@ from .kinds import (
     RestoreEnvelope,
     SeedEnvelope,
     SelfUpdateEnvelope,
+    SettingsEnvelope,
     SetupEnvelope,
     SpaceEnvelope,
     StartEnvelope,
@@ -112,6 +116,9 @@ type Kind = typing.Literal[
     "config",
     "credentials",
     "dashboard",
+    "device-challenge",
+    "device-key",
+    "device-keys",
     "doctor",
     "error",
     "forms",
@@ -152,6 +159,7 @@ type Kind = typing.Literal[
     "restore",
     "seed",
     "self-update",
+    "settings",
     "setup",
     "space",
     "start",
@@ -199,6 +207,9 @@ type Envelope = (
     | ConfigEnvelope
     | CredentialsEnvelope
     | DashboardEnvelope
+    | DeviceChallengeEnvelope
+    | DeviceKeyEnvelope
+    | DeviceKeysEnvelope
     | DoctorEnvelope
     | ErrorEnvelope
     | FormsEnvelope
@@ -239,6 +250,7 @@ type Envelope = (
     | RestoreEnvelope
     | SeedEnvelope
     | SelfUpdateEnvelope
+    | SettingsEnvelope
     | SetupEnvelope
     | SpaceEnvelope
     | StartEnvelope

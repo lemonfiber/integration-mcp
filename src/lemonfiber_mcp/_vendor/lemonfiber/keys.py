@@ -25,19 +25,63 @@ WHOLE_SECONDS: Final = re.compile(r"^\d+$", re.ASCII)
 """How a key link writes when its claim lapses: whole seconds since 1970, in UTC."""
 
 
+MINT_FORM: Final = "lemonfiber-mint/1"
+"""The first line of the text a device key signs to prove a mint."""
+
+LINE_END: Final = "\n"
+"""What ends every line of the text a device key signs."""
+
+
+@dataclass(frozen=True, slots=True)
+class DeviceProof:
+    """A registered device key's signature over the text `signed_text` spells for a mint and a challenge.
+
+    The challenge and the signature are left out of the representation.
+    """
+
+    device: str
+    """The device key's name."""
+    challenge: str = field(repr=False)
+    """The challenge, as the stack handed it over."""
+    signature: bytes = field(repr=False)
+    """ECDSA P-256 over SHA-256, in DER, as the phone's hardware made it."""
+
+
 @dataclass(frozen=True, slots=True)
 class Minting:
-    """What one integration key is minted with.
+    """What one integration key is minted with, and the operator's proof.
 
-    The password is the minter's own, given again for this one mint. It is sent
-    in the body, kept by nothing here, and left out of the representation.
+    The proof is the minter's password, given again for this one mint, or a
+    device key's signature in its place; exactly one of the two. Neither is kept
+    by anything here or shown in the representation.
     """
 
     name: str
     scope: str
     """What it admits: `read`, `act`, or `member:` and the account it acts as."""
     purpose: KeyPurpose
-    password: str = field(repr=False)
+    password: str | None = field(default=None, repr=False)
+    device: DeviceProof | None = field(default=None, repr=False)
+
+    def __post_init__(self) -> None:
+        """Refuse a mint proved by both the password and a device key, or by neither."""
+        if (self.password is None) == (self.device is None):
+            msg = "A mint is proved by the password or by a device key's signature, exactly one of the two."
+            raise ConfigurationError(msg)
+
+
+def signed_text(name: str, scope: str, purpose: KeyPurpose, challenge: str, *, claim: bool = False) -> bytes:
+    """Return the text a device key signs to prove a mint over `challenge`, as UTF-8.
+
+    The form, the challenge, the name, the scope, the purpose and `claim` or
+    `key`, each ended by a line feed. A part holding a line feed is refused: it
+    would sign another mint.
+    """
+    lines = (MINT_FORM, challenge, name, scope, purpose, "claim" if claim else "key")
+    if any(LINE_END in line for line in lines):
+        msg = "A mint's name, scope, purpose and challenge are each one line of the signed text; one holds a line feed."
+        raise ConfigurationError(msg)
+    return "".join(line + LINE_END for line in lines).encode()
 
 
 class KeyLink:

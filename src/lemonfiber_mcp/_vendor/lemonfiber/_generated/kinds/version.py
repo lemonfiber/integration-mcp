@@ -30,6 +30,11 @@ class VersionReport(typing.TypedDict):
     reaches both halves, and none of the three had to learn a new question.
     """
 
+    attestation_status: typing.NotRequired[str | None]
+    """When the snapshot of Google's attestation status list this build carries was
+    taken, which an Android device key's chain is checked against; nothing where it
+    does not read.
+    """
     binary: str
     """The running binary's version."""
     changelog: Notes

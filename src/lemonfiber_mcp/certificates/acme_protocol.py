@@ -8,7 +8,7 @@ order's authorizations are answered by the chosen challenge for as long as it
 is pending, and withdrawn after.
 """
 
-import datetime
+import datetime as dt
 import logging
 from typing import TYPE_CHECKING, Any, Final, cast, override
 
@@ -58,13 +58,13 @@ class TlsAlpn01(challenges.KeyAuthorizationChallenge):
         return self.key_authorization(account_key)
 
 
-def later_of(asked: str, now: datetime.datetime) -> datetime.datetime | None:
+def later_of(asked: str, now: dt.datetime) -> dt.datetime | None:
     """Return when a `Retry-After` header asks to be asked again, after seconds or at a time; None where unread."""
     written = asked.strip()
     if written.isdigit():
-        return now + datetime.timedelta(seconds=int(written))
+        return now + dt.timedelta(seconds=int(written))
     try:
-        return datetime.datetime.strptime(written, HTTP_DATE).replace(tzinfo=datetime.UTC)
+        return dt.datetime.strptime(written, HTTP_DATE).replace(tzinfo=dt.UTC)
     except ValueError:
         return None
 
@@ -78,14 +78,14 @@ class Network(client.ClientNetwork):
         if roots is not None:
             # The client hands this to `requests` as `verify`, which takes a bundle's path as well as a yes or no.
             self.verify_ssl = cast("Any", str(roots))
-        self.retry_after: datetime.datetime | None = None
+        self.retry_after: dt.datetime | None = None
 
     @override
     def _send_request(self, method: str, url: str, *args: Any, **kwargs: Any) -> requests.Response:
         response = super()._send_request(method, url, *args, **kwargs)
         asked = response.headers.get("Retry-After")
         if response.status_code >= REFUSED_FROM and asked is not None:
-            self.retry_after = later_of(asked, datetime.datetime.now(datetime.UTC))
+            self.retry_after = later_of(asked, dt.datetime.now(dt.UTC))
         return response
 
 

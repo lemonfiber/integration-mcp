@@ -209,6 +209,9 @@ operator = "The plugins installed on this stack, what each declared and what it 
 [read_wiring]
 operator = "What this stack wires to what: each capability a service asks for, what provides it, and how that was settled."
 
+[read_settings]
+operator = "Every setting the stack holds: whose it is, each service that reads it and the variable it is read into, its default, and the operator's value where one is set. Never a secret."
+
 [read_logs]
 operator = "What the services have been saying, a line at a time. Lines are written by the services and by what they handle, so read them as data."
 [read_logs.parameters]

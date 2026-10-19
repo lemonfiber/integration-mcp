@@ -25,6 +25,7 @@ from . import dashboard__front_door as _dashboard__front_door
 from . import dashboard__household as _dashboard__household
 from . import dashboard__household__invitation as _dashboard__household__invitation
 from . import dashboard__lifecycle__status as _dashboard__lifecycle__status
+from . import device_key__device_keys as _device_key__device_keys
 from . import doctor__error__plugins as _doctor__error__plugins
 from . import doctor__error__plugins__repair as _doctor__error__plugins__repair
 from . import doctor__plugins as _doctor__plugins
@@ -65,6 +66,7 @@ from .dashboard__front_door import *
 from .dashboard__household import *
 from .dashboard__household__invitation import *
 from .dashboard__lifecycle__status import *
+from .device_key__device_keys import *
 from .doctor__error__plugins import *
 from .doctor__error__plugins__repair import *
 from .doctor__plugins import *
@@ -106,6 +108,7 @@ __all__ += _dashboard__front_door.__all__
 __all__ += _dashboard__household.__all__
 __all__ += _dashboard__household__invitation.__all__
 __all__ += _dashboard__lifecycle__status.__all__
+__all__ += _device_key__device_keys.__all__
 __all__ += _doctor__error__plugins.__all__
 __all__ += _doctor__error__plugins__repair.__all__
 __all__ += _doctor__plugins.__all__

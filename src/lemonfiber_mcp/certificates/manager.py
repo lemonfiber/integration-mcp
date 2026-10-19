@@ -8,7 +8,7 @@ with the time left on the certificate in force, and as critical once an hour
 inside seven days of its expiry, when the health answer turns unhealthy too.
 """
 
-import datetime
+import datetime as dt
 import json
 import logging
 import ssl
@@ -29,8 +29,8 @@ if TYPE_CHECKING:
 
 CHECK_EVERY: Final = 60.0
 """Seconds between checks: a changed file or a due renewal is taken within a minute."""
-CRITICAL_EVERY: Final = datetime.timedelta(hours=1)
-UNHEALTHY_WITHIN: Final = datetime.timedelta(days=7)
+CRITICAL_EVERY: Final = dt.timedelta(hours=1)
+UNHEALTHY_WITHIN: Final = dt.timedelta(days=7)
 """How close to its expiry a certificate is when the health answer turns unhealthy."""
 ALPN: Final = ("http/1.1",)
 HEALTHY: Final = 200
@@ -41,9 +41,9 @@ PENDING: Final = "pending"
 logger = logging.getLogger(__name__)
 
 
-def utc_now() -> datetime.datetime:
+def utc_now() -> dt.datetime:
     """Return the time now, in UTC."""
-    return datetime.datetime.now(datetime.UTC)
+    return dt.datetime.now(dt.UTC)
 
 
 def server_context(pending: Challenges) -> Answering:
@@ -62,16 +62,16 @@ class Certificates:
         self,
         source: Source,
         pending: Challenges,
-        clock: Callable[[], datetime.datetime] = utc_now,
+        clock: Callable[[], dt.datetime] = utc_now,
     ) -> None:
         """Hold the source, a context nothing has been loaded into yet, and the TLS-ALPN-01 answers it gives."""
         self._source = source
         self._clock = clock
         self.context = server_context(pending)
         self._served: Served | None = None
-        self._last_attempt: datetime.datetime | None = None
+        self._last_attempt: dt.datetime | None = None
         self._outcome = "none"
-        self._last_critical: datetime.datetime | None = None
+        self._last_critical: dt.datetime | None = None
 
     @property
     def served(self) -> Served:
@@ -142,7 +142,7 @@ class Certificates:
         """Ask the source for the certificate to serve now, swapping it in where it changed, logging where it failed."""
         self.apply(self.attempt())
 
-    def _critical(self, now: datetime.datetime, left: datetime.timedelta) -> None:
+    def _critical(self, now: dt.datetime, left: dt.timedelta) -> None:
         if left > UNHEALTHY_WITHIN:
             return
         if self._last_critical is not None and now - self._last_critical < CRITICAL_EVERY:

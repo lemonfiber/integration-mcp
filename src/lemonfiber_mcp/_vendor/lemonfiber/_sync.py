@@ -29,6 +29,9 @@ if TYPE_CHECKING:
     from types import TracebackType
 
     from lemonfiber._generated import (
+        DeviceChallengeEnvelope,
+        DeviceKeyEnvelope,
+        DeviceKeysEnvelope,
         Envelope,
         JobEnvelope,
         KeyClaimEnvelope,
@@ -41,6 +44,7 @@ if TYPE_CHECKING:
     from lemonfiber.address import Address, Route
     from lemonfiber.capabilities import CapabilitySet
     from lemonfiber.credential import Credential, Session
+    from lemonfiber.device_keys import Registering
     from lemonfiber.files import BundleFile, Picture
     from lemonfiber.jobs import JobStanding
     from lemonfiber.keys import KeyLink, Minting
@@ -274,6 +278,22 @@ class SyncClient:
     def revoke(self, name: str) -> KeysEnvelope:
         """Revoke one integration key by its name, answered with the keys as they now stand."""
         return self._run(operation.revoke(name))
+
+    def register_device_key(self, registering: Registering) -> DeviceKeyEnvelope:
+        """Register a phone's key pair as a device key. Sent once, never retried."""
+        return self._run(operation.register_device_key(registering))
+
+    def device_keys(self) -> DeviceKeysEnvelope:
+        """Ask for the operator's device keys, revoked ones included."""
+        return self._run(operation.device_keys())
+
+    def device_key_challenge(self, name: str) -> DeviceChallengeEnvelope:
+        """Ask a challenge for one device key, good for one mint within a minute. Sent once."""
+        return self._run(operation.device_key_challenge(name))
+
+    def revoke_device_key(self, name: str) -> DeviceKeysEnvelope:
+        """Revoke one device key by its name; the keys it proved stay. Sent once, never retried."""
+        return self._run(operation.revoke_device_key(name))
 
     def job(self, job: str) -> JobStanding:
         """Ask where the work a name stands for got to."""

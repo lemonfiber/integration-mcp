@@ -28,10 +28,11 @@ from lemonfiber._sync import SyncClient, SyncStream, admit, collect
 from lemonfiber.address import Address, CertificatePin, Route
 from lemonfiber.capabilities import CapabilitySet
 from lemonfiber.credential import CREDENTIAL_HEADER, Credential, Session
+from lemonfiber.device_keys import AndroidAttestation, IosAttestation, Registering
 from lemonfiber.envelope import SPOKEN_API_VERSION, expect, parse_envelope, read_envelope
 from lemonfiber.files import PICTURE_MOST, PICTURE_TYPES, BundleFile, Picture
 from lemonfiber.jobs import Ended, Finished, JobStanding, Running
-from lemonfiber.keys import KeyLink, Minting
+from lemonfiber.keys import DeviceProof, KeyLink, Minting, signed_text
 from lemonfiber.problems import (
     AddressRefusedError,
     ApiVersionMismatchError,
@@ -74,6 +75,7 @@ __all__ = [
     "SPOKEN_API_VERSION",
     "Address",
     "AddressRefusedError",
+    "AndroidAttestation",
     "ApiVersionMismatchError",
     "Arrival",
     "AsyncClient",
@@ -90,11 +92,13 @@ __all__ = [
     "Credential",
     "CredentialRefusedError",
     "DeclinedError",
+    "DeviceProof",
     "Ended",
     "Envelope",
     "FailedError",
     "Finished",
     "Gap",
+    "IosAttestation",
     "JobStanding",
     "Json",
     "KeyCallable",
@@ -116,6 +120,7 @@ __all__ = [
     "Read",
     "RefusalCode",
     "RefusedError",
+    "Registering",
     "Route",
     "Running",
     "Session",
@@ -139,4 +144,5 @@ __all__ = [
     "is_refusal_code",
     "parse_envelope",
     "read_envelope",
+    "signed_text",
 ]

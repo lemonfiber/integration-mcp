@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Where the served certificate comes from: the operator's files, a pinned one, and a private root's."""
 
-import datetime
+import datetime as dt
 import ipaddress
 import stat
 from typing import TYPE_CHECKING, Final
@@ -22,7 +22,7 @@ from lemonfiber_mcp.certificates.settings import KeyType, Mode, Name, Tls, TlsSe
 if TYPE_CHECKING:
     import pathlib
 
-NOW: Final = datetime.datetime(2026, 10, 9, tzinfo=datetime.UTC)
+NOW: Final = dt.datetime(2026, 10, 9, tzinfo=dt.UTC)
 NAMES: Final[tuple[Name, ...]] = ("mcp.home.example", ipaddress.ip_address("192.168.1.42"))
 
 
@@ -47,7 +47,7 @@ def operator_files(
     """Write a certificate and key as an operator would bring them, and return their paths."""
     key = making.generated(KeyType.EC_P256)
     made = making.leaf_extensions(
-        making.builder(making.named(str(names[0])), key, datetime.timedelta(days=lifetime), NOW),
+        making.builder(making.named(str(names[0])), key, dt.timedelta(days=lifetime), NOW),
         names,
     )
     leaf = made.issuer_name(x509.Name([x509.NameAttribute(x509.NameOID.COMMON_NAME, "operator")])).sign(
@@ -116,7 +116,7 @@ def test_a_key_that_is_not_the_certificates_is_refused(tmp_path: pathlib.Path) -
 
 def test_an_expired_certificate_is_refused(tmp_path: pathlib.Path) -> None:
     source = modes.Files(files_tls(tmp_path, lifetime=1))
-    later = NOW + datetime.timedelta(days=2)
+    later = NOW + dt.timedelta(days=2)
     with pytest.raises(CertificateError, match="expired on"):
         source.obtain(later)
 
@@ -129,7 +129,7 @@ def test_a_pinned_certificate_is_made_once_and_kept(tmp_path: pathlib.Path) -> N
     assert source.announced() == [
         f"The certificate's fingerprint, for each client to pin: {first.fingerprint}",
     ]
-    again = modes.Pinned(tls_of(tmp_path, Mode.PINNED)).obtain(NOW + datetime.timedelta(days=400))
+    again = modes.Pinned(tls_of(tmp_path, Mode.PINNED)).obtain(NOW + dt.timedelta(days=400))
     assert again.fingerprint == first.fingerprint
     assert source.due(first) is None
     assert source.renewal == tmp_path / "state" / "certificates" / "mcp.home.example" / modes.RENEWAL
@@ -158,7 +158,7 @@ def test_a_private_root_issues_the_served_certificate_and_keeps_both(tmp_path: p
     served.leaf.verify_directly_issued_by(root)
     assert making.covered(served.leaf) == set(NAMES)
     assert source.due(served) == served.expires - modes.ISSUED_RENEWED_WITH
-    assert source.obtain(NOW + datetime.timedelta(days=5)).fingerprint == served.fingerprint
+    assert source.obtain(NOW + dt.timedelta(days=5)).fingerprint == served.fingerprint
     said = source.announced()
     install = (
         f"Install the root at {source.root_file} on each device that is to connect; it is also served at "

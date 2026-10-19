@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """TLS-ALPN-01 answered on the serving port: a connection asking for `acme-tls/1` alone gets the challenge, any other the server."""
 
-import datetime
+import datetime as dt
 import hashlib
 import ssl
 from typing import TYPE_CHECKING, Final
@@ -24,7 +24,7 @@ ROUNDS: Final = 6
 def served_context(tmp_path: pathlib.Path, pending: alpn.Challenges) -> ssl.SSLContext:
     """Return the serving context with a certificate of its own loaded."""
     key = making.generated(KeyType.EC_P256)
-    leaf = making.pinned((NAME,), key, datetime.datetime.now(datetime.UTC))
+    leaf = making.pinned((NAME,), key, dt.datetime.now(dt.UTC))
     (tmp_path / "chain.pem").write_bytes(making.certificate_pem(leaf))
     (tmp_path / "key.pem").write_bytes(making.key_pem(key))
     context = server_context(pending)

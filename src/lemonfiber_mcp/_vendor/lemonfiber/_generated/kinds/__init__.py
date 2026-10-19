@@ -23,6 +23,9 @@ from . import clients as _clients
 from . import config as _config
 from . import credentials as _credentials
 from . import dashboard as _dashboard
+from . import device_challenge as _device_challenge
+from . import device_key as _device_key
+from . import device_keys as _device_keys
 from . import doctor as _doctor
 from . import error as _error
 from . import forms as _forms
@@ -63,6 +66,7 @@ from . import reset as _reset
 from . import restore as _restore
 from . import seed as _seed
 from . import self_update as _self_update
+from . import settings as _settings
 from . import setup as _setup
 from . import space as _space
 from . import start as _start
@@ -104,6 +108,9 @@ from .clients import *
 from .config import *
 from .credentials import *
 from .dashboard import *
+from .device_challenge import *
+from .device_key import *
+from .device_keys import *
 from .doctor import *
 from .error import *
 from .forms import *
@@ -144,6 +151,7 @@ from .reset import *
 from .restore import *
 from .seed import *
 from .self_update import *
+from .settings import *
 from .setup import *
 from .space import *
 from .start import *
@@ -186,6 +194,9 @@ __all__ += _clients.__all__
 __all__ += _config.__all__
 __all__ += _credentials.__all__
 __all__ += _dashboard.__all__
+__all__ += _device_challenge.__all__
+__all__ += _device_key.__all__
+__all__ += _device_keys.__all__
 __all__ += _doctor.__all__
 __all__ += _error.__all__
 __all__ += _forms.__all__
@@ -226,6 +237,7 @@ __all__ += _reset.__all__
 __all__ += _restore.__all__
 __all__ += _seed.__all__
 __all__ += _self_update.__all__
+__all__ += _settings.__all__
 __all__ += _setup.__all__
 __all__ += _space.__all__
 __all__ += _start.__all__

@@ -27,6 +27,9 @@ from .kinds import (
     ConfigEnvelope,
     CredentialsEnvelope,
     DashboardEnvelope,
+    DeviceChallengeEnvelope,
+    DeviceKeyEnvelope,
+    DeviceKeysEnvelope,
     DoctorEnvelope,
     ErrorEnvelope,
     FormsEnvelope,
@@ -67,6 +70,7 @@ from .kinds import (
     RestoreEnvelope,
     SeedEnvelope,
     SelfUpdateEnvelope,
+    SettingsEnvelope,
     SetupEnvelope,
     SpaceEnvelope,
     StartEnvelope,
@@ -133,6 +137,14 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["credentials"], /) -> CredentialsEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["dashboard"], /) -> DashboardEnvelope: ...
+    @typing.overload
+    def __call__(
+        self, envelope: Envelope, kind: typing.Literal["device-challenge"], /
+    ) -> DeviceChallengeEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["device-key"], /) -> DeviceKeyEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["device-keys"], /) -> DeviceKeysEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["doctor"], /) -> DoctorEnvelope: ...
     @typing.overload
@@ -213,6 +225,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["seed"], /) -> SeedEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["self-update"], /) -> SelfUpdateEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["settings"], /) -> SettingsEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["setup"], /) -> SetupEnvelope: ...
     @typing.overload

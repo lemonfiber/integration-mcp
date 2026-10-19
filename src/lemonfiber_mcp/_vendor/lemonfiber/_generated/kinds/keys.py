@@ -46,6 +46,8 @@ class ListedKey(typing.TypedDict):
     """When it was minted."""
     name: str
     """The name it was minted under."""
+    proved_by: typing.NotRequired[str | None]
+    """The device key whose signature proved its mint, absent where none did."""
     purpose: KeyPurpose
     """What the minter said it is for. A declaration, not something the core verified."""
     revoked: typing.NotRequired[str | None]

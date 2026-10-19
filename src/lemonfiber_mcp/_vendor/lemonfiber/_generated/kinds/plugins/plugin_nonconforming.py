@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from .service_value import PluginInstall, PluginInstalled, PluginNonconforming, PluginProving, PluginUnfilled
+from .service_url_of import PluginInstall, PluginInstalled, PluginProving
 from ...shared.plugins__undo import UndoReversal
 
 
@@ -85,6 +85,21 @@ class PluginInstalls(typing.TypedDict):
     Boxed because it carries a whole install's account beside the reversal, and
     every other run's report would otherwise be as large as the one run that updates.
     """
+
+
+class PluginNonconforming(typing.TypedDict):
+    """One answer a plugin's adapter gave outside a contract it speaks."""
+
+    at: str
+    """When it answered so, as RFC 3339."""
+    capability: str
+    """The capability it was asked as."""
+    operation: str
+    """The operation it was asked."""
+    plugin: str
+    """The plugin whose adapter answered."""
+    why: str
+    """What was outside the contract."""
 
 
 class PluginRemoval(typing.TypedDict):
@@ -208,6 +223,20 @@ class PluginSubstituted(typing.TypedDict):
     """The service chosen."""
 
 
+class PluginUnfilled(typing.TypedDict):
+    """A capability that would have nothing filling it."""
+
+    capability: str
+    """The core name nothing would fill."""
+    filled_by: str
+    """The plugin that is filling it now, which is the one going.
+
+    Named rather than left to the reader, because the sentence an operator has to
+    act on is *this is the only thing filling it* and a capability on its own does
+    not say that.
+    """
+
+
 class PluginsEnvelope(typing.TypedDict):
     """The envelope carrying `plugins`."""
 
@@ -256,6 +285,7 @@ of.
 
 __all__ = [
     "PluginInstalls",
+    "PluginNonconforming",
     "PluginRemoval",
     "PluginReproof",
     "PluginRestored",
@@ -265,6 +295,7 @@ __all__ = [
     "PluginSourceStandingUnasked",
     "PluginSourceStandingUnreachable",
     "PluginSubstituted",
+    "PluginUnfilled",
     "PluginUpdate",
     "PluginsEnvelope",
 ]
