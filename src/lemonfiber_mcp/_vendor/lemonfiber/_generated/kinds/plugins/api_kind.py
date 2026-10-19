@@ -74,6 +74,8 @@ class Expect(typing.TypedDict):
     """What the body must begin with, where it is not JSON."""
     content_type: typing.NotRequired[str | None]
     """A substring of the content type the answer was served as."""
+    exit: typing.NotRequired[int | None]
+    """The exit status a run must end with. Not sufficient alone."""
     json: typing.NotRequired[dict[str, Expected] | None]
     """Places the answer must carry, each with the exact value it must hold."""
     json_array_min: typing.NotRequired[int | None]
@@ -98,6 +100,8 @@ class Expect(typing.TypedDict):
     """Places the answer must carry, each with the kind of value it must be."""
     status: typing.NotRequired[int | None]
     """The status the answer must carry."""
+    stdout_starts_with: typing.NotRequired[str | None]
+    """What a run's standard output must begin with."""
 
 
 type Expected = bool | int | str
@@ -200,6 +204,8 @@ type PluginConstraint = typing.Literal[
     "json_is_absent",
     "content_type",
     "body_starts_with",
+    "exit",
+    "stdout_starts_with",
 ]
 """A kind of constraint an expectation can put on a body.
 
@@ -454,17 +460,6 @@ class ServiceSetting(typing.TypedDict):
     """The setting's name."""
 
 
-class ServiceUrlOf(typing.TypedDict):
-    """The address of a capability's filler."""
-
-    files: typing.NotRequired[str | None]
-    """The medium the filler asked for files."""
-    native: typing.NotRequired[str | None]
-    """The upstream's own API, where the ask reaches the upstream an adapter fronts."""
-    url_of: str
-    """The capability asked for."""
-
-
 type ServiceUserMode = typing.Literal["image", "puid-env", "uid"]
 """Who the container runs as."""
 
@@ -542,6 +537,5 @@ __all__ = [
     "ServicePublish",
     "ServiceSecretOf",
     "ServiceSetting",
-    "ServiceUrlOf",
     "ServiceUserMode",
 ]

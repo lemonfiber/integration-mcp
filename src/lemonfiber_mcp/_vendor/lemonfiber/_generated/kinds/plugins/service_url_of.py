@@ -11,6 +11,7 @@ from .api_kind import (
     Api,
     ApiKind,
     Contribution,
+    Expect,
     PluginAdapterOwner,
     PluginAsking,
     PluginChange,
@@ -28,7 +29,6 @@ from .api_kind import (
     ServicePublish,
     ServiceSecretOf,
     ServiceSetting,
-    ServiceUrlOf,
     ServiceUserMode,
 )
 from ...shared.doctor__error__plugins import StepCame
@@ -117,21 +117,6 @@ class PluginInstall(typing.TypedDict):
     """What the install settled, said whether or not it was written down."""
 
 
-class PluginNonconforming(typing.TypedDict):
-    """One answer a plugin's adapter gave outside a contract it speaks."""
-
-    at: str
-    """When it answered so, as RFC 3339."""
-    capability: str
-    """The capability it was asked as."""
-    operation: str
-    """The operation it was asked."""
-    plugin: str
-    """The plugin whose adapter answered."""
-    why: str
-    """What was outside the contract."""
-
-
 class PluginPlaced(typing.TypedDict):
     """One service of an installed plugin, as it was placed."""
 
@@ -207,6 +192,8 @@ class PluginPlaced(typing.TypedDict):
     """The privileged shape lemonfiber writes for it, where it took one."""
     speaks: typing.NotRequired[list[str]]
     """Each capability contract it answers as an adapter, as `capability@major`."""
+    starting: typing.NotRequired[str | None]
+    """The digest of the starting files kept for its run proofs, where it has any."""
     tag: str
     """The readable name that digest went by when it was installed."""
     takes_data: bool
@@ -268,6 +255,36 @@ class PluginRecipeRan(typing.TypedDict):
     """Every step it declares, in order, with what each came to."""
     why: typing.NotRequired[str | None]
     """Why it did not, where it did not."""
+
+
+class PluginRun(typing.TypedDict):
+    """A run of the image's own program, as a proof declares it."""
+
+    args: list[str]
+    """Each argument handed to the image's entrypoint, one string each: one to 64, each at
+    most 4096 bytes and none holding a NUL.
+    """
+    timeout_s: typing.NotRequired[int | None]
+    """How long the run may take, from 1 to 120 seconds. Default 30."""
+
+
+class PluginRunProof(typing.TypedDict):
+    """One proof that runs the image's own program, kept so the doctor and a later proof can
+    run it again without the plugin's source.
+    """
+
+    expect: Expect
+    """What the run must come to."""
+    proof: str
+    """The proof's id."""
+    run: PluginRun
+    """What the image's own program is handed."""
+    service: str
+    """The service whose image it runs."""
+    title: str
+    """What it establishes, in one line."""
+    why: str
+    """Why it is worth asserting."""
 
 
 class PluginServiceAdapter(typing.TypedDict):
@@ -343,20 +360,6 @@ class PluginTaking(typing.TypedDict):
     """The service taking it."""
     shape: PluginShape
     """The shape it takes."""
-
-
-class PluginUnfilled(typing.TypedDict):
-    """A capability that would have nothing filling it."""
-
-    capability: str
-    """The core name nothing would fill."""
-    filled_by: str
-    """The plugin that is filling it now, which is the one going.
-
-    Named rather than left to the reader, because the sentence an operator has to
-    act on is *this is the only thing filling it* and a capability on its own does
-    not say that.
-    """
 
 
 type PluginVerdict = (
@@ -449,6 +452,17 @@ class ServiceFields(typing.TypedDict):
     """Who it runs as, where declared."""
 
 
+class ServiceUrlOf(typing.TypedDict):
+    """The address of a capability's filler."""
+
+    files: typing.NotRequired[str | None]
+    """The medium the filler asked for files."""
+    native: typing.NotRequired[str | None]
+    """The upstream's own API, where the ask reaches the upstream an adapter fronts."""
+    url_of: str
+    """The capability asked for."""
+
+
 type ServiceValue = ServiceConstant | ServiceSetting | ServiceUrlOf | ServiceSecretOf
 """One environment variable's value."""
 
@@ -481,6 +495,7 @@ PluginInstalled = typing.TypedDict(
         "provides": typing.NotRequired[list[str]],
         "recipes": typing.NotRequired[list[PluginRecipe]],
         "revision": typing.NotRequired[str],
+        "run_proofs": typing.NotRequired[list[PluginRunProof]],
         "services": list[PluginPlaced],
         "signed": typing.NotRequired[str],
         "version": str,
@@ -506,18 +521,18 @@ PluginPair = typing.TypedDict(
 __all__ = [
     "PluginInstall",
     "PluginInstalled",
-    "PluginNonconforming",
     "PluginPair",
     "PluginPlaced",
     "PluginProving",
     "PluginRecipe",
     "PluginRecipeRan",
+    "PluginRun",
+    "PluginRunProof",
     "PluginServiceAdapter",
     "PluginStep",
     "PluginStepAdapter",
     "PluginStepRan",
     "PluginTaking",
-    "PluginUnfilled",
     "PluginVerdict",
     "PluginVerdictFailed",
     "PluginVerdictFailingAsDeclared",
@@ -525,6 +540,7 @@ __all__ = [
     "PluginVerdictUnproven",
     "PluginVerification",
     "ServiceFields",
+    "ServiceUrlOf",
     "ServiceValue",
     "WiringContest",
 ]

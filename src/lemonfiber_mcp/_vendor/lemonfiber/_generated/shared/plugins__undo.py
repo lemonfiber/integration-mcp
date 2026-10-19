@@ -18,6 +18,8 @@ type Action = (
     | ActionReconfigure
     | ActionRevoke
     | ActionReinstate
+    | ActionRevokeDevice
+    | ActionReinstateDevice
     | ActionResettle
     | ActionRehold
 )
@@ -83,6 +85,18 @@ class ActionReinstate(typing.TypedDict):
     """The key's name."""
 
 
+class ActionReinstateDevice(typing.TypedDict):
+    """Make a revoked device key good again.
+
+    Worked out so the record of a revoke has a reversal to name, and never carried
+    out, for the reason [`Action::Reinstate`] never is.
+    """
+
+    does: typing.Literal["reinstate-device"]
+    name: str
+    """The device key's name."""
+
+
 class ActionRemove(typing.TypedDict):
     """Remove the resource that was created."""
 
@@ -115,6 +129,8 @@ class ActionResettle(typing.TypedDict):
     """Put a setting in the settings store back to what it held."""
 
     does: typing.Literal["resettle"]
+    filed: typing.NotRequired[str | None]
+    """The environment file's setting it goes back to, where it was moved out of one."""
     name: str
     """The setting's name."""
     recorded: typing.NotRequired[str | None]
@@ -148,6 +164,14 @@ class ActionRevoke(typing.TypedDict):
     does: typing.Literal["revoke"]
     name: str
     """The key's name."""
+
+
+class ActionRevokeDevice(typing.TypedDict):
+    """Revoke the device key a registration made."""
+
+    does: typing.Literal["revoke-device"]
+    name: str
+    """The device key's name."""
 
 
 class ActionRewind(typing.TypedDict):
@@ -268,11 +292,13 @@ __all__ = [
     "ActionReconfigure",
     "ActionRehold",
     "ActionReinstate",
+    "ActionReinstateDevice",
     "ActionRemove",
     "ActionRepin",
     "ActionResettle",
     "ActionRestore",
     "ActionRevoke",
+    "ActionRevokeDevice",
     "ActionRewind",
     "ActionWithdraw",
     "Undo",
