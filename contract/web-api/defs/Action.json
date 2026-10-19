@@ -233,12 +233,55 @@
       ]
     },
     {
+      "description": "Revoke the device key a registration made.",
+      "type": "object",
+      "properties": {
+        "does": {
+          "type": "string",
+          "const": "revoke-device"
+        },
+        "name": {
+          "description": "The device key's name.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "does",
+        "name"
+      ]
+    },
+    {
+      "description": "Make a revoked device key good again.\n\nWorked out so the record of a revoke has a reversal to name, and never carried\nout, for the reason [`Action::Reinstate`] never is.",
+      "type": "object",
+      "properties": {
+        "does": {
+          "type": "string",
+          "const": "reinstate-device"
+        },
+        "name": {
+          "description": "The device key's name.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "does",
+        "name"
+      ]
+    },
+    {
       "description": "Put a setting in the settings store back to what it held.",
       "type": "object",
       "properties": {
         "does": {
           "type": "string",
           "const": "resettle"
+        },
+        "filed": {
+          "description": "The environment file's setting it goes back to, where it was moved out of one.",
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "name": {
           "description": "The setting's name.",

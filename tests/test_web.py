@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """The HTTP mode served for real over TLS: each request with its own key, health and the root without one."""
 
-import datetime
+import datetime as dt
 import hashlib
 import logging
 import socket
@@ -198,7 +198,7 @@ async def test_the_probe_holds_the_server_to_the_certificate_it_keeps(
             making.pinned(
                 ("localhost",),
                 making.generated(KeyType.EC_P256),
-                datetime.datetime.now(datetime.UTC),
+                dt.datetime.now(dt.UTC),
             ),
         ),
     )
@@ -260,7 +260,7 @@ def leaf_for(*names: str) -> x509.Certificate:
         making.named("probe"),
         key,
         making.ISSUED_LIFETIME,
-        datetime.datetime.now(datetime.UTC),
+        dt.datetime.now(dt.UTC),
     )
     if names:
         built = built.add_extension(

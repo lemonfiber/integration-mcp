@@ -7,7 +7,7 @@ answered from that challenge's own context; every other is handed on to the
 server's context untouched, so serving never pauses for a renewal.
 """
 
-import datetime
+import datetime as dt
 import hashlib
 import secrets
 import ssl
@@ -27,14 +27,14 @@ HTTP_1_1: Final = "http/1.1"
 ACME_IDENTIFIER: Final = x509.ObjectIdentifier("1.3.6.1.5.5.7.1.31")
 """The `id-pe-acmeIdentifier` extension a challenge certificate carries the key authorization's digest in."""
 OCTET_STRING: Final = 0x04
-CHALLENGE_LIFETIME: Final = datetime.timedelta(days=1)
+CHALLENGE_LIFETIME: Final = dt.timedelta(days=1)
 
 
 def challenge_certificate(name: str, key_authorization: str) -> tuple[x509.Certificate, making.PrivateKey]:
     """Return the certificate answering a TLS-ALPN-01 challenge for a name, and its key."""
     key = making.generated(KeyType.EC_P256)
     digest = hashlib.sha256(key_authorization.encode()).digest()
-    now = datetime.datetime.now(datetime.UTC)
+    now = dt.datetime.now(dt.UTC)
     subject = making.named(f"lemonfiber MCP challenge for {name}")
     certificate = (
         making.builder(subject, key, CHALLENGE_LIFETIME, now)

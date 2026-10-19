@@ -11,6 +11,7 @@ import typing
 from .admit_codes import ADMIT
 from .ask_codes import ASK
 from .bundle_codes import BUNDLE
+from .device_codes import DEVICE
 from .form_codes import FORM
 from .gone_codes import GONE
 from .key_codes import KEY
@@ -26,6 +27,7 @@ from .rehearse_codes import REHEARSE
 from .repair_codes import REPAIR
 from .restore_codes import RESTORE
 from .serve_codes import SERVE
+from .setting_codes import SETTING
 from .setup_codes import SETUP
 from .space_codes import SPACE
 from .stack_codes import STACK
@@ -39,6 +41,7 @@ REFUSAL_CODES: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = types.
         **ADMIT,
         **ASK,
         **BUNDLE,
+        **DEVICE,
         **FORM,
         **GONE,
         **KEY,
@@ -53,6 +56,7 @@ REFUSAL_CODES: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = types.
         **REPAIR,
         **RESTORE,
         **SERVE,
+        **SETTING,
         **SETUP,
         **SPACE,
         **STACK,

@@ -9,7 +9,7 @@ is the SHA-256 digest of a certificate's DER encoding in lower-case hex, the
 form the companion's pairing material carries.
 """
 
-import datetime
+import datetime as dt
 import hashlib
 import ipaddress
 from typing import TYPE_CHECKING, Final, cast
@@ -30,13 +30,13 @@ if TYPE_CHECKING:
 
 type PrivateKey = ec.EllipticCurvePrivateKey | rsa.RSAPrivateKey
 
-ROOT_LIFETIME: Final = datetime.timedelta(days=3650)
+ROOT_LIFETIME: Final = dt.timedelta(days=3650)
 """How long a private root is valid: ten years, one installation per device per decade."""
-ISSUED_LIFETIME: Final = datetime.timedelta(days=30)
+ISSUED_LIFETIME: Final = dt.timedelta(days=30)
 """How long a certificate a private root issues is valid."""
-PINNED_LIFETIME: Final = datetime.timedelta(days=3650)
+PINNED_LIFETIME: Final = dt.timedelta(days=3650)
 """How long a pinned certificate is valid: renewing it would break every pin."""
-BACKDATED: Final = datetime.timedelta(minutes=5)
+BACKDATED: Final = dt.timedelta(minutes=5)
 """How far before now a certificate's validity starts, for a client whose clock runs behind."""
 RSA_EXPONENT: Final = 65537
 ORGANISATION: Final = "lemonfiber"
@@ -141,8 +141,8 @@ def labelled(kind: str, names: tuple[Name, ...]) -> x509.Name:
 def builder(
     subject: x509.Name,
     key: PrivateKey,
-    lifetime: datetime.timedelta,
-    now: datetime.datetime,
+    lifetime: dt.timedelta,
+    now: dt.datetime,
 ) -> x509.CertificateBuilder:
     """Return a certificate builder for a subject and public key, valid from a little before now for a lifetime."""
     return (
@@ -179,7 +179,7 @@ def leaf_extensions(made: x509.CertificateBuilder, names: Iterable[Name]) -> x50
     )
 
 
-def root(names: tuple[Name, ...], key: PrivateKey, now: datetime.datetime) -> x509.Certificate:
+def root(names: tuple[Name, ...], key: PrivateKey, now: dt.datetime) -> x509.Certificate:
     """Return a private root for these names: it signs certificates, no authority below it, and nothing outside them."""
     subject = labelled("root", names)
     made = (
@@ -217,7 +217,7 @@ def issued(
     key: PrivateKey,
     by: x509.Certificate,
     signer: PrivateKey,
-    now: datetime.datetime,
+    now: dt.datetime,
 ) -> x509.Certificate:
     """Return a server's certificate for these names, issued by a private root."""
     made = leaf_extensions(
@@ -230,7 +230,7 @@ def issued(
     return made.sign(signer, hashes.SHA256())
 
 
-def pinned(names: tuple[Name, ...], key: PrivateKey, now: datetime.datetime) -> x509.Certificate:
+def pinned(names: tuple[Name, ...], key: PrivateKey, now: dt.datetime) -> x509.Certificate:
     """Return a server's certificate signed by its own key, for clients that pin it."""
     subject = labelled("server", names)
     made = leaf_extensions(builder(subject, key, PINNED_LIFETIME, now), names).issuer_name(subject)

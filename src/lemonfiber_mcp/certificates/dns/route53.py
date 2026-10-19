@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Amazon Route 53, by an access key allowed to change the hosted zone, each request signed with Signature Version 4."""
 
-import datetime
+import datetime as dt
 import hashlib
 import hmac
 import urllib.parse
@@ -60,9 +60,9 @@ class AccessKey:
     secret: str = field(repr=False)
 
 
-def utc_now() -> datetime.datetime:
+def utc_now() -> dt.datetime:
     """Return the time now, in UTC."""
-    return datetime.datetime.now(datetime.UTC)
+    return dt.datetime.now(dt.UTC)
 
 
 def digest(data: bytes) -> str:
@@ -79,7 +79,7 @@ def signed_headers(
     key: AccessKey,
     url: str,
     body: bytes,
-    now: datetime.datetime,
+    now: dt.datetime,
     region: str = SIGNING_REGION,
 ) -> dict[str, str]:
     """Return the headers a POST is signed with, as Signature Version 4 sets out."""
@@ -135,7 +135,7 @@ class Route53:
         key: AccessKey,
         zone: str,
         region: str = "",
-        clock: Callable[[], datetime.datetime] = utc_now,
+        clock: Callable[[], dt.datetime] = utc_now,
     ) -> None:
         """Hold the access key, the hosted zone, the partition its region sits in, and the clock requests are dated by."""
         self._key = key

@@ -2,7 +2,7 @@
 """Keys and certificates: a root that signs only for its names, what it issues, a pinned one, and the state they live in."""
 
 import contextlib
-import datetime
+import datetime as dt
 import hashlib
 import ipaddress
 import os
@@ -22,7 +22,7 @@ from lemonfiber_mcp.certificates.settings import KeyType, Name
 if TYPE_CHECKING:
     import pathlib
 
-NOW: Final = datetime.datetime(2026, 10, 9, tzinfo=datetime.UTC)
+NOW: Final = dt.datetime(2026, 10, 9, tzinfo=dt.UTC)
 NAMES: Final = ("mcp.home.example", ipaddress.ip_address("192.168.1.42"))
 HOST_ONLY: Final[tuple[Name, ...]] = ("mcp.home.example",)
 ADDRESS_ONLY: Final[tuple[Name, ...]] = (ipaddress.ip_address("192.168.1.42"),)
@@ -40,7 +40,7 @@ def identity(name: Name) -> x509.DNSName | x509.IPAddress:
     return x509.DNSName(name) if isinstance(name, str) else x509.IPAddress(name)
 
 
-def verified(root: x509.Certificate, leaf: x509.Certificate, name: Name, now: datetime.datetime) -> bool:
+def verified(root: x509.Certificate, leaf: x509.Certificate, name: Name, now: dt.datetime) -> bool:
     """Tell whether cryptography's verifier accepts a leaf for a name under a root."""
     verifier = (
         verification.PolicyBuilder()
@@ -85,7 +85,7 @@ def handshaken(
 
 def accepted(names: tuple[Name, ...], leaf_names: tuple[Name, ...], held: pathlib.Path) -> tuple[bool, bool]:
     """Return whether each validator accepts a leaf for `leaf_names` signed by a root made for `names`."""
-    now = datetime.datetime.now(datetime.UTC)
+    now = dt.datetime.now(dt.UTC)
     signer = making.generated(KeyType.EC_P384)
     root = making.root(names, signer, now)
     key = making.generated(KeyType.EC_P256)
@@ -164,7 +164,7 @@ def test_every_address_and_every_host_name_are_excluded_whole() -> None:
 
 
 def test_a_root_vouches_for_tls_servers_and_no_client() -> None:
-    now = datetime.datetime.now(datetime.UTC)
+    now = dt.datetime.now(dt.UTC)
     signer = making.generated(KeyType.EC_P384)
     root = making.root(HOST_ONLY, signer, now)
     assert list(root.extensions.get_extension_for_class(x509.ExtendedKeyUsage).value) == [

@@ -10,7 +10,7 @@ where Pebble reaches this machine's loopback.
 
 import asyncio
 import contextlib
-import datetime
+import datetime as dt
 import json
 import logging
 import os
@@ -53,7 +53,7 @@ HTTP_PORT: Final = 5002
 """The ports Pebble validates TLS-ALPN-01 and HTTP-01 on, the same for every name."""
 EVERYWHERE: Final = "0.0.0.0"  # The tests' TLS-ALPN-01 server, reached by Pebble from wherever it runs.
 LOOPBACK: Final = "127.0.0.1"
-NOW: Final = datetime.datetime(2026, 10, 9, tzinfo=datetime.UTC)
+NOW: Final = dt.datetime(2026, 10, 9, tzinfo=dt.UTC)
 PEBBLE: Final = os.environ.get("PEBBLE_DIRECTORY", "")
 ROOTS: Final = os.environ.get("PEBBLE_ROOTS", "")
 CHALLTESTSRV: Final = os.environ.get("PEBBLE_CHALLTESTSRV", "")
@@ -172,7 +172,7 @@ async def answering(tmp_path: pathlib.Path, place: Place) -> AsyncIterator[alpn.
         yield pending
 
 
-async def obtained(source: acme.AcmeSource, now: datetime.datetime) -> Served:
+async def obtained(source: acme.AcmeSource, now: dt.datetime) -> Served:
     """Obtain in a thread, as the server does, while this loop answers the authority."""
     return await anyio.to_thread.run_sync(source.obtain, now)
 
@@ -211,7 +211,7 @@ async def test_the_first_certificate_is_issued_by_tls_alpn_01_and_kept(
 ) -> None:
     caplog.set_level(logging.INFO)
     source = source_of(tmp_path, settings_of(), answering, place.names)
-    now = datetime.datetime.now(datetime.UTC)
+    now = dt.datetime.now(dt.UTC)
     assert source.first(now).standing_in
     served = await obtained(source, now)
     assert not served.standing_in
@@ -243,7 +243,7 @@ async def test_the_first_certificate_is_issued_by_http_01_on_port_80_opened_for_
     monkeypatch.setattr(http01, "PORT", HTTP_PORT)
     monkeypatch.setattr(http01, "EVERYWHERE", place.dual_stack)
     source = source_of(tmp_path, settings_of(Challenge.HTTP_01), names=place.names)
-    served = await obtained(source, datetime.datetime.now(datetime.UTC))
+    served = await obtained(source, dt.datetime.now(dt.UTC))
     assert making_covered(served) == set(place.names)
     assert closed(place.reached, HTTP_PORT)
 
@@ -256,8 +256,8 @@ async def test_the_authority_is_asked_when_to_renew(
     answering: alpn.Challenges,
 ) -> None:
     source = source_of(tmp_path, settings_of(), answering, place.names)
-    first = await obtained(source, datetime.datetime.now(datetime.UTC))
-    due = cast("datetime.datetime", source.due(first))
+    first = await obtained(source, dt.datetime.now(dt.UTC))
+    due = cast("dt.datetime", source.due(first))
     assert first.leaf.not_valid_before_utc < due < first.expires
 
 
@@ -269,16 +269,16 @@ async def test_a_certificate_is_renewed_when_the_authority_says(
     answering: alpn.Challenges,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    said = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=2)
+    said = dt.datetime.now(dt.UTC) + dt.timedelta(days=2)
 
-    def saying(_: client.ClientV2, __: bytes) -> tuple[datetime.datetime | None, datetime.datetime]:
-        return said, said - datetime.timedelta(days=1)
+    def saying(_: client.ClientV2, __: bytes) -> tuple[dt.datetime | None, dt.datetime]:
+        return said, said - dt.timedelta(days=1)
 
     monkeypatch.setattr(client.ClientV2, "renewal_time", saying)
     source = source_of(tmp_path, settings_of(), answering, place.names)
-    first = await obtained(source, datetime.datetime.now(datetime.UTC))
+    first = await obtained(source, dt.datetime.now(dt.UTC))
     assert source.due(first) == said
-    assert await obtained(source, said - datetime.timedelta(seconds=1)) == first
+    assert await obtained(source, said - dt.timedelta(seconds=1)) == first
     renewed = await obtained(source, said)
     assert renewed.fingerprint != first.fingerprint
 
@@ -291,12 +291,12 @@ async def test_a_certificate_is_renewed_with_a_third_left_where_the_authority_sa
     answering: alpn.Challenges,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    def silent(_: client.ClientV2, __: bytes) -> tuple[datetime.datetime | None, datetime.datetime]:
-        return None, datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=6)
+    def silent(_: client.ClientV2, __: bytes) -> tuple[dt.datetime | None, dt.datetime]:
+        return None, dt.datetime.now(dt.UTC) + dt.timedelta(hours=6)
 
     monkeypatch.setattr(client.ClientV2, "renewal_time", silent)
     source = source_of(tmp_path, settings_of(), answering, place.names)
-    first = await obtained(source, datetime.datetime.now(datetime.UTC))
+    first = await obtained(source, dt.datetime.now(dt.UTC))
     lifetime = first.leaf.not_valid_after_utc - first.leaf.not_valid_before_utc
     assert source.due(first) == first.leaf.not_valid_after_utc - lifetime / 3
 
@@ -319,7 +319,7 @@ async def test_an_authority_requiring_a_binding_issues_with_one(
     answering: alpn.Challenges,
 ) -> None:
     source = source_of(tmp_path, settings_of(bound=True), answering, place.names)
-    now = datetime.datetime.now(datetime.UTC)
+    now = dt.datetime.now(dt.UTC)
     assert source.first(now).standing_in
     assert not (await obtained(source, now)).standing_in
 
@@ -334,7 +334,7 @@ async def test_an_order_that_fails_is_tried_again_after_a_minute_then_two(
     monkeypatch.setattr(http01, "PORT", HTTP_PORT + 1000)
     monkeypatch.setattr(http01, "EVERYWHERE", place.dual_stack)
     source = source_of(tmp_path, settings_of(Challenge.HTTP_01), names=place.names)
-    now = datetime.datetime.now(datetime.UTC)
+    now = dt.datetime.now(dt.UTC)
     with pytest.raises(
         CertificateError,
         match=f"could not validate {re.escape(place.name)}: urn:ietf:params:acme:error",
@@ -359,7 +359,7 @@ async def test_an_account_whose_record_is_lost_is_found_again_by_its_key(
     place: Place,
     answering: alpn.Challenges,
 ) -> None:
-    now = datetime.datetime.now(datetime.UTC)
+    now = dt.datetime.now(dt.UTC)
     await obtained(source_of(tmp_path, settings_of(), answering, place.names), now)
     record = next((tmp_path / "state" / acme.ACCOUNT).iterdir()) / acme.ACCOUNT_RECORD
     known = json.loads(record.read_text(encoding="utf-8"))
@@ -422,7 +422,7 @@ async def test_a_certificate_is_issued_by_dns_01_through_the_operators_program(
         random.Random(0),
         dns=answering,
     )
-    served = await obtained(source, datetime.datetime.now(datetime.UTC))
+    served = await obtained(source, dt.datetime.now(dt.UTC))
     assert making_covered(served) == set(names)
     for name in names:
         with pytest.raises(dns.exception.DNSException):
@@ -451,12 +451,12 @@ def test_a_directory_that_cannot_be_reached_at_start_leaves_a_certificate_standi
 @pytest.mark.parametrize(
     ("asked", "after"),
     [
-        ("120", datetime.timedelta(seconds=120)),
-        (" 7 ", datetime.timedelta(seconds=7)),
-        ("Fri, 09 Oct 2026 01:00:00 GMT", datetime.timedelta(hours=1)),
+        ("120", dt.timedelta(seconds=120)),
+        (" 7 ", dt.timedelta(seconds=7)),
+        ("Fri, 09 Oct 2026 01:00:00 GMT", dt.timedelta(hours=1)),
     ],
 )
-def test_a_retry_after_is_read_as_seconds_or_a_time(asked: str, after: datetime.timedelta) -> None:
+def test_a_retry_after_is_read_as_seconds_or_a_time(asked: str, after: dt.timedelta) -> None:
     assert acme_protocol.later_of(asked, NOW) == NOW + after
 
 
@@ -502,8 +502,8 @@ def test_a_refusal_asking_to_wait_is_kept() -> None:
         pytest.raises(messages.Error, match="rateLimited"),
     ):
         network.get(address)
-    waited = cast("datetime.datetime", network.retry_after) - datetime.datetime.now(datetime.UTC)
-    assert datetime.timedelta(seconds=55) < waited <= datetime.timedelta(seconds=60)
+    waited = cast("dt.datetime", network.retry_after) - dt.datetime.now(dt.UTC)
+    assert dt.timedelta(seconds=55) < waited <= dt.timedelta(seconds=60)
 
 
 @pytest.mark.parametrize(

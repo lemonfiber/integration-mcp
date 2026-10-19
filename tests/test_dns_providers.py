@@ -2,7 +2,7 @@
 """Each DNS provider talking to a remote API, against a stand-in of that API: what it writes, what it removes, and how it refuses."""
 
 import base64
-import datetime
+import datetime as dt
 import json
 import time
 from http import HTTPMethod
@@ -272,7 +272,7 @@ def test_duckdns_refuses_a_name_that_is_not_its_own_and_an_update_it_did_not_tak
     assert CREDENTIAL not in str(refused.value)
 
 
-MOMENT: Final = datetime.datetime(2026, 10, 9, 12, tzinfo=datetime.UTC)
+MOMENT: Final = dt.datetime(2026, 10, 9, 12, tzinfo=dt.UTC)
 KEY: Final = route53.AccessKey("AKIDEXAMPLE", CREDENTIAL)
 
 
@@ -317,7 +317,7 @@ def test_route53_signs_as_amazon_documents_it() -> None:
         route53.AccessKey("AKIDEXAMPLE", "wJalrXUtnFEMI/K7MDENG+bPxRfiCYEXAMPLEKEY"),
         "https://route53.amazonaws.com/2013-04-01/hostedzone/Z123/rrset/",
         b"",
-        datetime.datetime(2015, 8, 30, 12, 36, tzinfo=datetime.UTC),
+        dt.datetime(2015, 8, 30, 12, 36, tzinfo=dt.UTC),
     )
     assert signed["X-Amz-Date"] == "20150830T123600Z"
     assert (
@@ -332,7 +332,7 @@ def test_route53_is_made_from_its_settings(tmp_path: pathlib.Path) -> None:
         route53.HOSTED_ZONE_ID: "Z123",
     }
     assert isinstance(route53.Route53.from_environment(environment), route53.Route53)
-    assert route53.utc_now().tzinfo is datetime.UTC
+    assert route53.utc_now().tzinfo is dt.UTC
 
 
 @pytest.mark.parametrize(

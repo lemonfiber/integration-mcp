@@ -9,7 +9,7 @@ attempt is tried again after a minute, doubling to six hours with jitter, and
 never sooner than the authority asked.
 """
 
-import datetime
+import datetime as dt
 import hashlib
 import json
 import logging
@@ -50,10 +50,10 @@ ACCOUNT_KEY: Final = "key.pem"
 ACCOUNT_RECORD: Final = "account.json"
 STANDING_IN: Final = "standing-in"
 """Where the certificate standing in until the first is issued is kept, beside the state's own."""
-ORDER_TIMEOUT: Final = datetime.timedelta(minutes=3)
+ORDER_TIMEOUT: Final = dt.timedelta(minutes=3)
 """How long an order is waited on before it counts as failed."""
-FIRST_RETRY: Final = datetime.timedelta(minutes=1)
-LAST_RETRY: Final = datetime.timedelta(hours=6)
+FIRST_RETRY: Final = dt.timedelta(minutes=1)
+LAST_RETRY: Final = dt.timedelta(hours=6)
 JITTER: Final = 0.1
 """How far either way a wait before trying again is moved, as a share of it, so servers do not all ask at once."""
 RENEWED_WITH: Final = 1 / 3
@@ -66,16 +66,16 @@ logger = logging.getLogger(__name__)
 class Waiting:
     """When a failed attempt is tried again, and how long the wait before it was."""
 
-    until: datetime.datetime
-    wait: datetime.timedelta
+    until: dt.datetime
+    wait: dt.timedelta
 
 
-def utc(moment: datetime.datetime) -> datetime.datetime:
+def utc(moment: dt.datetime) -> dt.datetime:
     """Return a moment in UTC, one without a zone read as this machine's local time."""
-    return moment.astimezone(datetime.UTC)
+    return moment.astimezone(dt.UTC)
 
 
-def local_deadline(now: datetime.datetime) -> datetime.datetime:
+def local_deadline(now: dt.datetime) -> dt.datetime:
     """Return when an order stops being waited on, in this machine's local time without a zone, as the client reads it."""
     return (now + ORDER_TIMEOUT).astimezone().replace(tzinfo=None)
 
@@ -114,9 +114,9 @@ class AcmeSource:
         self._account_dir = tls.state / ACCOUNT / hashlib.sha256(settings.directory.encode()).hexdigest()
         self._rng = random.SystemRandom() if rng is None else rng
         self._waiting: Waiting | None = None
-        self._asked: datetime.datetime | None = None
-        self._due: datetime.datetime | None = None
-        self._ask_again: datetime.datetime | None = None
+        self._asked: dt.datetime | None = None
+        self._due: dt.datetime | None = None
+        self._ask_again: dt.datetime | None = None
         self._standing_in: Served | None = None
 
     @property
@@ -125,7 +125,7 @@ class AcmeSource:
         return self._leaf_dir / RENEWAL
 
     @property
-    def waiting_until(self) -> datetime.datetime | None:
+    def waiting_until(self) -> dt.datetime | None:
         """Return when a failed attempt is tried again, or None where the last attempt did not fail."""
         return None if self._waiting is None else self._waiting.until
 
@@ -133,7 +133,7 @@ class AcmeSource:
         """Return nothing beyond the mode: the authority's terms are logged once, when an account is registered."""
         return []
 
-    def first(self, now: datetime.datetime) -> Served:
+    def first(self, now: dt.datetime) -> Served:
         """Return the kept certificate where it still serves, and one standing in where it does not.
 
         The directory is asked once here, so a start against an authority that
@@ -149,19 +149,19 @@ class AcmeSource:
             raise CertificateError(msg)
         return self._kept(now) or self._stand_in(now)
 
-    def due(self, served: Served, /) -> datetime.datetime | None:
+    def due(self, served: Served, /) -> dt.datetime | None:
         """Return when the certificate is renewed: when the authority said, or once a third of its lifetime is left."""
         if served.standing_in:
             return None
         lifetime = served.leaf.not_valid_after_utc - served.leaf.not_valid_before_utc
         return self._due or served.leaf.not_valid_after_utc - lifetime * RENEWED_WITH
 
-    def obtain(self, now: datetime.datetime) -> Served:
+    def obtain(self, now: dt.datetime) -> Served:
         """Return the certificate to serve now: the kept one until it is due, and a new one ordered when it is."""
         kept = self._kept(now)
         if kept is not None:
             self._asked_for_renewal(kept, now)
-            if now < cast("datetime.datetime", self.due(kept)):
+            if now < cast("dt.datetime", self.due(kept)):
                 return kept
         if self._waiting is not None and now < self._waiting.until:
             return kept or self._stand_in(now)
@@ -174,11 +174,11 @@ class AcmeSource:
         self._waiting = None
         return served
 
-    def _kept(self, now: datetime.datetime) -> Served | None:
+    def _kept(self, now: dt.datetime) -> Served | None:
         kept = kept_leaf(self._leaf_dir, self._tls.names, now)
         return None if kept is None else Served(self._leaf_dir / CHAIN, self._leaf_dir / KEY, kept[0])
 
-    def _stand_in(self, now: datetime.datetime) -> Served:
+    def _stand_in(self, now: dt.datetime) -> Served:
         """Return the certificate standing in until the first is issued, made once, kept nowhere."""
         if self._standing_in is None:
             held = self._tls.state / STANDING_IN / self._tls.first
@@ -189,12 +189,12 @@ class AcmeSource:
             self._standing_in = Served(held / CHAIN, held / KEY, leaf, standing_in=True)
         return self._standing_in
 
-    def _waited(self, now: datetime.datetime) -> None:
+    def _waited(self, now: dt.datetime) -> None:
         wait = FIRST_RETRY if self._waiting is None else min(self._waiting.wait * 2, LAST_RETRY)
         until = now + wait * (1 + self._rng.uniform(-JITTER, JITTER))
         self._waiting = Waiting(until if self._asked is None else max(until, self._asked), wait)
 
-    def _asked_for_renewal(self, kept: Served, now: datetime.datetime) -> None:
+    def _asked_for_renewal(self, kept: Served, now: dt.datetime) -> None:
         """Ask the authority when to renew the kept certificate, where it is time to ask again."""
         if self._ask_again is not None and now < self._ask_again:
             return
@@ -249,7 +249,7 @@ class AcmeSource:
         terms = cast("Any", acme.directory).meta.terms_of_service
         logger.info("An ACME account is registered, agreeing to the authority's terms: %s", terms)
 
-    def _ordered(self, now: datetime.datetime) -> Served:
+    def _ordered(self, now: dt.datetime) -> Served:
         acme: client.ClientV2 | None = None
         key = making.generated(self._tls.key_type)
         try:

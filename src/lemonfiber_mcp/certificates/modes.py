@@ -7,7 +7,7 @@ start and again on every check, so a renewal, a replaced root or file, or a
 command run beside the server is taken without a restart.
 """
 
-import datetime
+import datetime as dt
 import fnmatch
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Final, Protocol, cast
@@ -26,11 +26,11 @@ if TYPE_CHECKING:
     from lemonfiber_mcp.certificates.making import PrivateKey
     from lemonfiber_mcp.certificates.settings import Name, Tls
 
-ISSUED_RENEWED_WITH: Final = datetime.timedelta(days=10)
+ISSUED_RENEWED_WITH: Final = dt.timedelta(days=10)
 """How much of an issued certificate's life is left when the private root issues the next."""
-ROOT_REPLACED_WITH: Final = datetime.timedelta(days=365)
+ROOT_REPLACED_WITH: Final = dt.timedelta(days=365)
 """How much of a private root's life is left when its replacement is made."""
-ROOT_SWITCHED_WITH: Final = datetime.timedelta(days=30)
+ROOT_SWITCHED_WITH: Final = dt.timedelta(days=30)
 """How much of a private root's life is left when the server switches to its replacement unasked."""
 CERTIFICATES: Final = "certificates"
 CA: Final = "ca"
@@ -60,7 +60,7 @@ class Served:
     """Whether it stands in until the first certificate is issued, which no client trusts."""
 
     @property
-    def expires(self) -> datetime.datetime:
+    def expires(self) -> dt.datetime:
         """Return when the leaf stops being valid."""
         return self.leaf.not_valid_after_utc
 
@@ -75,11 +75,11 @@ class Source(Protocol):
 
     mode: Mode
 
-    def first(self, now: datetime.datetime) -> Served:
+    def first(self, now: dt.datetime) -> Served:
         """Return the certificate to start serving with, before the server answers anything."""
         ...
 
-    def obtain(self, now: datetime.datetime) -> Served:
+    def obtain(self, now: dt.datetime) -> Served:
         """Return the certificate to serve now, making or reading a new one where one is due."""
         ...
 
@@ -87,7 +87,7 @@ class Source(Protocol):
         """Return what the start-up log and every change say of this source beyond its mode."""
         ...
 
-    def due(self, served: Served, /) -> datetime.datetime | None:
+    def due(self, served: Served, /) -> dt.datetime | None:
         """Return when the source makes the next certificate unasked, or None where it never does."""
         ...
 
@@ -144,11 +144,11 @@ class Files:
         self._key = cast("pathlib.Path", tls.private_key)
         self._names = tls.names
 
-    def first(self, now: datetime.datetime) -> Served:
+    def first(self, now: dt.datetime) -> Served:
         """Return the certificate to start serving with: the one this source obtains."""
         return self.obtain(now)
 
-    def obtain(self, now: datetime.datetime) -> Served:
+    def obtain(self, now: dt.datetime) -> Served:
         """Return the operator's certificate, refusing one that cannot be served, by what is wrong with it."""
         try:
             chain = chain_of(self._certificate)
@@ -172,7 +172,7 @@ class Files:
         """Return nothing beyond the mode: the operator knows their own certificate."""
         return []
 
-    def due(self, _: Served, /) -> datetime.datetime | None:
+    def due(self, _: Served, /) -> dt.datetime | None:
         """Return None: what renews the operator's files is the operator's."""
         return None
 
@@ -185,7 +185,7 @@ class Files:
 def kept_leaf(
     directory: pathlib.Path,
     names: tuple[Name, ...],
-    now: datetime.datetime,
+    now: dt.datetime,
 ) -> tuple[x509.Certificate, PrivateKey] | None:
     """Return the certificate kept in a directory and its key, where both are there, match, and cover exactly these names."""
     try:
@@ -218,11 +218,11 @@ class Pinned:
         self._made = False
         self._served: Served | None = None
 
-    def first(self, now: datetime.datetime) -> Served:
+    def first(self, now: dt.datetime) -> Served:
         """Return the certificate to start serving with: the one this source obtains."""
         return self.obtain(now)
 
-    def obtain(self, now: datetime.datetime) -> Served:
+    def obtain(self, now: dt.datetime) -> Served:
         """Return the kept certificate, or make one where none is kept for these names."""
         kept = kept_leaf(self._directory, self._names, now)
         if kept is not None:
@@ -233,7 +233,7 @@ class Pinned:
         self._served = keep(self._directory, [making.pinned(self._names, key, now)], key)
         return self._served
 
-    def replace(self, now: datetime.datetime) -> Served:
+    def replace(self, now: dt.datetime) -> Served:
         """Make a new certificate in place of the kept one, on the operator's command."""
         self._made = True
         key = making.generated(self._key_type)
@@ -249,7 +249,7 @@ class Pinned:
             said.append("This certificate is new: give every client this fingerprint again.")
         return said
 
-    def due(self, _: Served, /) -> datetime.datetime | None:
+    def due(self, _: Served, /) -> dt.datetime | None:
         """Return None: a pinned certificate is replaced only on command, since a new one breaks every pin."""
         return None
 
@@ -284,7 +284,7 @@ class PrivateCa:
         names: tuple[Name, ...],
         certificate: str,
         key: str,
-        now: datetime.datetime,
+        now: dt.datetime,
     ) -> x509.Certificate:
         signer = making.generated(ROOT_KEY_TYPE)
         made = making.root(names, signer, now)
@@ -303,7 +303,7 @@ class PrivateCa:
         (self._ca / NEXT_ROOT).replace(self._ca / ROOT)
         (self._directory / CHAIN).unlink(missing_ok=True)
 
-    def roots(self, now: datetime.datetime) -> tuple[x509.Certificate, PrivateKey]:
+    def roots(self, now: dt.datetime) -> tuple[x509.Certificate, PrivateKey]:
         """Return the root in force, making, replacing or switching to one as its life and the names say."""
         held = self._held(ROOT, ROOT_KEY)
         if held is None:
@@ -322,11 +322,11 @@ class PrivateCa:
         self._root, self._next = held[0], replacement
         return held
 
-    def first(self, now: datetime.datetime) -> Served:
+    def first(self, now: dt.datetime) -> Served:
         """Return the certificate to start serving with: the one this source obtains."""
         return self.obtain(now)
 
-    def obtain(self, now: datetime.datetime) -> Served:
+    def obtain(self, now: dt.datetime) -> Served:
         """Return the certificate the root issued, issuing the next once ten days are left or the root changed."""
         root, signer = self.roots(now)
         names = tuple(name for name in self._names if name not in self._uncovered) or tuple(
@@ -343,7 +343,7 @@ class PrivateCa:
         key = making.generated(self._key_type)
         return keep(self._directory, [making.issued(names, key, root, signer, now)], key)
 
-    def replace(self, now: datetime.datetime) -> x509.Certificate:
+    def replace(self, now: dt.datetime) -> x509.Certificate:
         """Make a replacement root beside the one in force, on the operator's command."""
         self.roots(now)
         if self._next is None:
@@ -377,7 +377,7 @@ class PrivateCa:
             )
         return said
 
-    def due(self, served: Served, /) -> datetime.datetime | None:
+    def due(self, served: Served, /) -> dt.datetime | None:
         """Return when the root issues the next certificate: ten days before this one expires."""
         return served.expires - ISSUED_RENEWED_WITH
 

@@ -2,7 +2,7 @@
 """The server driven through the protocol against the stand-in stack, every call through the vendored client."""
 
 import base64
-import datetime
+import datetime as dt
 import json
 from typing import TYPE_CHECKING, Any, Final, cast
 
@@ -508,7 +508,7 @@ async def test_a_reading_is_acted_on_for_its_time_and_no_longer(
     stack: Stack,
     withholding: Withholding,
 ) -> None:
-    moment = [datetime.datetime(2026, 10, 9, tzinfo=datetime.UTC)]
+    moment = [dt.datetime(2026, 10, 9, tzinfo=dt.UTC)]
     stack.reply("/api/status", STATUS)
     async with AsyncClient(Address(stack.url, pin=stack.pin), Credential(KEY)) as client:
         held = Connection(client, withholding, clock=lambda: moment[0])
@@ -516,13 +516,13 @@ async def test_a_reading_is_acted_on_for_its_time_and_no_longer(
         moment[0] += connection_module.FRESH_FOR
         await held.call("read_status", {})
         assert len(stack.asked("/api/capabilities")) == 1
-        moment[0] += datetime.timedelta(microseconds=1)
+        moment[0] += dt.timedelta(microseconds=1)
         await held.call("read_status", {})
         assert len(stack.asked("/api/capabilities")) == 2
 
 
 def test_a_connections_clock_is_utc() -> None:
-    assert connection_module.utc_now().tzinfo is datetime.UTC
+    assert connection_module.utc_now().tzinfo is dt.UTC
 
 
 @pytest.mark.parametrize(
@@ -562,7 +562,7 @@ async def test_a_listing_that_moved_during_a_call_is_announced(
     await mcp_client.call_tool("read_version", {})
     assert not announced
     await mcp_client.list_tools()
-    monkeypatch.setattr(connection_module, "FRESH_FOR", datetime.timedelta(seconds=-1))
+    monkeypatch.setattr(connection_module, "FRESH_FOR", dt.timedelta(seconds=-1))
     stack.reply("/api/status", STATUS)
     await mcp_client.call_tool("read_status", {})
     assert not announced

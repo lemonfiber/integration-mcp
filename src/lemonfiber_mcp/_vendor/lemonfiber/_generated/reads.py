@@ -93,6 +93,8 @@ class Read(enum.StrEnum):
     """Answers with `plugins`."""
     WIRING = "wiring"
     """Answers with `wiring`."""
+    SETTINGS = "settings"
+    """Answers with `settings`."""
 
     @property
     def path(self) -> str:
@@ -188,6 +190,7 @@ READS: typing.Final[typing.Mapping[Read, Readable]] = types.MappingProxyType(
         ),
         Read.PLUGINS: Readable(("plugins",), ()),
         Read.WIRING: Readable(("wiring",), ()),
+        Read.SETTINGS: Readable(("settings",), ()),
     }
 )
 """What the contract says of each read answering with one envelope, in the order it lists them."""

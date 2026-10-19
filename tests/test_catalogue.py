@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Every read and key-callable action has its tools, every tool its words, and a credential is offered what it may use."""
 
-import datetime
+import datetime as dt
 import json
 import pathlib
 import types as builtin_types
@@ -40,7 +40,7 @@ pictures, what they are part-way through and playing, their search and its poste
 
 def capability_set(states: dict[str, CapabilityState], scope: CredentialScope = "operator") -> CapabilitySet:
     """Return a capability set as the client reads one, for a credential of a scope."""
-    return CapabilitySet(builtin_types.MappingProxyType(states), datetime.datetime.now(datetime.UTC), scope)
+    return CapabilitySet(builtin_types.MappingProxyType(states), dt.datetime.now(dt.UTC), scope)
 
 
 def contract(name: str) -> list[dict[str, object]]:

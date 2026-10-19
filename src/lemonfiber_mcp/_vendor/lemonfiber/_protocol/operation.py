@@ -22,13 +22,17 @@ from lemonfiber._protocol.calls import (
     bundle_call,
     capabilities_call,
     collect_call,
+    device_key_challenge_call,
+    device_keys_call,
     job_call,
     keys_call,
     logs_call,
     mint_call,
     picture_call,
     read_call,
+    register_device_key_call,
     revoke_call,
+    revoke_device_key_call,
     session_call,
 )
 from lemonfiber.envelope import expect
@@ -37,6 +41,9 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Mapping, Sequence
 
     from lemonfiber._generated import (
+        DeviceChallengeEnvelope,
+        DeviceKeyEnvelope,
+        DeviceKeysEnvelope,
         Envelope,
         KeyClaimEnvelope,
         KeysEnvelope,
@@ -47,6 +54,7 @@ if TYPE_CHECKING:
     from lemonfiber._protocol.calls import Json, Query
     from lemonfiber.capabilities import CapabilitySet
     from lemonfiber.credential import Session
+    from lemonfiber.device_keys import Registering
     from lemonfiber.files import BundleFile, Picture
     from lemonfiber.jobs import JobStanding
     from lemonfiber.keys import Minting
@@ -134,3 +142,36 @@ def revoke(name: str) -> Operation[KeysEnvelope]:
 def collection(claim: str) -> Operation[MintedKey]:
     """Collect the key a claim was minted for, its secret in this answer and in no other."""
     return Operation(collect_call(claim), collected_of)
+
+
+def register_device_key(registering: Registering) -> Operation[DeviceKeyEnvelope]:
+    """Register a phone's key pair as a device key, answered with the device key as registered."""
+    return Operation(
+        register_device_key_call(registering),
+        lambda answer: expect(envelope_of(answer), "device-key"),
+    )
+
+
+def device_keys() -> Operation[DeviceKeysEnvelope]:
+    """Ask for the operator's device keys, revoked ones included."""
+    return Operation(
+        device_keys_call(),
+        lambda answer: expect(envelope_of(answer), "device-keys"),
+        again=True,
+    )
+
+
+def device_key_challenge(name: str) -> Operation[DeviceChallengeEnvelope]:
+    """Ask a challenge for one device key, good for one mint from this credential within a minute."""
+    return Operation(
+        device_key_challenge_call(name),
+        lambda answer: expect(envelope_of(answer), "device-challenge"),
+    )
+
+
+def revoke_device_key(name: str) -> Operation[DeviceKeysEnvelope]:
+    """Revoke one device key by its name, answered with the device keys as they now stand."""
+    return Operation(
+        revoke_device_key_call(name),
+        lambda answer: expect(envelope_of(answer), "device-keys"),
+    )

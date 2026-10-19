@@ -18,6 +18,7 @@ __all__ = [
     "ASKABLE_ID_POSTER",
     "BUNDLE",
     "CAPABILITIES",
+    "DEVICE_KEYS",
     "EVENTS",
     "HELD_ID_BACKDROP",
     "HELD_ID_POSTER",
@@ -46,6 +47,9 @@ CAPABILITIES: Final = "/api/capabilities"
 
 KEYS: Final = "/api/keys"
 """Where integration keys are listed and minted, and each revoked by its name."""
+
+DEVICE_KEYS: Final = "/api/device-keys"
+"""Where the operator's device keys are listed and registered, and each challenged and revoked by its name."""
 
 KEY_CLAIMS: Final = "/api/keys/claim"
 """Where a key minted as a claim is collected, with the claim alone."""

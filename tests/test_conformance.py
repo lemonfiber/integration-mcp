@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Every tool, resource and answer the server writes holds to the MCP specification's own schema."""
 
-import datetime
+import datetime as dt
 import pathlib
 import types as builtin_types
 from typing import TYPE_CHECKING, Any, Final
@@ -49,7 +49,7 @@ def everything_offered(audience: Audience) -> dict[str, types.Tool]:
     states: dict[str, CapabilityState] = {shape.capability: "available" for shape in TOOLS}
     held = CapabilitySet(
         builtin_types.MappingProxyType(states),
-        datetime.datetime.now(datetime.UTC),
+        dt.datetime.now(dt.UTC),
         "operator",
     )
     return {**catalogue.offered(held, audience), **catalogue.connection_only(audience)}
