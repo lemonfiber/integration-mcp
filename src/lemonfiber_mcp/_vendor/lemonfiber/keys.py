@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """What an integration key is minted with, and the key link a key minted as a claim is collected with."""
 
-import datetime
+import datetime as dt
 import re
 import time
 import urllib.parse
@@ -125,7 +125,7 @@ class KeyLink:
         return self._stack
 
     @property
-    def lapses(self) -> datetime.datetime:
+    def lapses(self) -> dt.datetime:
         """Return when the claim stops collecting the key, in UTC."""
         return self._lapses
 
@@ -143,11 +143,11 @@ class KeyLink:
         return f"KeyLink({self._address.base!r}, stack={self._stack!r}, lapses={self._lapses.isoformat()!r})"
 
 
-def lapsing(written: str) -> datetime.datetime:
+def lapsing(written: str) -> dt.datetime:
     """Return when a key link says its claim lapses, refusing what is not whole seconds a date can hold."""
     try:
         if WHOLE_SECONDS.match(written):
-            return datetime.datetime.fromtimestamp(int(written), tz=datetime.UTC)
+            return dt.datetime.fromtimestamp(int(written), tz=dt.UTC)
     except OverflowError, ValueError, OSError:
         pass
     msg = "A key link says when its claim lapses in whole seconds; this one does not."

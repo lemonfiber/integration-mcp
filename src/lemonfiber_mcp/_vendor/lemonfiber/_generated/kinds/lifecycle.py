@@ -9,9 +9,11 @@ import typing
 
 from ..shared.dashboard__lifecycle__status import Service
 from ..shared.lifecycle__migration import ConflictReport
+from ..shared.lifecycle__plugins__settings__substitution__update import Unvetted
 from ..shared.lifecycle__preview import Plan
 from ..shared.lifecycle__quality__reset__update import StackEdit
 from ..shared.lifecycle__status import Condition
+from ..shared.lifecycle__update import MoveOffered
 
 
 class LifecycleEnvelope(typing.TypedDict):
@@ -51,10 +53,18 @@ class LifecycleReport(typing.TypedDict):
     battery and nobody said to start anyway — and a run nobody is watching has to
     leave the reason somewhere a reader finds later.
     """
+    moves: typing.NotRequired[list[MoveOffered]]
+    """Each part this release installs as a plugin that the stack still runs as its own
+    service: a move in place on offer, named by every start and taken by none.
+    """
     offer: typing.NotRequired[str | None]
     """The offer a restart answers: the services it would restart, named so that a
     restart carrying it back is carried out against those services or refused.
     Absent for every other action.
+    """
+    passing: typing.NotRequired[str | None]
+    """Why the pass service is left out of the project a start writes, where the stream
+    guard is filled and it is. Absent for every other action.
     """
     plan: Plan
     """What the named forms came to: the profiles, the services they hold, and
@@ -92,10 +102,19 @@ class LifecycleReport(typing.TypedDict):
     """
     status: typing.NotRequired[int | None]
     """The exit status, absent for a rehearsal or a signalled process."""
+    swept: typing.NotRequired[list[str]]
+    """Every network the engine holds for the project that the project no longer
+    declares, by the engine's name: disconnected and taken away before a start, or
+    named and left by a rehearsal. Empty for every other action.
+    """
     switched: typing.NotRequired[Switched | None]
     """What narrowing moved, where the command was a switch. Absent for every
     other action, which is what tells a reader that nothing was left running
     on purpose.
+    """
+    unvetted: typing.NotRequired[Unvetted | None]
+    """The operator's overlay and every service it changes, where there is one: merged
+    over the project this run starts, and held to nothing lemonfiber vets.
     """
 
 

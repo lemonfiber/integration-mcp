@@ -7,6 +7,8 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.lifecycle__plugins__settings__substitution__update import Unvetted
+
 
 type Owner = OwnerCore | OwnerNamespace
 """Whose a setting or a secret is."""
@@ -100,6 +102,10 @@ class SettingsReport(typing.TypedDict):
     """Every secret a service's environment names, in name order, never with its value."""
     settings: list[SettingRead]
     """Every setting, in name order."""
+    unvetted: typing.NotRequired[Unvetted | None]
+    """The operator's overlay and every service it changes, where there is one: merged
+    over the project this run would start, and held to nothing lemonfiber vets.
+    """
 
 
 SecretRead = typing.TypedDict(

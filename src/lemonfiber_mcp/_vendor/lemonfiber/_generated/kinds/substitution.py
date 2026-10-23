@@ -7,6 +7,7 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.lifecycle__plugins__settings__substitution__update import Unvetted
 from ..shared.substitution__wiring import Unfilled
 
 
@@ -75,6 +76,10 @@ class SubstitutionReport(typing.TypedDict):
     """
     substitution: Substitution
     """The change itself, and what it would leave with nothing filling it."""
+    unvetted: typing.NotRequired[Unvetted | None]
+    """The operator's overlay and every service it changes, where there is one: merged
+    over the project this choice would write, and held to nothing lemonfiber vets.
+    """
 
 
 __all__ = [

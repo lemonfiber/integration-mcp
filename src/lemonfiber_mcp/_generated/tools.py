@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Every tool the server offers, as the contract describes it.
 
-Generated from the contract lemonfiber 675430a7b93f8a4abbd859b5fe7702f836bd3207 published, vendored in `contract/web-api/`.
+Generated from the contract lemonfiber 2fdb17698fa8603b4fd6649e0109bd01705f8b3b published, vendored in `contract/web-api/`.
 Do not edit: `just generate` rewrites it, and CI fails on any difference.
 """
 
@@ -12,7 +12,7 @@ from lemonfiber_mcp.shapes import Reach, ToolShape
 API_VERSION: Final = 1
 """The `api_version` the tools were generated for."""
 
-CONTRACT: Final = '675430a7b93f8a4abbd859b5fe7702f836bd3207'
+CONTRACT: Final = '2fdb17698fa8603b4fd6649e0109bd01705f8b3b'
 """The lemonfiber revision whose contract the tools were generated from."""
 
 TOOLS: Final[tuple[ToolShape, ...]] = (
@@ -623,11 +623,10 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
                                               'description': 'The group of checks, or the one check, a diagnosis is '
                                                              'narrowed to.',
                                               'type': ['string', 'null']},
-                                     'disruptive': {'default': False,
-                                                    'description': 'Whether the checks that disturb the running system '
+                                     'disruptive': {'description': 'Whether the checks that disturb the running system '
                                                                    'are included.',
                                                     'type': 'boolean'}},
-                      'required': [],
+                      'required': ['disruptive'],
                       'additionalProperties': False},
         resource=None,
         read_only=False,

@@ -31,6 +31,8 @@ class MusicReport(typing.TypedDict):
     still recorded first, so it is remembered even when the service cannot be reached.
     """
 
+    changes: str
+    """What the choice changes, in the stack's words."""
     choice: MusicChoice
     """The format chosen, what it means, and what it costs."""
     disposition: Disposition

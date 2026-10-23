@@ -156,6 +156,16 @@ PLUGIN: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
         403,
         "Raised when a plugin that is not first-party declares a service replacing one the stack ships.",
     ),
+    "PLUGIN-44": ListedRefusal(
+        "NOTHING_TO_RUN",
+        404,
+        "Raised when a run names a plugin that is not installed, or a demand recipe the plugin does not declare.",
+    ),
+    "PLUGIN-45": ListedRefusal(
+        "MANIFEST_UNKEPT",
+        409,
+        "Raised when the manifest kept for an installed plugin is missing or is not the one that was installed, so its demand recipes cannot be read.",
+    ),
     "PLUGIN-5": ListedRefusal("ALREADY", 400, "The plugin is installed already."),
     "PLUGIN-6": ListedRefusal(
         "NOWHERE", 500, "There is no stack on this machine to put a plugin's container in."

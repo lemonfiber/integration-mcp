@@ -43,12 +43,27 @@ class Elsewhere(typing.TypedDict):
 
 
 class Leaving(typing.TypedDict):
-    """Everything that leaves this machine: lemonfiber's own requests, and the stack's."""
+    """Everything that leaves this machine: lemonfiber's own requests, those it makes on an
+    installed plugin's behalf, and the stack's.
+    """
 
+    on_behalf: list[OnBehalf]
+    """Every request lemonfiber makes on an installed plugin's behalf."""
     ours: list[Outbound]
     """Every request lemonfiber makes on its own account, in a fixed order."""
     theirs: list[Elsewhere]
     """The requests made by services this stack runs, attributed to them."""
+
+
+class OnBehalf(typing.TypedDict):
+    """A request lemonfiber makes on an installed plugin's behalf, attributed to it."""
+
+    destination: str
+    """Where it goes, as the plugin declared it."""
+    plugin: str
+    """The plugin that declared it, by its id."""
+    purpose: str
+    """Why it may be made."""
 
 
 class Outbound(typing.TypedDict):
@@ -130,6 +145,7 @@ draws it without ever being sent there.
 __all__ = [
     "Elsewhere",
     "Leaving",
+    "OnBehalf",
     "Outbound",
     "OutboundEnvelope",
     "OutboundReach",

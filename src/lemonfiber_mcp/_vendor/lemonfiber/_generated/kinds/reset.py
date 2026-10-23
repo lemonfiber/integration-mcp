@@ -27,6 +27,8 @@ class ResetReport(typing.TypedDict):
 
     confirmed: bool
     """Whether the reset was carried out, or only previewed pending confirmation."""
+    offer: str
+    """The name of this reading, which the reset takes as its yes."""
     rehearsed: bool
     """Whether this was a rehearsal: what would have happened, with none of it done.
 

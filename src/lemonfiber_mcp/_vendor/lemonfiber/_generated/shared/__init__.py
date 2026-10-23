@@ -35,10 +35,14 @@ from . import held__part_way__title as _held__part_way__title
 from . import import___migration__seed__status__stuck as _import___migration__seed__status__stuck
 from . import key_claim__keys__minted_key as _key_claim__keys__minted_key
 from . import lifecycle__migration as _lifecycle__migration
+from . import (
+    lifecycle__plugins__settings__substitution__update as _lifecycle__plugins__settings__substitution__update,
+)
 from . import lifecycle__preview as _lifecycle__preview
 from . import lifecycle__preview__status as _lifecycle__preview__status
 from . import lifecycle__quality__reset__update as _lifecycle__quality__reset__update
 from . import lifecycle__status as _lifecycle__status
+from . import lifecycle__update as _lifecycle__update
 from . import music__quality as _music__quality
 from . import music__upgrade as _music__upgrade
 from . import news__news_items as _news__news_items
@@ -76,10 +80,12 @@ from .held__part_way__title import *
 from .import___migration__seed__status__stuck import *
 from .key_claim__keys__minted_key import *
 from .lifecycle__migration import *
+from .lifecycle__plugins__settings__substitution__update import *
 from .lifecycle__preview import *
 from .lifecycle__preview__status import *
 from .lifecycle__quality__reset__update import *
 from .lifecycle__status import *
+from .lifecycle__update import *
 from .music__quality import *
 from .music__upgrade import *
 from .news__news_items import *
@@ -118,10 +124,12 @@ __all__ += _held__part_way__title.__all__
 __all__ += _import___migration__seed__status__stuck.__all__
 __all__ += _key_claim__keys__minted_key.__all__
 __all__ += _lifecycle__migration.__all__
+__all__ += _lifecycle__plugins__settings__substitution__update.__all__
 __all__ += _lifecycle__preview.__all__
 __all__ += _lifecycle__preview__status.__all__
 __all__ += _lifecycle__quality__reset__update.__all__
 __all__ += _lifecycle__status.__all__
+__all__ += _lifecycle__update.__all__
 __all__ += _music__quality.__all__
 __all__ += _music__upgrade.__all__
 __all__ += _news__news_items.__all__

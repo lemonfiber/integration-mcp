@@ -20,7 +20,7 @@ from lemonfiber._generated import CapabilityState, CredentialScope
 from lemonfiber.reads import ACTIONS
 
 if typing.TYPE_CHECKING:
-    import datetime
+    import datetime as dt
     from collections.abc import Mapping
 
     from lemonfiber.reads import Read
@@ -37,7 +37,7 @@ class CapabilitySet:
 
     states: Mapping[str, CapabilityState]
     """Each capability's path, to what it comes to for the credential that asked."""
-    read_at: datetime.datetime
+    read_at: dt.datetime
     """When the answer arrived, in UTC. A set not read again lately is an opinion, not a fact."""
     scope: CredentialScope
     """Whose credential asked: the operator, a `read` or `act` key, or a household member."""

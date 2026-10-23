@@ -16,6 +16,10 @@ from ...shared.dashboard__lifecycle__status import Service
 class Affected(typing.TypedDict):
     """One thing that is wrong, as the expanded summary lists it."""
 
+    acknowledged: typing.NotRequired[bool]
+    """Whether the operator has acknowledged it by declining its fix. It still stands
+    and is still counted.
+    """
     check: str
     """The check that raised it."""
     downstream: list[str]
