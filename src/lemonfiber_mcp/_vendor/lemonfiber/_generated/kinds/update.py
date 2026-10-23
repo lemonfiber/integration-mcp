@@ -7,7 +7,9 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.lifecycle__plugins__settings__substitution__update import Unvetted
 from ..shared.lifecycle__quality__reset__update import StackEdit
+from ..shared.lifecycle__update import MoveOffered
 from ..shared.update__version import Notes
 
 
@@ -23,6 +25,19 @@ that is the fact an operator weighs: a first-number change is where a project pu
 the work that breaks configurations, and the two behind it are where it puts the
 work that does not.
 """
+
+
+class StackMoveTaken(typing.TypedDict):
+    """A move in place this run took, or tried to take and could not."""
+
+    plugin: str
+    """The plugin the bundle installs."""
+    service: str
+    """The stack's own service it took, or would have taken, the place of."""
+    taken: bool
+    """Whether the plugin now runs in the service's place."""
+    why: typing.NotRequired[str | None]
+    """Why it was not taken, where it was not."""
 
 
 class StackUpdateReport(typing.TypedDict):
@@ -58,6 +73,12 @@ class StackUpdateReport(typing.TypedDict):
     """What the download clients are still working on, named so an operator can
     tell whether the thing they have been waiting for is among them.
     """
+    moved: typing.NotRequired[list[StackMoveTaken]]
+    """Each move in place this run took, or tried to take and could not, with why."""
+    moves: typing.NotRequired[list[MoveOffered]]
+    """Each part this release installs as a plugin that the stack still runs as its own
+    service after this run: a move in place on offer, which a confirmed update takes.
+    """
     offer: str
     """The offer this answers: every step, from the release each service stands on to
     the one it would move to, named so that an update carrying it back takes those
@@ -75,6 +96,10 @@ class StackUpdateReport(typing.TypedDict):
     """
     state: UpdateState
     """The one word the run comes to."""
+    unvetted: typing.NotRequired[Unvetted | None]
+    """The operator's overlay and every service it changes, where there is one: merged
+    over the project this run would start, and held to nothing lemonfiber vets.
+    """
 
 
 class UpdateChange(typing.TypedDict):
@@ -142,6 +167,7 @@ UpdateApplied = typing.TypedDict(
 __all__ = [
     "Ending",
     "Jump",
+    "StackMoveTaken",
     "StackUpdateReport",
     "UpdateApplied",
     "UpdateChange",

@@ -83,6 +83,13 @@
         "$ref": "PluginRecipe.json"
       }
     },
+    "request_proofs": {
+      "description": "Every proof it declares that asks one of its services a question.",
+      "type": "array",
+      "items": {
+        "$ref": "PluginRequestProof.json"
+      }
+    },
     "revision": {
       "description": "The commit it was installed at, where it came from a git source.\n\nThe one commit the revision named at install resolved to, so what was installed\ncan be told from whatever that source serves now. Empty for a plugin installed\nfrom a directory, which has no revision to name, and for a record written before\nthis was kept.",
       "type": "string",
@@ -104,6 +111,11 @@
     },
     "signed": {
       "description": "What signed it: the key the catalogue index it was resolved through verified\nagainst, named with its fingerprint; empty where nothing signed it.",
+      "type": "string",
+      "default": ""
+    },
+    "tree": {
+      "description": "The digest of the plugin's tree it was installed from, `sha256:<hex>`; empty\nwhere the tree could not be read whole, or the record predates it.",
       "type": "string",
       "default": ""
     },

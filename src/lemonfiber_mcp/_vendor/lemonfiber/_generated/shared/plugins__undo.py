@@ -14,6 +14,8 @@ type Action = (
     | ActionDelete
     | ActionWithdraw
     | ActionRewind
+    | ActionMoveBack
+    | ActionKeepCopy
     | ActionRepin
     | ActionReconfigure
     | ActionRevoke
@@ -22,6 +24,7 @@ type Action = (
     | ActionReinstateDevice
     | ActionResettle
     | ActionRehold
+    | ActionLeave
 )
 """What an undo does.
 
@@ -36,6 +39,30 @@ class ActionDelete(typing.TypedDict):
     does: typing.Literal["delete"]
     path: str
     """The path to remove."""
+
+
+class ActionKeepCopy(typing.TypedDict):
+    """Keep the copy of a volume where it is: the volume was never changed, so nothing
+    is put back.
+    """
+
+    does: typing.Literal["keep-copy"]
+    to: str
+    """Where the copy is."""
+    volume: str
+    """The volume it was copied from."""
+
+
+class ActionLeave(typing.TypedDict):
+    """Leave the operator's overlay as it is.
+
+    Worked out so the record of a change to it has a reversal to name, and never
+    carried out: lemonfiber does not write the operator's own file.
+    """
+
+    does: typing.Literal["leave"]
+    path: str
+    """The overlay."""
 
 
 class ActionReconfigure(typing.TypedDict):
@@ -286,9 +313,26 @@ class UndoReversal(typing.TypedDict):
     """
 
 
+ActionMoveBack = typing.TypedDict(
+    "ActionMoveBack",
+    {
+        "does": typing.Literal["move-back"],
+        "from": str,
+        "to": str,
+    },
+)
+"""Move a service's state back to where it was.
+
+Only where nothing has taken its old place, and only from where it was moved to.
+"""
+
+
 __all__ = [
     "Action",
     "ActionDelete",
+    "ActionKeepCopy",
+    "ActionLeave",
+    "ActionMoveBack",
     "ActionReconfigure",
     "ActionRehold",
     "ActionReinstate",

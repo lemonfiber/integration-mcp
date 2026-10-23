@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """What each answer that is a success comes to, or the refusal it is."""
 
-import datetime
+import datetime as dt
 import types
 from http import HTTPStatus
 from typing import TYPE_CHECKING, Final, cast
@@ -99,7 +99,7 @@ def capabilities_of(answer: Answer) -> CapabilitySet:
     a scope the contract does not list, or a stack named by anything but text, is
     not a document lemonfiber writes.
     """
-    arrived = datetime.datetime.now(datetime.UTC)
+    arrived = dt.datetime.now(dt.UTC)
     data = cast("object", expect(envelope_of(answer), "capabilities")["data"])
     answered = cast("dict[str, object]", data) if isinstance(data, dict) else {}
     held = answered.get("capabilities")
@@ -152,16 +152,16 @@ def collected_of(answer: Answer) -> MintedKey:
     return expect(envelope_of(answer), "minted-key")["data"]
 
 
-def instant(written: str) -> datetime.datetime:
+def instant(written: str) -> dt.datetime:
     """Read an instant as this product writes one, in UTC."""
     try:
-        read = datetime.datetime.fromisoformat(written)
+        read = dt.datetime.fromisoformat(written)
     except ValueError as unreadable:
         msg = f"{written!r} is not an instant"
         raise UnreadableResponseError(msg) from unreadable
     if read.tzinfo is None:
-        return read.replace(tzinfo=datetime.UTC)
-    if read.utcoffset() != datetime.timedelta(0):
+        return read.replace(tzinfo=dt.UTC)
+    if read.utcoffset() != dt.timedelta(0):
         msg = f"{written!r} names an offset other than UTC"
         raise UnreadableResponseError(msg)
-    return read.astimezone(datetime.UTC)
+    return read.astimezone(dt.UTC)

@@ -13,6 +13,17 @@ from .doctor__error__plugins import Code, Problem, ProblemState, ProblemStep
 from .doctor__error__plugins__repair import Remedy
 
 
+class Disruptive(typing.TypedDict):
+    """What checking a finding disturbs, and the narrowing a diagnosis runs it under."""
+
+    bounded: typing.NotRequired[int | None]
+    """The whole seconds the disturbance is bounded to, where the stack bounds it."""
+    disturbs: str
+    """What checking it disturbs, in the stack's words."""
+    only: str
+    """The check or group a `diagnose` action takes as `only` to run it."""
+
+
 type DoctorCategory = typing.Literal[
     "environment", "storage", "network", "vpn", "credentials", "services", "providers", "queue", "config"
 ]
@@ -133,6 +144,10 @@ class Finding(typing.TypedDict):
     """
     check: str
     """A stable identifier for the thing checked, such as `vpn.egress-match`."""
+    disruptive: typing.NotRequired[Disruptive | None]
+    """What checking it disturbs, where the read left it unverified because checking it
+    disturbs something, and how a diagnosis is asked to run it.
+    """
     onset: typing.NotRequired[str | None]
     """When the stack first saw this check wrong since it last saw it right, in whole
     seconds since the epoch.
@@ -191,6 +206,7 @@ class Finding(typing.TypedDict):
 
 
 __all__ = [
+    "Disruptive",
     "DoctorCategory",
     "DoctorVerdict",
     "DoctorVerdictFail",

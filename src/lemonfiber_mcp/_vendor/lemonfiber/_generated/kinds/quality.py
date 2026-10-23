@@ -44,11 +44,24 @@ class QualityEnvelope(typing.TypedDict):
     kind: typing.Literal["quality"]
 
 
+class QualityOffered(typing.TypedDict):
+    """What a quality choice may be made from, each in the plain terms the command takes it in."""
+
+    formats: list[str]
+    """Every format music may take, least to most demanding."""
+    media_types: list[str]
+    """Every kind of media a choice may be made for apart from everything at once."""
+    presets: list[str]
+    """Every resolution preset, least to most demanding."""
+
+
 class QualityReport(typing.TypedDict):
     """The operator's quality choice, what each preset means, and what the command
     did with it.
     """
 
+    changes: typing.NotRequired[str | None]
+    """What a choice changes, in the stack's words; present where this answers one."""
     choices: list[PresetChoice]
     """The global choice first, then each media type set apart from it."""
     customised: bool
@@ -63,6 +76,8 @@ class QualityReport(typing.TypedDict):
     resolution, so it is reported apart from the resolution presets rather than
     forced into their shape.
     """
+    offered: QualityOffered
+    """What a choice may be made from."""
     overwritten: typing.NotRequired[StackEdit | None]
     """The hand-edited config a reapply replaced — or, rehearsed, would replace — with
     the diff of what goes against what lands in its place.
@@ -84,5 +99,6 @@ class QualityReport(typing.TypedDict):
 __all__ = [
     "PresetChoice",
     "QualityEnvelope",
+    "QualityOffered",
     "QualityReport",
 ]

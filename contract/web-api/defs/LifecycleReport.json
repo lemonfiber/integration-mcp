@@ -39,8 +39,22 @@
         "null"
       ]
     },
+    "moves": {
+      "description": "Each part this release installs as a plugin that the stack still runs as its own\nservice: a move in place on offer, named by every start and taken by none.",
+      "type": "array",
+      "items": {
+        "$ref": "MoveOffered.json"
+      }
+    },
     "offer": {
       "description": "The offer a restart answers: the services it would restart, named so that a\nrestart carrying it back is carried out against those services or refused.\nAbsent for every other action.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "passing": {
+      "description": "Why the pass service is left out of the project a start writes, where the stream\nguard is filled and it is. Absent for every other action.",
       "type": [
         "string",
         "null"
@@ -84,11 +98,29 @@
       ],
       "format": "int32"
     },
+    "swept": {
+      "description": "Every network the engine holds for the project that the project no longer\ndeclares, by the engine's name: disconnected and taken away before a start, or\nnamed and left by a rehearsal. Empty for every other action.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "switched": {
       "description": "What narrowing moved, where the command was a switch. Absent for every\nother action, which is what tells a reader that nothing was left running\non purpose.",
       "anyOf": [
         {
           "$ref": "Switched.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "unvetted": {
+      "description": "The operator's overlay and every service it changes, where there is one: merged\nover the project this run starts, and held to nothing lemonfiber vets.",
+      "anyOf": [
+        {
+          "$ref": "Unvetted.json"
         },
         {
           "type": "null"

@@ -37,7 +37,7 @@ class BesideReport(typing.TypedDict):
     stance: Stance
     """Where the act stands."""
     written: typing.NotRequired[str | None]
-    """Where the Compose file that says so was written."""
+    """The settings file the moves were recorded in."""
 
 
 __all__ = [

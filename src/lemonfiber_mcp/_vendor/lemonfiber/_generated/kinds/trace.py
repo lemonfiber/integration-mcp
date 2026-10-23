@@ -43,6 +43,15 @@ class Part(typing.TypedDict):
     """Its title, as a person would name it."""
 
 
+class Searchable(typing.TypedDict):
+    """What a search that could tell this trace's stall apart would spend, and what it covers."""
+
+    covers: str
+    """What the search covers: the curator's wanted list at the quality in force."""
+    spends: str
+    """What the search spends, in the stack's words."""
+
+
 class SeasonCoverage(typing.TypedDict):
     """How much of one season is actually here, and what is outstanding — the season-level
     answer, which for a series is the one an operator can act on.
@@ -136,6 +145,11 @@ class TraceReport(typing.TypedDict):
     """Whether a monitored item matched the term at all — a false here is itself the
     answer: nobody asked for it.
     """
+    searchable: typing.NotRequired[Searchable | None]
+    """What a search would spend to tell nothing at the quality from nothing at all,
+    where the trace stopped at `monitored` with that open and a search would spend
+    something.
+    """
     stages: list[TraceStage]
     """The stages it passed through, in order."""
     stall: typing.NotRequired[str | None]
@@ -160,6 +174,7 @@ class TraceStage(typing.TypedDict):
 __all__ = [
     "Coverage",
     "Part",
+    "Searchable",
     "SeasonCoverage",
     "TraceConfidence",
     "TraceEnvelope",

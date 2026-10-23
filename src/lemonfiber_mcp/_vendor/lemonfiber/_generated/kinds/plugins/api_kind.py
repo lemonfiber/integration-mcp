@@ -7,6 +7,7 @@ and CI fails on any difference.
 
 import typing
 
+from ...shared.doctor__error__plugins import StepCame
 from ...shared.doctor__plugins import DoctorVerdict, Finding
 
 
@@ -60,8 +61,8 @@ class Expect(typing.TypedDict):
     A status is a claim about the network path rather than about the service: Docker
     publishes a port by putting a proxy in front of it, and that proxy accepts a
     connection before knowing whether anything inside is listening. So a status alone
-    is not evidence — except for a refusal, which is the one answer no port proxy can
-    produce.
+    is not evidence — except for a refusal or a redirect to HTTPS, answers no port proxy
+    produces.
 
     **A key of the four key-wise constraints is a place rather than a name.** A plain
     name is a top-level member, and one beginning with `/` is a JSON Pointer, extended
@@ -256,6 +257,19 @@ type PluginDeclaredVerdict = typing.Literal["fails"]
 """The one verdict a declaration may name."""
 
 
+class PluginDemand(typing.TypedDict):
+    """What asking for one of an installed plugin's demand recipes came to."""
+
+    plugin: str
+    """The plugin whose recipe it is."""
+    ran: typing.NotRequired[PluginRecipeRan | None]
+    """What running it came to, or nothing where it was only read."""
+    recipe: PluginRecipe
+    """The recipe as the operator agrees to it: its calls, what it asks for, and every
+    value it would carry where.
+    """
+
+
 type PluginEvidence = typing.Literal["recordings", "service"]
 """What the verdicts in a report were reached against.
 
@@ -304,21 +318,6 @@ class PluginExpectedFailure(typing.TypedDict):
     """
 
 
-class PluginFailingAsDeclared(typing.TypedDict):
-    """One recording an assertion fails on as its manifest declares."""
-
-    constraint: PluginConstraint
-    """The constraint of the expectation that fails there."""
-    fixture: str
-    """The recording."""
-    held: str
-    """What the recording held there."""
-    place: typing.NotRequired[str | None]
-    """Where within that constraint, for one that looks at places."""
-    reason: str
-    """Why the manifest says this recording is one the assertion fails on."""
-
-
 class PluginOverriding(typing.TypedDict):
     """One bundled thing a plugin declares it will change."""
 
@@ -332,48 +331,55 @@ type PluginPuts = typing.Literal["directory", "document", "key", "region", "secr
 """What an install puts at one path."""
 
 
-type PluginReached = PluginReachedLoopback | PluginReachedHousehold
-"""How an installed service is reached, where it is reached at all.
+class PluginRecipe(typing.TypedDict):
+    """One recipe, as an operator agrees to what it does."""
 
-The tier is the arm, so the label a tier earns lives only in the arm entitled to
-one. Only a household service is proxied — the bundled policy is that an admin
-surface does not get a name on the household network — and a record able to carry
-a loopback service with a hostname would be a record able to describe the thing
-that policy exists to prevent.
-
-**The group is on both arms, and that is not an oversight.** Only the proxy is
-the household tier's alone; the bundled dashboard carries an entry for an
-operator surface too, with the address it links to rendered from the tier — nine
-of the shipped stack's own entries point at this machine. A record that kept the
-group for the wider tier alone would leave a loopback service off the panel its
-bundled neighbours are on.
-
-A tier and never an address, either way: lemonfiber renders one from the other
-exactly as it does for a bundled service, so the two-tier policy stays a property
-of the system rather than a request a plugin made.
-"""
+    id: str
+    """The recipe's id within the plugin."""
+    inputs: typing.NotRequired[list[PluginRecipeInput]]
+    """Every value it asks the operator for when it runs, in the order it declares them."""
+    on: typing.NotRequired[PluginRecipeOn]
+    """When it runs: as part of an install and an update, or only when asked for by name."""
+    pairs: list[PluginPair]
+    """Every value it could carry, and where to."""
+    steps: list[PluginStep]
+    """Every call, in the order the recipe makes them."""
+    title: str
+    """What it accomplishes, in one line."""
+    why: str
+    """Why it is worth running."""
 
 
-class PluginReachedHousehold(typing.TypedDict):
-    """From the household, through the stack's own proxy, at this label."""
+class PluginRecipeInput(typing.TypedDict):
+    """One value a recipe asks the operator for when it runs.
 
-    group: typing.NotRequired[str | None]
-    """The group on the bundled dashboard, where the manifest named one."""
-    hostname: str
-    """The single label in front of the operator's domain."""
-    port: int
-    """The port the service listens on."""
-    tier: typing.Literal["household"]
+    Never the value: a reading says what will be asked, and what is given for it is
+    handed to the recipe and said back by nothing.
+    """
+
+    ask: str
+    """What the operator is asked for it."""
+    name: str
+    """What the input is called, which is what a value is given for it under."""
+    secret: bool
+    """Whether the value may be a secret, so a surface takes it without showing it."""
 
 
-class PluginReachedLoopback(typing.TypedDict):
-    """From this machine and nowhere else. No route, and no label to route to."""
+type PluginRecipeOn = typing.Literal["install", "demand"]
+"""When a recipe runs."""
 
-    group: typing.NotRequired[str | None]
-    """The group on the bundled dashboard, where the manifest named one."""
-    port: int
-    """The port the service listens on."""
-    tier: typing.Literal["loopback"]
+
+class PluginRecipeRan(typing.TypedDict):
+    """What one recipe came to."""
+
+    held: bool
+    """Whether every step it made came to what it should."""
+    recipe: str
+    """The recipe's id."""
+    steps: list[PluginStepRan]
+    """Every step it declares, in order, with what each came to."""
+    why: typing.NotRequired[str | None]
+    """Why it did not, where it did not."""
 
 
 class PluginRequest(typing.TypedDict):
@@ -416,52 +422,53 @@ class PluginSecret(typing.TypedDict):
     """What holding it is for."""
 
 
-type PluginShape = typing.Literal["egress-guard", "render"]
-"""A privileged shape lemonfiber writes for a service."""
+class PluginStep(typing.TypedDict):
+    """One call a recipe makes, in the order it makes them."""
+
+    adapter: typing.NotRequired[PluginStepAdapter | None]
+    """The adapter the destination is reached through, or nothing where it is a name
+    outside the stack, which no adapter of lemonfiber's speaks to.
+    """
+    id: str
+    """The step's id within its recipe."""
+    method: str
+    """The HTTP method it calls with."""
+    path: str
+    """The path it calls."""
+    to: str
+    """Where it calls: a service of this stack's or the plugin's own, or a name outside
+    both, as the manifest wrote it. Never a resolved address.
+    """
 
 
-type ServiceConstant = str | int | bool
-"""A value written exactly as declared."""
+class PluginStepAdapter(typing.TypedDict):
+    """The adapter a call reaches its destination through."""
+
+    kind: ApiKind
+    """Which of lemonfiber's adapters it is."""
+    owner: PluginAdapterOwner
+    """Whose it is, which is lemonfiber's."""
 
 
-class ServiceNetwork(typing.TypedDict):
-    """The network a service runs inside instead of its own."""
+class PluginStepRan(typing.TypedDict):
+    """What one step came to."""
 
-    via: str
-    """The capability whose filler's network it runs inside."""
-
-
-type ServicePosture = typing.Literal["standard", "confined"]
-"""How tightly the container is held."""
-
-
-class ServicePublish(typing.TypedDict):
-    """A further port a service publishes on its tier."""
-
-    listens: typing.NotRequired[int | None]
-    """Where it answers inside the container, `port` where absent."""
-    port: int
-    """Where it is published on the host."""
-
-
-class ServiceSecretOf(typing.TypedDict):
-    """A secret the manifest declares."""
-
-    secret: str
-    """The declared secret's name."""
-
-
-class ServiceSetting(typing.TypedDict):
-    """An operator setting, with what is written while none is recorded."""
-
-    default: ServiceConstant
-    """What is written while the operator has recorded no value."""
-    setting: str
-    """The setting's name."""
-
-
-type ServiceUserMode = typing.Literal["image", "puid-env", "uid"]
-"""Who the container runs as."""
+    came: StepCame
+    """What it came to."""
+    landed: bool
+    """Whether it reached somewhere other than this plugin's own services, which an
+    install going back cannot undo.
+    """
+    status: typing.NotRequired[int | None]
+    """The status its last answer carried, where anything answered."""
+    step: str
+    """The step's id."""
+    to: str
+    """Where it calls, by the name the manifest gives it."""
+    tries: int
+    """How many times it was made."""
+    why: typing.NotRequired[str | None]
+    """Why it came to what it did, where that wants saying."""
 
 
 Contribution = typing.TypedDict(
@@ -493,15 +500,18 @@ it carries nothing outside the union of the rows the published points take.
 """
 
 
-ServiceMount = typing.TypedDict(
-    "ServiceMount",
+PluginPair = typing.TypedDict(
+    "PluginPair",
     {
-        "from": str,
-        "ro": typing.NotRequired[bool],
+        "approval": typing.NotRequired[str],
+        "from": typing.NotRequired[str],
+        "origin": str,
+        "release": typing.NotRequired[str],
         "to": str,
+        "value": str,
     },
 )
-"""A further path mounted from the service's own mount tree."""
+"""One value a recipe could carry to one destination, as the operator agrees to it."""
 
 
 __all__ = [
@@ -519,23 +529,19 @@ __all__ = [
     "PluginConstraint",
     "PluginDeclaration",
     "PluginDeclaredVerdict",
+    "PluginDemand",
     "PluginEvidence",
     "PluginExpectedFailure",
-    "PluginFailingAsDeclared",
     "PluginOverriding",
+    "PluginPair",
     "PluginPuts",
-    "PluginReached",
-    "PluginReachedHousehold",
-    "PluginReachedLoopback",
+    "PluginRecipe",
+    "PluginRecipeInput",
+    "PluginRecipeOn",
+    "PluginRecipeRan",
     "PluginRequest",
     "PluginSecret",
-    "PluginShape",
-    "ServiceConstant",
-    "ServiceMount",
-    "ServiceNetwork",
-    "ServicePosture",
-    "ServicePublish",
-    "ServiceSecretOf",
-    "ServiceSetting",
-    "ServiceUserMode",
+    "PluginStep",
+    "PluginStepAdapter",
+    "PluginStepRan",
 ]

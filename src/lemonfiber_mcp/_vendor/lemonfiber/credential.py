@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Final, override
 from lemonfiber.problems import CredentialRefusedError
 
 if TYPE_CHECKING:
-    import datetime
+    import datetime as dt
 
 CREDENTIAL_HEADER: Final = "X-Lemonfiber-Token"
 """The one header every credential travels in, and never a URL."""
@@ -51,5 +51,5 @@ class Session:
     """
 
     credential: Credential
-    until: datetime.datetime
+    until: dt.datetime
     member: str | None

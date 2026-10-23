@@ -13,7 +13,7 @@ from ..shared.lifecycle__preview__status import Filtered
 from ..shared.lifecycle__status import Condition
 
 
-type Awaiting = typing.Literal["downloads"]
+type Awaiting = typing.Literal["downloads", "images"]
 """What an operation with no bound on it is waiting for.
 
 A case rather than a sentence, so what an operation is waiting for is a value
@@ -39,6 +39,8 @@ class Disturbances(typing.TypedDict):
     a read a surface would skip, and then it would estimate.
     """
 
+    fetching: TakesAway
+    """Fetching a form's images."""
     restarting: TakesAway
     """Restarting services."""
     starting: TakesAway
