@@ -23,6 +23,7 @@ type Action = (
     | ActionRevokeDevice
     | ActionReinstateDevice
     | ActionResettle
+    | ActionRegrant
     | ActionRehold
     | ActionLeave
 )
@@ -82,6 +83,18 @@ class ActionReconfigure(typing.TypedDict):
     """The kind of resource."""
     value: typing.NotRequired[str | None]
     """What to put back, or `None` where it held nothing."""
+
+
+class ActionRegrant(typing.TypedDict):
+    """Give a grant back to a plugin, or end one it was given."""
+
+    does: typing.Literal["regrant"]
+    give: bool
+    """Whether to give it, rather than end it."""
+    grant: PluginGrant
+    """The grant, by the setting the credential is held under."""
+    plugin: str
+    """The plugin the grant is of."""
 
 
 class ActionRehold(typing.TypedDict):
@@ -327,6 +340,20 @@ Only where nothing has taken its old place, and only from where it was moved to.
 """
 
 
+PluginGrant = typing.TypedDict(
+    "PluginGrant",
+    {
+        "at": str,
+        "credential": str,
+        "for": str,
+        "of": str,
+    },
+)
+"""A credential of another service the operator granted a third-party plugin, named by
+the setting it is held under and never by its value.
+"""
+
+
 __all__ = [
     "Action",
     "ActionDelete",
@@ -334,6 +361,7 @@ __all__ = [
     "ActionLeave",
     "ActionMoveBack",
     "ActionReconfigure",
+    "ActionRegrant",
     "ActionRehold",
     "ActionReinstate",
     "ActionReinstateDevice",
@@ -345,6 +373,7 @@ __all__ = [
     "ActionRevokeDevice",
     "ActionRewind",
     "ActionWithdraw",
+    "PluginGrant",
     "Undo",
     "UndoLeft",
     "UndoNoted",

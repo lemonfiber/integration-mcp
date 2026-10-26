@@ -152,6 +152,8 @@ class PluginAsking(typing.TypedDict):
     """The core capability asked for."""
     each: typing.NotRequired[bool]
     """Whether every service that fills it is reached rather than one."""
+    native: typing.NotRequired[str | None]
+    """The upstream's own API it talks in, which it reaches in place of the adapter."""
 
 
 class PluginChange(typing.TypedDict):
@@ -270,20 +272,6 @@ class PluginDemand(typing.TypedDict):
     """
 
 
-type PluginEvidence = typing.Literal["recordings", "service"]
-"""What the verdicts in a report were reached against.
-
-One value, because one is all this build can produce: nothing here asks a service
-anything. It is a field rather than a sentence for the reason a verdict is one — a
-reader handed `demonstrated` has nothing else in the document to tell a recording
-that answered from a service that did, and the weaker of those two claims must not
-be readable as the stronger. The prose says it on the page; this says it to
-whatever consumes the report: an author's own CI, a catalogue, anything counting
-passes. Naming the axis now is what made the second kind of evidence a change the
-compiler walked somebody through rather than one they had to remember.
-"""
-
-
 class PluginExpectedFailure(typing.TypedDict):
     """A recording an assertion fails on, the one constraint of its expectation that fails
     there, and why.
@@ -327,7 +315,7 @@ class PluginOverriding(typing.TypedDict):
     """What changing it is for."""
 
 
-type PluginPuts = typing.Literal["directory", "document", "key", "region", "secrets"]
+type PluginPuts = typing.Literal["directory", "document", "key", "region", "secrets", "starting", "upstream"]
 """What an install puts at one path."""
 
 
@@ -409,17 +397,6 @@ class PluginRequest(typing.TypedDict):
     """The HTTP method."""
     path: str
     """The path on the service being asked."""
-
-
-class PluginSecret(typing.TypedDict):
-    """One credential a plugin says it will hold, without a value and with no place for one."""
-
-    id: str
-    """What the value is, within the plugin."""
-    of: str
-    """Whose credential it is."""
-    why: str
-    """What holding it is for."""
 
 
 class PluginStep(typing.TypedDict):
@@ -514,6 +491,19 @@ PluginPair = typing.TypedDict(
 """One value a recipe could carry to one destination, as the operator agrees to it."""
 
 
+PluginSecret = typing.TypedDict(
+    "PluginSecret",
+    {
+        "for": typing.NotRequired[str | None],
+        "id": str,
+        "minted": typing.NotRequired[bool],
+        "of": str,
+        "why": str,
+    },
+)
+"""One credential a plugin says it will hold, without a value and with no place for one."""
+
+
 __all__ = [
     "Api",
     "ApiKind",
@@ -530,7 +520,6 @@ __all__ = [
     "PluginDeclaration",
     "PluginDeclaredVerdict",
     "PluginDemand",
-    "PluginEvidence",
     "PluginExpectedFailure",
     "PluginOverriding",
     "PluginPair",

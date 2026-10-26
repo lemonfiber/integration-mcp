@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Every tool the server offers, as the contract describes it.
 
-Generated from the contract lemonfiber 2fdb17698fa8603b4fd6649e0109bd01705f8b3b published, vendored in `contract/web-api/`.
+Generated from the contract lemonfiber 8ab642c3a9a1c205c3e4f5a4e3ce03a0ad464328 published, vendored in `contract/web-api/`.
 Do not edit: `just generate` rewrites it, and CI fails on any difference.
 """
 
@@ -12,7 +12,7 @@ from lemonfiber_mcp.shapes import Reach, ToolShape
 API_VERSION: Final = 1
 """The `api_version` the tools were generated for."""
 
-CONTRACT: Final = '2fdb17698fa8603b4fd6649e0109bd01705f8b3b'
+CONTRACT: Final = '8ab642c3a9a1c205c3e4f5a4e3ce03a0ad464328'
 """The lemonfiber revision whose contract the tools were generated from."""
 
 TOOLS: Final[tuple[ToolShape, ...]] = (

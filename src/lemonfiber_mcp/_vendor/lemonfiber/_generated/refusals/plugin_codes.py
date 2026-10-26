@@ -166,6 +166,14 @@ PLUGIN: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
         409,
         "Raised when the manifest kept for an installed plugin is missing or is not the one that was installed, so its demand recipes cannot be read.",
     ),
+    "PLUGIN-46": ListedRefusal(
+        "UNAIMED_CROSSING",
+        403,
+        "Raised when a third-party plugin declares a secret of another service that names no capability of its own it is for.",
+    ),
+    "PLUGIN-47": ListedRefusal(
+        "NO_GRANT", 404, "Raised when a grant asked to be revoked is not one the plugin holds."
+    ),
     "PLUGIN-5": ListedRefusal("ALREADY", 400, "The plugin is installed already."),
     "PLUGIN-6": ListedRefusal(
         "NOWHERE", 500, "There is no stack on this machine to put a plugin's container in."
