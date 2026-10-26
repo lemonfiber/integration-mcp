@@ -7,8 +7,10 @@ and CI fails on any difference.
 
 import typing
 
-from .api_kind import PluginChange, PluginDemand, PluginEvidence, PluginOverriding, PluginRecipeRan
-from .plugin_failing_as_declared import (
+from .api_kind import PluginChange, PluginDemand, PluginOverriding, PluginRecipeRan
+from .plugin_evidence import (
+    PluginEvidence,
+    PluginGranting,
     PluginInstalled,
     PluginProving,
     PluginTaking,
@@ -54,6 +56,10 @@ class PluginInstall(typing.TypedDict):
     A plugin's service that claims what the stack asks for is a candidate like any
     other, so installing it leaves the ask refused until somebody chooses — which is
     a change to what the stack does, and stated with the rest before it happens.
+    """
+    granting: list[PluginGranting]
+    """Every credential of another service that would cross to the plugin, each approved
+    apart from the offer as its `approval` names it.
     """
     overrides: list[PluginOverriding]
     """Every bundled thing the plugin declares it will change.

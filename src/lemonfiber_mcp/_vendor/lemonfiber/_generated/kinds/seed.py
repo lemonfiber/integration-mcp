@@ -172,10 +172,9 @@ class SeedStateObserved(typing.TypedDict):
 
 class SeedStateRefused(typing.TypedDict):
     """Refused by lemonfiber's own policy, carrying the reason a re-run will not
-    resolve — such as two curators pointed at one root folder, or a service that
-    does not serve the API version this build speaks. Either way nothing it
-    names was written, whether it was refused before the write or the write
-    itself found nothing to land in.
+    resolve — such as two curators pointed at one root folder. Nothing it names
+    was written, whether it was refused before the write or the write itself
+    found nothing to land in.
     """
 
     reason: str
@@ -258,10 +257,9 @@ class SeedStateWouldWire(typing.TypedDict):
     Both values are serialized, so a secret-bearing field must not report through
     this variant carrying one. It does not have to: `ours` is absent exactly where
     a real run would generate the value rather than read it, which is the only
-    place a credential arises — the torrent client's web UI password and the media
-    server's admin account. A value minted to describe a rehearsal is a secret that
-    exists because somebody asked a question, and it would then have to be kept or
-    thrown away.
+    place a credential arises — the media server's admin account. A value minted to
+    describe a rehearsal is a secret that exists because somebody asked a question, and
+    it would then have to be kept or thrown away.
 
     `yours` is absent where the service holds nothing, and where this run could not
     ask without writing — reading the household's telling means signing in as the

@@ -39,7 +39,7 @@ class Reader(typing.TypedDict):
     """The variable it is read into."""
 
 
-type SecretFrom = typing.Literal["operator", "recipe", "granted"]
+type SecretFrom = typing.Literal["operator", "recipe", "granted", "minted"]
 """Where a secret's value came from."""
 
 

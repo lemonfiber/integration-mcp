@@ -20,6 +20,10 @@ class ReachesAsked(typing.TypedDict):
     capability: str
     """The capability asked for."""
     how: typing.Literal["asked"]
+    native: typing.NotRequired[str | None]
+    """The upstream's own API the ask talks in, where it reaches the upstream an
+    adapter fronts rather than the adapter.
+    """
     origins: dict[str, ValueOrigin]
     """Where each service that claims it came from: this build's stack, or a
     named plugin.

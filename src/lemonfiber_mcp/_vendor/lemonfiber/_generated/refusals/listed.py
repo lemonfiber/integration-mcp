@@ -109,6 +109,8 @@ type RefusalCode = typing.Literal[
     "PLUGIN-40",
     "PLUGIN-44",
     "PLUGIN-45",
+    "PLUGIN-46",
+    "PLUGIN-47",
     "PLUGIN-5",
     "PLUGIN-6",
     "PLUGIN-7",

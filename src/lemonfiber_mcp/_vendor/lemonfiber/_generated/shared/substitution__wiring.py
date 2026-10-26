@@ -21,6 +21,8 @@ class Unfilled(typing.TypedDict):
     """The service that asked."""
     capability: str
     """What it asked for."""
+    native: typing.NotRequired[str | None]
+    """The upstream's own API it asked in, where no upstream filling it declares that API."""
 
 
 __all__ = [

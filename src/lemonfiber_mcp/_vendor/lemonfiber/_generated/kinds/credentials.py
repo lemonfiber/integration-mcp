@@ -42,6 +42,21 @@ class CredentialReachUpdated(typing.TypedDict):
     reach: typing.Literal["updated"]
 
 
+class CredentialRevoked(typing.TypedDict):
+    """What revoking one grant came to, or would come to."""
+
+    agreement: str
+    """The name this reading goes by, which the revoke takes as its yes."""
+    ended: bool
+    """Whether the grant was ended, rather than read or rehearsed."""
+    grant: CredentialGranted
+    """The grant it ends."""
+    restarts: list[str]
+    """The plugin's services that read the credential, restarted once it is withdrawn."""
+    unrestarted: typing.NotRequired[str | None]
+    """Why its services did not restart, where they did not."""
+
+
 type CredentialState = typing.Literal["absent", "active", "stale", "invalid", "rotating", "superseded"]
 """Where a credential stands, as far as lemonfiber can tell without spending it.
 
@@ -71,6 +86,8 @@ class Inventory(typing.TypedDict):
     against one.
     """
 
+    grants: list[CredentialGranted]
+    """Every credential granted to a third-party plugin."""
     held: list[CredentialHeld]
     """Every credential, whether or not it is present."""
     protection: Protection
@@ -83,6 +100,8 @@ class Inventory(typing.TypedDict):
     """
     revealed: typing.NotRequired[Revealed | None]
     """One value, where one was asked for."""
+    revoked: typing.NotRequired[CredentialRevoked | None]
+    """What became of revoking a grant, where one was asked for."""
     rotated: typing.NotRequired[Rotation | None]
     """What became of a rotation, where one was asked for."""
 
@@ -183,7 +202,7 @@ class SettledRehearsed(typing.TypedDict):
     Its own outcome rather than one of the refusals above, because it is not a
     refusal: nothing went wrong, and what an operator is being told is what would
     happen if they ran it again meaning it. Carrying its own three fields rather
-    than one sentence, because \"it would rotate the torrent client's password\" is not a
+    than one sentence, because \"it would rotate the administrator's password\" is not a
     report — where the value lives is what would be written over, and what is owed
     afterwards is the half nobody finds out about until a consumer stops working.
 
@@ -242,6 +261,21 @@ class SettledUnproven(typing.TypedDict):
     settled: typing.Literal["unproven"]
 
 
+CredentialGranted = typing.TypedDict(
+    "CredentialGranted",
+    {
+        "at": str,
+        "credential": str,
+        "for": str,
+        "of": str,
+        "plugin": str,
+    },
+)
+"""A credential of another service granted to a third-party plugin, named by the setting it
+is held under and never by its value.
+"""
+
+
 CredentialHeld = typing.TypedDict(
     "CredentialHeld",
     {
@@ -264,11 +298,13 @@ without the change being visible in review.
 
 
 __all__ = [
+    "CredentialGranted",
     "CredentialHeld",
     "CredentialReach",
     "CredentialReachFailed",
     "CredentialReachPending",
     "CredentialReachUpdated",
+    "CredentialRevoked",
     "CredentialState",
     "CredentialsEnvelope",
     "Inventory",
