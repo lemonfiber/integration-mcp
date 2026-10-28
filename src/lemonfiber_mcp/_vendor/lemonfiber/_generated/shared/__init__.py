@@ -32,7 +32,7 @@ from . import doctor__plugins as _doctor__plugins
 from . import glossary__word as _glossary__word
 from . import held__part_way__playing__title as _held__part_way__playing__title
 from . import held__part_way__title as _held__part_way__title
-from . import import___migration__seed__status__stuck as _import___migration__seed__status__stuck
+from . import import___migration as _import___migration
 from . import key_claim__keys__minted_key as _key_claim__keys__minted_key
 from . import lifecycle__migration as _lifecycle__migration
 from . import (
@@ -46,6 +46,7 @@ from . import lifecycle__update as _lifecycle__update
 from . import music__quality as _music__quality
 from . import music__upgrade as _music__upgrade
 from . import news__news_items as _news__news_items
+from . import plugins__settings__status as _plugins__settings__status
 from . import plugins__undo as _plugins__undo
 from . import plugins__wiring as _plugins__wiring
 from . import space__stop_seeding as _space__stop_seeding
@@ -77,7 +78,7 @@ from .doctor__plugins import *
 from .glossary__word import *
 from .held__part_way__playing__title import *
 from .held__part_way__title import *
-from .import___migration__seed__status__stuck import *
+from .import___migration import *
 from .key_claim__keys__minted_key import *
 from .lifecycle__migration import *
 from .lifecycle__plugins__settings__substitution__update import *
@@ -89,6 +90,7 @@ from .lifecycle__update import *
 from .music__quality import *
 from .music__upgrade import *
 from .news__news_items import *
+from .plugins__settings__status import *
 from .plugins__undo import *
 from .plugins__wiring import *
 from .space__stop_seeding import *
@@ -121,7 +123,7 @@ __all__ += _doctor__plugins.__all__
 __all__ += _glossary__word.__all__
 __all__ += _held__part_way__playing__title.__all__
 __all__ += _held__part_way__title.__all__
-__all__ += _import___migration__seed__status__stuck.__all__
+__all__ += _import___migration.__all__
 __all__ += _key_claim__keys__minted_key.__all__
 __all__ += _lifecycle__migration.__all__
 __all__ += _lifecycle__plugins__settings__substitution__update.__all__
@@ -133,6 +135,7 @@ __all__ += _lifecycle__update.__all__
 __all__ += _music__quality.__all__
 __all__ += _music__upgrade.__all__
 __all__ += _news__news_items.__all__
+__all__ += _plugins__settings__status.__all__
 __all__ += _plugins__undo.__all__
 __all__ += _plugins__wiring.__all__
 __all__ += _space__stop_seeding.__all__

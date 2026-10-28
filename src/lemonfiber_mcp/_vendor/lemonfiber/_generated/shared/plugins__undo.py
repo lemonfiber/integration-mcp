@@ -15,6 +15,7 @@ type Action = (
     | ActionWithdraw
     | ActionRewind
     | ActionMoveBack
+    | ActionRenameBack
     | ActionKeepCopy
     | ActionRepin
     | ActionReconfigure
@@ -340,6 +341,21 @@ Only where nothing has taken its old place, and only from where it was moved to.
 """
 
 
+ActionRenameBack = typing.TypedDict(
+    "ActionRenameBack",
+    {
+        "does": typing.Literal["rename-back"],
+        "from": str,
+        "to": str,
+    },
+)
+"""Move a value in the environment file back to the key it was under.
+
+Only where the key it is under now holds a value and the one it goes back to holds
+none.
+"""
+
+
 PluginGrant = typing.TypedDict(
     "PluginGrant",
     {
@@ -366,6 +382,7 @@ __all__ = [
     "ActionReinstate",
     "ActionReinstateDevice",
     "ActionRemove",
+    "ActionRenameBack",
     "ActionRepin",
     "ActionResettle",
     "ActionRestore",

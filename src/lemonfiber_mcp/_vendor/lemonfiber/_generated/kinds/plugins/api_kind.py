@@ -11,29 +11,6 @@ from ...shared.doctor__error__plugins import StepCame
 from ...shared.doctor__plugins import DoctorVerdict, Finding
 
 
-class Api(typing.TypedDict):
-    """How lemonfiber talks to a service when seeding.
-
-    The same shape on a plugin's service as on the stack's own, which is what lets a
-    plugin name one of these adapters rather than supply one of its own.
-    """
-
-    key_source: KeySource
-    """Where the credential comes from."""
-    kind: ApiKind
-    """Selects the client implementation."""
-    path: typing.NotRequired[str | None]
-    """The file holding the credential, where one applies."""
-    version: typing.NotRequired[int | None]
-    """The major version of the service's HTTP API — the `/api/vN` path segment.
-
-    Required for the `servarr` shape and read there, because that one shape
-    spans two versions (Sonarr and Radarr at v3, Lidarr and Prowlarr at v1),
-    so the version is data rather than a guess from a service's name. Absent
-    for the other kinds, whose one fixed version their client already knows.
-    """
-
-
 type ApiKind = typing.Literal[
     "servarr",
     "sabnzbd",
@@ -128,12 +105,6 @@ the one name there a generator is certain to want for itself: every envelope thi
 contract describes is keyed by its `kind`, so the union of them is a `Kind` too, and
 two of them in one module is a definition nothing can be compiled against.
 """
-
-
-type KeySource = typing.Literal[
-    "config-xml", "config-ini", "config-json", "config-yaml", "api-settings", "generated", "none"
-]
-"""Where a service's credential comes from."""
 
 
 type PluginAdapterOwner = typing.Literal["lemonfiber"]
@@ -272,6 +243,20 @@ class PluginDemand(typing.TypedDict):
     """
 
 
+type PluginEvidence = typing.Literal["recordings", "service"]
+"""What the verdicts in a report were reached against.
+
+One value, because one is all this build can produce: nothing here asks a service
+anything. It is a field rather than a sentence for the reason a verdict is one — a
+reader handed `demonstrated` has nothing else in the document to tell a recording
+that answered from a service that did, and the weaker of those two claims must not
+be readable as the stronger. The prose says it on the page; this says it to
+whatever consumes the report: an author's own CI, a catalogue, anything counting
+passes. Naming the axis now is what made the second kind of evidence a change the
+compiler walked somebody through rather than one they had to remember.
+"""
+
+
 class PluginExpectedFailure(typing.TypedDict):
     """A recording an assertion fails on, the one constraint of its expectation that fails
     there, and why.
@@ -304,6 +289,21 @@ class PluginExpectedFailure(typing.TypedDict):
     """`fails`, and nothing else: passing is what the expectation already says, and
     could-not-run is never excused.
     """
+
+
+class PluginFailingAsDeclared(typing.TypedDict):
+    """One recording an assertion fails on as its manifest declares."""
+
+    constraint: PluginConstraint
+    """The constraint of the expectation that fails there."""
+    fixture: str
+    """The recording."""
+    held: str
+    """What the recording held there."""
+    place: typing.NotRequired[str | None]
+    """Where within that constraint, for one that looks at places."""
+    reason: str
+    """Why the manifest says this recording is one the assertion fails on."""
 
 
 class PluginOverriding(typing.TypedDict):
@@ -448,6 +448,10 @@ class PluginStepRan(typing.TypedDict):
     """Why it came to what it did, where that wants saying."""
 
 
+type ServiceConstant = str | int | bool
+"""A value written exactly as declared."""
+
+
 Contribution = typing.TypedDict(
     "Contribution",
     {
@@ -497,7 +501,10 @@ PluginSecret = typing.TypedDict(
         "for": typing.NotRequired[str | None],
         "id": str,
         "minted": typing.NotRequired[bool],
+        "needed_to_start": typing.NotRequired[bool],
+        "needs": typing.NotRequired[dict[str, list[ServiceConstant]]],
         "of": str,
+        "was": typing.NotRequired[str | None],
         "why": str,
     },
 )
@@ -505,13 +512,11 @@ PluginSecret = typing.TypedDict(
 
 
 __all__ = [
-    "Api",
     "ApiKind",
     "Contribution",
     "Expect",
     "Expected",
     "ExpectedKind",
-    "KeySource",
     "PluginAdapterOwner",
     "PluginAsking",
     "PluginChange",
@@ -520,7 +525,9 @@ __all__ = [
     "PluginDeclaration",
     "PluginDeclaredVerdict",
     "PluginDemand",
+    "PluginEvidence",
     "PluginExpectedFailure",
+    "PluginFailingAsDeclared",
     "PluginOverriding",
     "PluginPair",
     "PluginPuts",
@@ -533,4 +540,5 @@ __all__ = [
     "PluginStep",
     "PluginStepAdapter",
     "PluginStepRan",
+    "ServiceConstant",
 ]

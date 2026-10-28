@@ -8,9 +8,9 @@ and CI fails on any difference.
 import typing
 
 from ..shared.dashboard__lifecycle__status import Service, ServiceState
-from ..shared.import___migration__seed__status__stuck import UnsupportedReport
 from ..shared.lifecycle__preview__status import Filtered
 from ..shared.lifecycle__status import Condition
+from ..shared.plugins__settings__status import Waiting
 
 
 type Awaiting = typing.Literal["downloads", "images"]
@@ -115,17 +115,12 @@ class StatusReport(typing.TypedDict):
     not put there is the operator's business whether or not lemonfiber understands
     it.
     """
-    unsupported: typing.NotRequired[list[UnsupportedReport]]
-    """Services that are running and operable like any other, and that lemonfiber
-    cannot offer the features needing to know what they are — each with why.
+    waiting: list[Waiting]
+    """The services held back until the operator gives what they need to start, each
+    with what it waits for and never a value.
 
-    Empty for the stack this build ships. It fills in for a stack the operator
-    maintains, where a declaration can name an API and leave out the part that
-    makes it addressable: such a service starts, stops and reports its state
-    exactly as the others do, and every feature that would have spoken to it used
-    to do nothing and say nothing. Here rather than on the service's own row,
-    because it is a statement about what this build can do rather than about how
-    the service is faring.
+    Beside the services, as what was filtered is: one that is not there is listed
+    here and nowhere else, because it is waiting rather than failing to start.
     """
 
 

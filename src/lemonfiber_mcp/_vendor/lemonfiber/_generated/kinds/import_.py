@@ -8,7 +8,7 @@ and CI fails on any difference.
 import typing
 
 from ..shared.adoption__beside__config__import___replacement import Stance
-from ..shared.import___migration__seed__status__stuck import UnsupportedReport
+from ..shared.import___migration import UnsupportedReport
 
 
 class ImportEnvelope(typing.TypedDict):

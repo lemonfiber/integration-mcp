@@ -1,5 +1,5 @@
 # Copyright (c) 2026 NightWorksIO
-"""The shapes `import`, `migration`, `seed`, `status` and `stuck` all carry.
+"""The shapes `import` and `migration` both carry.
 
 Generated from the contract vendored in `contract/`. Do not edit: `just generate` rewrites it,
 and CI fails on any difference.

@@ -9,7 +9,7 @@ import typing
 
 from ..shared.adoption__migration import CarryingReport
 from ..shared.beside__migration import MovedReport
-from ..shared.import___migration__seed__status__stuck import UnsupportedReport
+from ..shared.import___migration import UnsupportedReport
 from ..shared.lifecycle__migration import ConflictReport
 
 

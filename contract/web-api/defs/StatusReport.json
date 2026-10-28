@@ -46,12 +46,11 @@
         "$ref": "Undeclared.json"
       }
     },
-    "unsupported": {
-      "description": "Services that are running and operable like any other, and that lemonfiber\ncannot offer the features needing to know what they are — each with why.\n\nEmpty for the stack this build ships. It fills in for a stack the operator\nmaintains, where a declaration can name an API and leave out the part that\nmakes it addressable: such a service starts, stops and reports its state\nexactly as the others do, and every feature that would have spoken to it used\nto do nothing and say nothing. Here rather than on the service's own row,\nbecause it is a statement about what this build can do rather than about how\nthe service is faring.",
+    "waiting": {
+      "description": "The services held back until the operator gives what they need to start, each\nwith what it waits for and never a value.\n\nBeside the services, as what was filtered is: one that is not there is listed\nhere and nowhere else, because it is waiting rather than failing to start.",
       "type": "array",
-      "default": [],
       "items": {
-        "$ref": "UnsupportedReport.json"
+        "$ref": "Waiting.json"
       }
     }
   },
@@ -59,6 +58,7 @@
     "forms",
     "active_forms",
     "filtered",
+    "waiting",
     "condition",
     "services",
     "undeclared",
