@@ -7,7 +7,6 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.import___migration__seed__status__stuck import UnsupportedReport
 from ..shared.stuck__trace import Stage
 
 
@@ -44,15 +43,6 @@ class StuckReport(typing.TypedDict):
     """
     items: list[StuckEntry]
     """The stuck items, each linkable to its trace."""
-    unsupported: typing.NotRequired[list[UnsupportedReport]]
-    """Services whose queue lemonfiber cannot read at all, each with why.
-
-    Apart from [`Self::incomplete`], which is a queue that was asked and would not
-    answer. This is a queue that was never asked, because the service declares an
-    API shape this build does not speak or a curator declaration it cannot reach
-    through — and a reading that dropped those would be as short as an unreadable
-    queue makes it, without the sentence that says so.
-    """
 
 
 __all__ = [

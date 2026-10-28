@@ -7,17 +7,18 @@ and CI fails on any difference.
 
 import typing
 
-from .api_kind import PluginChange, PluginDemand, PluginOverriding, PluginRecipeRan
-from .plugin_evidence import (
-    PluginEvidence,
+from .api_kind import PluginChange, PluginDemand, PluginEvidence, PluginOverriding, PluginRecipeRan
+from .plugin_granting import (
     PluginGranting,
     PluginInstalled,
     PluginProving,
+    PluginSharing,
     PluginTaking,
     PluginVerification,
     WiringContest,
 )
 from ...shared.lifecycle__plugins__settings__substitution__update import Unvetted
+from ...shared.plugins__settings__status import Waiting
 from ...shared.plugins__undo import UndoReversal
 from ...shared.plugins__wiring import Wired
 
@@ -90,6 +91,8 @@ class PluginInstall(typing.TypedDict):
     that had nothing to put back, which is both a rehearsal and an install that
     held.
     """
+    sharing: list[PluginSharing]
+    """Every adapter that writes the files of the service it fronts."""
     taking: list[PluginTaking]
     """Every service taking a privileged shape, with what it is given, each approved
     apart from the offer.
@@ -103,6 +106,8 @@ class PluginInstall(typing.TypedDict):
     stack still does. Absent on a rehearsal, which writes nothing and so has
     nothing to hold a reading against.
     """
+    waiting: list[Waiting]
+    """The services held back once the install is made, each with what it waits for."""
     would: PluginInstalled
     """What the install settled, said whether or not it was written down."""
 

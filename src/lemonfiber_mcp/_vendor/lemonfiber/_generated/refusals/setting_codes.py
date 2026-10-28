@@ -32,5 +32,10 @@ SETTING: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
     "SETTING-6": ListedRefusal(
         "ALREADY_HOLDS", 400, "Raised where the setting already holds what the change asks for."
     ),
+    "SETTING-7": ListedRefusal(
+        "OUTSIDE_ITS_CHOICES",
+        400,
+        "Raised where a change would leave a setting holding a value outside its choices.",
+    ),
 }
 """What the contract says of each `SETTING` code."""

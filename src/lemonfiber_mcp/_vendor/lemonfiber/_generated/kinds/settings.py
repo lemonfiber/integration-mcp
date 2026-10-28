@@ -8,6 +8,20 @@ and CI fails on any difference.
 import typing
 
 from ..shared.lifecycle__plugins__settings__substitution__update import Unvetted
+from ..shared.plugins__settings__status import Waiting
+
+
+class Choosable(typing.TypedDict):
+    """One value a setting accepts."""
+
+    needs: dict[str, list[str]]
+    """The values of other settings under which it is a choice: each setting with the
+    values it has to hold one of, and none where it always is.
+    """
+    open: bool
+    """Whether it is a choice now."""
+    value: str
+    """The value."""
 
 
 type Owner = OwnerCore | OwnerNamespace
@@ -33,6 +47,12 @@ class Reader(typing.TypedDict):
 
     default: typing.NotRequired[str | None]
     """What the service's manifest declares while no value is recorded."""
+    met: bool
+    """Whether those settings hold what it needs now."""
+    needs: dict[str, list[str]]
+    """The values of other settings under which the variable is written: each setting
+    with the values it has to hold one of.
+    """
     service: str
     """The service."""
     variable: str
@@ -44,22 +64,35 @@ type SecretFrom = typing.Literal["operator", "recipe", "granted", "minted"]
 
 
 class SettingChange(typing.TypedDict):
-    """A change to one setting."""
+    """A change to one or more settings, made in one act."""
 
     agreement: str
     """What this reading names itself, part by part."""
     applied: bool
     """Whether it was written."""
-    consequence: typing.NotRequired[str | None]
-    """What the change costs, where it costs anything."""
     regenerates: list[str]
     """Every service whose entry the change regenerates."""
     restarts: list[str]
     """Every running service the change restarts."""
-    setting: str
-    """The setting."""
+    settings: list[SettingMove]
+    """Each setting the act moves, in name order."""
+    starts: list[str]
+    """Every service held back that the change starts, having given the last thing it
+    waited for.
+    """
     unrestarted: typing.NotRequired[str | None]
     """Why the services it restarts were not restarted, where they were not."""
+    waiting: list[Waiting]
+    """The services held back once the change is made, each with what it waits for."""
+
+
+class SettingMove(typing.TypedDict):
+    """One setting a change moves."""
+
+    consequence: typing.NotRequired[str | None]
+    """What moving it costs, where it costs anything."""
+    setting: str
+    """The setting."""
     value: typing.NotRequired[str | None]
     """What it is to hold, or nothing where it is cleared."""
     was: typing.NotRequired[str | None]
@@ -69,6 +102,8 @@ class SettingChange(typing.TypedDict):
 class SettingRead(typing.TypedDict):
     """One setting."""
 
+    choices: typing.NotRequired[list[Choosable] | None]
+    """Every value it accepts, where its manifest declares them."""
     environment: typing.NotRequired[str | None]
     """The environment file's key it is held under, where it is held there."""
     name: str
@@ -106,6 +141,10 @@ class SettingsReport(typing.TypedDict):
     """The operator's overlay and every service it changes, where there is one: merged
     over the project this run would start, and held to nothing lemonfiber vets.
     """
+    waiting: list[Waiting]
+    """The services held back until the operator gives what they need to start, each
+    with what it waits for, as status names them.
+    """
 
 
 SecretRead = typing.TypedDict(
@@ -122,6 +161,7 @@ SecretRead = typing.TypedDict(
 
 
 __all__ = [
+    "Choosable",
     "Owner",
     "OwnerCore",
     "OwnerNamespace",
@@ -129,6 +169,7 @@ __all__ = [
     "SecretFrom",
     "SecretRead",
     "SettingChange",
+    "SettingMove",
     "SettingRead",
     "SettingsEnvelope",
     "SettingsReport",

@@ -264,6 +264,11 @@
     "status": 400,
     "description": "Raised where a restart names an offer that is not the one a fresh look at the stack builds."
   },
+  "LIFE-11": {
+    "name": "MOUNT_LINKED",
+    "status": 409,
+    "description": "Raised when a start finds a service's mount source reached through a link."
+  },
   "LIFE-3": {
     "name": "ALREADY_WORKING",
     "status": 409,
@@ -514,6 +519,11 @@
     "status": 404,
     "description": "Raised when a grant asked to be revoked is not one the plugin holds."
   },
+  "PLUGIN-48": {
+    "name": "EARLIER_TAKEN",
+    "status": 400,
+    "description": "Raised when a plugin's setting or secret names, as the variable an earlier release kept its value under, one another installed plugin's setting or secret names."
+  },
   "PLUGIN-5": {
     "name": "ALREADY",
     "status": 400,
@@ -743,6 +753,11 @@
     "name": "ALREADY_HOLDS",
     "status": 400,
     "description": "Raised where the setting already holds what the change asks for."
+  },
+  "SETTING-7": {
+    "name": "OUTSIDE_ITS_CHOICES",
+    "status": 400,
+    "description": "Raised where a change would leave a setting holding a value outside its choices."
   },
   "SETUP-1": {
     "name": "NOT_REVIEWED",

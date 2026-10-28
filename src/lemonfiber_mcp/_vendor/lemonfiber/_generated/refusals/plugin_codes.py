@@ -174,6 +174,11 @@ PLUGIN: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
     "PLUGIN-47": ListedRefusal(
         "NO_GRANT", 404, "Raised when a grant asked to be revoked is not one the plugin holds."
     ),
+    "PLUGIN-48": ListedRefusal(
+        "EARLIER_TAKEN",
+        400,
+        "Raised when a plugin's setting or secret names, as the variable an earlier release kept its value under, one another installed plugin's setting or secret names.",
+    ),
     "PLUGIN-5": ListedRefusal("ALREADY", 400, "The plugin is installed already."),
     "PLUGIN-6": ListedRefusal(
         "NOWHERE", 500, "There is no stack on this machine to put a plugin's container in."

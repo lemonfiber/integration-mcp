@@ -8,58 +8,22 @@ and CI fails on any difference.
 import typing
 
 from .api_kind import (
-    Api,
-    ApiKind,
     Contribution,
     Expect,
-    PluginAdapterOwner,
     PluginAsking,
     PluginChangedCheck,
-    PluginConstraint,
     PluginDeclaration,
+    PluginFailingAsDeclared,
     PluginRecipe,
     PluginRequest,
+    ServiceConstant,
 )
 from ...shared.plugins__undo import PluginGrant
-
-
-type PluginEvidence = typing.Literal["recordings", "service"]
-"""What the verdicts in a report were reached against.
-
-One value, because one is all this build can produce: nothing here asks a service
-anything. It is a field rather than a sentence for the reason a verdict is one — a
-reader handed `demonstrated` has nothing else in the document to tell a recording
-that answered from a service that did, and the weaker of those two claims must not
-be readable as the stronger. The prose says it on the page; this says it to
-whatever consumes the report: an author's own CI, a catalogue, anything counting
-passes. Naming the axis now is what made the second kind of evidence a change the
-compiler walked somebody through rather than one they had to remember.
-"""
-
-
-class PluginFailingAsDeclared(typing.TypedDict):
-    """One recording an assertion fails on as its manifest declares."""
-
-    constraint: PluginConstraint
-    """The constraint of the expectation that fails there."""
-    fixture: str
-    """The recording."""
-    held: str
-    """What the recording held there."""
-    place: typing.NotRequired[str | None]
-    """Where within that constraint, for one that looks at places."""
-    reason: str
-    """Why the manifest says this recording is one the assertion fails on."""
 
 
 class PluginPlaced(typing.TypedDict):
     """One service of an installed plugin, as it was placed."""
 
-    api: typing.NotRequired[Api | None]
-    """The adapter of lemonfiber's its manifest names, which only a part the bundle
-    assembles is reached through. A record read from the register holds none, whatever
-    an older one carried: an installed plugin is reached over the contracts it speaks.
-    """
     asks: typing.NotRequired[list[PluginAsking]]
     """Every capability it asks for."""
     asks_for: typing.NotRequired[str | None]
@@ -70,6 +34,10 @@ class PluginPlaced(typing.TypedDict):
     Resolved rather than optional. The record answers where the directory is, and
     a run that re-derived the fallback would answer for a container it did not
     write the day that fallback moved.
+    """
+    contract: typing.NotRequired[int | None]
+    """The port inside its container it speaks its contracts on, where it declared one
+    apart from where it listens.
     """
     description: typing.NotRequired[str]
     """The line its dashboard entry shows beside it: the one its wiring names, or what
@@ -261,19 +229,21 @@ class PluginRunProof(typing.TypedDict):
     """Why it is worth asserting."""
 
 
-class PluginServiceAdapter(typing.TypedDict):
-    """One adapter of lemonfiber's that one of the plugin's own services names."""
-
-    kind: ApiKind
-    """Which of lemonfiber's adapters it is."""
-    owner: PluginAdapterOwner
-    """Whose it is, which is lemonfiber's."""
-    service: str
-    """The service that names it."""
-
-
 type PluginShape = typing.Literal["egress-guard", "render"]
 """A privileged shape lemonfiber writes for a service."""
+
+
+class PluginSharing(typing.TypedDict):
+    """An adapter that writes the files of the service it fronts, through that service's
+    whole configuration directory mounted into it.
+    """
+
+    adapter: str
+    """The adapter."""
+    at: str
+    """Where that service's configuration directory lands inside the adapter."""
+    upstream: str
+    """The service whose files it writes."""
 
 
 class PluginTaking(typing.TypedDict):
@@ -356,8 +326,10 @@ class PluginVerification(typing.TypedDict):
     """
 
 
-type ServiceConstant = str | int | bool
-"""A value written exactly as declared."""
+type RecordedWith = str | int | bool
+"""What a recording gives a service in the operator's place: a constant reaching no third
+party, or, written `\"minted\"`, a value made for that run alone.
+"""
 
 
 class ServiceFields(typing.TypedDict):
@@ -379,6 +351,10 @@ class ServiceFields(typing.TypedDict):
     """How tightly it is held."""
     publish: typing.NotRequired[list[ServicePublish]]
     """Its further published ports."""
+    rebuilt: typing.NotRequired[list[str]]
+    """The paths beneath its configuration directory it rebuilds when they are missing."""
+    shares_config: typing.NotRequired[str | None]
+    """Where the whole configuration directory of the service it fronts lands in it."""
     tmpfs: typing.NotRequired[list[str]]
     """Its scratch paths in memory."""
     user_mode: typing.NotRequired[ServiceUserMode | None]
@@ -417,8 +393,20 @@ class ServiceSetting(typing.TypedDict):
 
     default: ServiceConstant
     """What is written while the operator has recorded no value."""
+    needs: typing.NotRequired[dict[str, list[ServiceConstant]]]
+    """The values of other settings under which it is written."""
+    one_of: typing.NotRequired[list[SettingChoice] | None]
+    """The values its service accepts, where it says."""
+    recorded_with: typing.NotRequired[RecordedWith | None]
+    """What a recording gives the service in the operator's place, where only the
+    operator holds the value and the service needs one to start.
+    """
     setting: str
     """The setting's name."""
+    was: typing.NotRequired[str | None]
+    """The variable an earlier release kept its value under in the stack's environment
+    file.
+    """
 
 
 class ServiceUrlOf(typing.TypedDict):
@@ -438,6 +426,21 @@ type ServiceUserMode = typing.Literal["image", "puid-env", "uid"]
 
 type ServiceValue = ServiceConstant | ServiceSetting | ServiceUrlOf | ServiceSecretOf
 """One environment variable's value."""
+
+
+type SettingChoice = ServiceConstant | SettingChoiceNeeding
+"""One value a setting accepts."""
+
+
+class SettingChoiceNeeding(typing.TypedDict):
+    """Values that are choices only where the other settings `needs` names hold one of the
+    values it lists.
+    """
+
+    needs: dict[str, list[ServiceConstant]]
+    """What they are choices under."""
+    values: list[ServiceConstant]
+    """The values."""
 
 
 class WiringContest(typing.TypedDict):
@@ -468,7 +471,6 @@ PluginGranting = typing.TypedDict(
 PluginInstalled = typing.TypedDict(
     "PluginInstalled",
     {
-        "adapters": typing.NotRequired[list[PluginServiceAdapter]],
         "contributions": typing.NotRequired[list[Contribution]],
         "declared": typing.NotRequired[PluginDeclaration],
         "description": typing.NotRequired[str | None],
@@ -504,8 +506,6 @@ ServiceMount = typing.TypedDict(
 
 
 __all__ = [
-    "PluginEvidence",
-    "PluginFailingAsDeclared",
     "PluginGranting",
     "PluginInstalled",
     "PluginPlaced",
@@ -516,8 +516,8 @@ __all__ = [
     "PluginRequestProof",
     "PluginRun",
     "PluginRunProof",
-    "PluginServiceAdapter",
     "PluginShape",
+    "PluginSharing",
     "PluginTaking",
     "PluginVerdict",
     "PluginVerdictFailed",
@@ -525,7 +525,7 @@ __all__ = [
     "PluginVerdictPassed",
     "PluginVerdictUnproven",
     "PluginVerification",
-    "ServiceConstant",
+    "RecordedWith",
     "ServiceFields",
     "ServiceMount",
     "ServiceNetwork",
@@ -536,5 +536,7 @@ __all__ = [
     "ServiceUrlOf",
     "ServiceUserMode",
     "ServiceValue",
+    "SettingChoice",
+    "SettingChoiceNeeding",
     "WiringContest",
 ]

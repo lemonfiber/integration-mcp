@@ -7,8 +7,6 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.import___migration__seed__status__stuck import UnsupportedReport
-
 
 type Assessment = typing.Literal["assessed", "unassessable"]
 """Whether a pass could assess drift — whether it had the record of what lemonfiber
@@ -39,16 +37,6 @@ class SeedReport(typing.TypedDict):
     lemonfiber would write is what it would write. What changes is that two of the
     states are reachable only here, and that the last line of the report is an
     instruction to run it for real rather than to run it again.
-    """
-    unsupported: typing.NotRequired[list[UnsupportedReport]]
-    """Services this pass could not wire because it cannot speak to them, each with
-    why.
-
-    Not wirings, because nothing was attempted and a wiring says how an attempt
-    turned out. Not absences either, which is the point: a pass that skipped a
-    service declaring an API shape this build does not speak and said nothing would
-    leave the operator who wrote that declaration no way to tell it from a service
-    lemonfiber had simply forgotten.
     """
     wirings: list[Wiring]
     """Every connection attempted, and how each turned out."""
@@ -211,8 +199,8 @@ class SeedStateUnmanaged(typing.TypedDict):
 
 class SeedStateUnmatched(typing.TypedDict):
     """Something on this machine fills what a service asks for, and nothing lemonfiber
-    does connects the two — the filler names no adapter, or none lemonfiber pairs with
-    what the asker speaks.
+    does connects the two — the filler names no API of its own, or one lemonfiber pairs
+    with nothing the asker speaks.
 
     Settled, because no run changes it: the stack, or what is installed, has to. Said
     rather than left out, because a filler nothing reaches and a filler lemonfiber
