@@ -9,19 +9,7 @@ import typing
 
 from ..shared.lifecycle__plugins__settings__substitution__update import Unvetted
 from ..shared.plugins__settings__status import Waiting
-
-
-class Choosable(typing.TypedDict):
-    """One value a setting accepts."""
-
-    needs: dict[str, list[str]]
-    """The values of other settings under which it is a choice: each setting with the
-    values it has to hold one of, and none where it always is.
-    """
-    open: bool
-    """Whether it is a choice now."""
-    value: str
-    """The value."""
+from ..shared.settings__wizard import Choosable
 
 
 type Owner = OwnerCore | OwnerNamespace
@@ -161,7 +149,6 @@ SecretRead = typing.TypedDict(
 
 
 __all__ = [
-    "Choosable",
     "Owner",
     "OwnerCore",
     "OwnerNamespace",

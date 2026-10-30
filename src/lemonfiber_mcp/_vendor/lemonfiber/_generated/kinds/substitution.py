@@ -30,6 +30,12 @@ class Substitution(typing.TypedDict):
     """What would fill it."""
     setting: str
     """The setting the change writes."""
+    starts: list[str]
+    """Each part the change brings back to its form, started again."""
+    stops: list[str]
+    """Each part the change takes out of its form, stopped with its configuration and
+    data kept where they are.
+    """
     was: typing.NotRequired[str | None]
     """What fills it now, where anything does."""
     why: typing.NotRequired[str | None]
@@ -76,14 +82,26 @@ class SubstitutionReport(typing.TypedDict):
     """
     substitution: Substitution
     """The change itself, and what it would leave with nothing filling it."""
+    unran: typing.NotRequired[list[SubstitutionUnran]]
+    """Each part the change was to stop or start and could not, with why."""
     unvetted: typing.NotRequired[Unvetted | None]
     """The operator's overlay and every service it changes, where there is one: merged
     over the project this choice would write, and held to nothing lemonfiber vets.
     """
 
 
+class SubstitutionUnran(typing.TypedDict):
+    """A part a substitution was to stop or start and could not."""
+
+    because: str
+    """Why it was not."""
+    service: str
+    """The part's service."""
+
+
 __all__ = [
     "Substitution",
     "SubstitutionEnvelope",
     "SubstitutionReport",
+    "SubstitutionUnran",
 ]
