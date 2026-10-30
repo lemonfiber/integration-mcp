@@ -8,6 +8,49 @@ and CI fails on any difference.
 import typing
 
 from ..shared.config__wizard import SettingReport, Validation
+from ..shared.settings__wizard import Choosable
+
+
+type GuardQuestion = GuardQuestionChoice | GuardQuestionValue | GuardQuestionSecret
+"""One question the VPN step asks of the service filling `network.egress-guard`.
+
+Asked in order. A choice offers only the values whose needs the answers before it
+meet, and a value or a secret is asked only where its own needs are met.
+"""
+
+
+class GuardQuestionChoice(typing.TypedDict):
+    """One of a setting's values."""
+
+    asks: typing.Literal["choice"]
+    choices: list[Choosable]
+    """Every value it accepts, each with what it is a choice under."""
+    default: typing.NotRequired[str | None]
+    """What it holds where it is left unanswered."""
+    setting: str
+    """The setting."""
+
+
+class GuardQuestionSecret(typing.TypedDict):
+    """A secret, entered without being shown."""
+
+    asks: typing.Literal["secret"]
+    needs: dict[str, list[str]]
+    """The values of settings under which it is asked."""
+    secret: str
+    """The name the secret store holds it under."""
+    why: str
+    """What holding it is for."""
+
+
+class GuardQuestionValue(typing.TypedDict):
+    """A setting's value, which only the operator holds."""
+
+    asks: typing.Literal["value"]
+    needs: dict[str, list[str]]
+    """The values of other settings under which it is asked."""
+    setting: str
+    """The setting."""
 
 
 type Phase = typing.Literal["in-progress", "reviewing", "applying", "applied"]
@@ -60,6 +103,10 @@ class WizardReport(typing.TypedDict):
     """Whether that step asks a question, as opposed to only informing."""
     at: WizardStep
     """The step the operator is on."""
+    guard: list[GuardQuestion]
+    """What the VPN step asks of the egress guard where one carries the torrents, in the
+    order it asks it: empty where nothing fills the guard or it asks nothing.
+    """
     offered: bool
     """Whether this machine has setup left to do. False once configuration
     exists and nothing is part-way through, which is when a surface directs
@@ -129,6 +176,10 @@ the read-only phase that precedes them.
 
 
 __all__ = [
+    "GuardQuestion",
+    "GuardQuestionChoice",
+    "GuardQuestionSecret",
+    "GuardQuestionValue",
     "Phase",
     "Ran",
     "WizardEnvelope",

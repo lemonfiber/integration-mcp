@@ -11,6 +11,7 @@ import typing
 from .admit_codes import ADMIT
 from .ask_codes import ASK
 from .bundle_codes import BUNDLE
+from .cred_codes import CRED
 from .device_codes import DEVICE
 from .form_codes import FORM
 from .gone_codes import GONE
@@ -43,6 +44,7 @@ REFUSAL_CODES: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = types.
         **ADMIT,
         **ASK,
         **BUNDLE,
+        **CRED,
         **DEVICE,
         **FORM,
         **GONE,

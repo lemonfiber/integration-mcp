@@ -15,7 +15,6 @@ from .plugin_granting import (
     PluginSharing,
     PluginTaking,
     PluginVerification,
-    WiringContest,
 )
 from ...shared.lifecycle__plugins__settings__substitution__update import Unvetted
 from ...shared.plugins__settings__status import Waiting
@@ -90,6 +89,12 @@ class PluginInstall(typing.TypedDict):
     back, and what did not with the reason each is still standing. Absent on a run
     that had nothing to put back, which is both a rehearsal and an install that
     held.
+    """
+    secured: typing.NotRequired[str | None]
+    """What asking the egress guard among its services to hold its control server to the
+    credential its adapter was handed came to, where it was more than held at once:
+    the guard restarted to take it up, or why it did not. Absent where none of its
+    services is a guard speaking its contract, and on every rehearsal.
     """
     sharing: list[PluginSharing]
     """Every adapter that writes the files of the service it fronts."""
@@ -359,6 +364,19 @@ class PluginsEnvelope(typing.TypedDict):
     kind: typing.Literal["plugins"]
 
 
+class WiringContest(typing.TypedDict):
+    """An ask several services claim and nothing has chosen between, so it reaches
+    nothing.
+    """
+
+    by: str
+    """The service that asked."""
+    capability: str
+    """What it asked for."""
+    claimants: list[str]
+    """Every claimant, named — a plugin's with the plugin beside it."""
+
+
 PluginSource = typing.TypedDict(
     "PluginSource",
     {
@@ -411,4 +429,5 @@ __all__ = [
     "PluginUnfilled",
     "PluginUpdate",
     "PluginsEnvelope",
+    "WiringContest",
 ]

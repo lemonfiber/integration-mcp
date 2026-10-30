@@ -13,6 +13,11 @@ SETUP: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
     "SETUP-1": ListedRefusal(
         "NOT_REVIEWED", 400, "Raised when apply is asked for before the answers have been reviewed."
     ),
+    "SETUP-16": ListedRefusal(
+        "GUARD_UNANSWERED",
+        400,
+        "Raised when a VPN answer leaves the egress guard without what it needs to start.",
+    ),
     "SETUP-5": ListedRefusal(
         "DOES_NOT_APPLY", 400, "Raised when an answer is not meaningful on the platform setup is running on."
     ),

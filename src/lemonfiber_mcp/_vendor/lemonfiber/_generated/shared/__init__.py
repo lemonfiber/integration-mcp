@@ -49,6 +49,7 @@ from . import news__news_items as _news__news_items
 from . import plugins__settings__status as _plugins__settings__status
 from . import plugins__undo as _plugins__undo
 from . import plugins__wiring as _plugins__wiring
+from . import settings__wizard as _settings__wizard
 from . import space__stop_seeding as _space__stop_seeding
 from . import step__walkthrough as _step__walkthrough
 from . import stuck__trace as _stuck__trace
@@ -93,6 +94,7 @@ from .news__news_items import *
 from .plugins__settings__status import *
 from .plugins__undo import *
 from .plugins__wiring import *
+from .settings__wizard import *
 from .space__stop_seeding import *
 from .step__walkthrough import *
 from .stuck__trace import *
@@ -138,6 +140,7 @@ __all__ += _news__news_items.__all__
 __all__ += _plugins__settings__status.__all__
 __all__ += _plugins__undo.__all__
 __all__ += _plugins__wiring.__all__
+__all__ += _settings__wizard.__all__
 __all__ += _space__stop_seeding.__all__
 __all__ += _step__walkthrough.__all__
 __all__ += _stuck__trace.__all__

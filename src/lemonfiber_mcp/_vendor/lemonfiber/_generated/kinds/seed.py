@@ -75,6 +75,7 @@ class SeedSeverityWarning(typing.TypedDict):
 
 type SeedState = (
     SeedStateWired
+    | SeedStateRestarted
     | SeedStateAlreadyWired
     | SeedStateDrifted
     | SeedStateStale
@@ -168,6 +169,16 @@ class SeedStateRefused(typing.TypedDict):
     reason: str
     """Why it was refused, in lemonfiber's own words."""
     state: typing.Literal["refused"]
+
+
+class SeedStateRestarted(typing.TypedDict):
+    """Written, and in force once `service` started again, as the adapter that took it
+    answered.
+    """
+
+    service: str
+    """The service started again."""
+    state: typing.Literal["restarted"]
 
 
 class SeedStateSkipped(typing.TypedDict):
@@ -293,6 +304,7 @@ __all__ = [
     "SeedStateFailed",
     "SeedStateObserved",
     "SeedStateRefused",
+    "SeedStateRestarted",
     "SeedStateSkipped",
     "SeedStateStale",
     "SeedStateUnmanaged",

@@ -86,6 +86,12 @@ class LifecycleReport(typing.TypedDict):
     """
     rehearsed: bool
     """Whether this was a rehearsal."""
+    secured: typing.NotRequired[str | None]
+    """What asking the egress guard to hold its control server to the credential its
+    adapter was handed came to, where it was more than held at once: the guard
+    restarted to take it up, or why it did not. Absent where it held it at once or no
+    guard speaks its contract.
+    """
     services: list[Service]
     """What each service ended up doing, where the action waited to find out, or
     where a start did not complete, read once when it ended.
