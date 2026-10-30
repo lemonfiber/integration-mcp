@@ -124,6 +124,11 @@
     "status": 404,
     "description": "Raised when a name does not name one of the bundles this run kept."
   },
+  "CRED-4": {
+    "name": "REPLACEMENT_MOVED",
+    "status": 400,
+    "description": "Raised where a replacement of the media server's internal certificate answers an offer that is not the one a fresh reading builds."
+  },
   "DEVICE-1": {
     "name": "NOT_A_DEVICE_NAME",
     "status": 400,
@@ -763,6 +768,11 @@
     "name": "NOT_REVIEWED",
     "status": 400,
     "description": "Raised when apply is asked for before the answers have been reviewed."
+  },
+  "SETUP-16": {
+    "name": "GUARD_UNANSWERED",
+    "status": 400,
+    "description": "Raised when a VPN answer leaves the egress guard without what it needs to start."
   },
   "SETUP-5": {
     "name": "DOES_NOT_APPLY",

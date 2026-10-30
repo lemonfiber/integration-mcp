@@ -332,11 +332,24 @@ party, or, written `\"minted\"`, a value made for that run alone.
 """
 
 
+class ServiceCertificate(typing.TypedDict):
+    """The certificate lemonfiber makes for a service before it first starts."""
+
+    certificate: str
+    """Where the certificate is written, relative to the configuration directory."""
+    key: str
+    """Where its private key is written, relative to the configuration directory."""
+    names: list[str]
+    """The host names it is made out to."""
+
+
 class ServiceFields(typing.TypedDict):
     """The container fields an install record keeps for a service, beyond those every
     record already holds.
     """
 
+    certificate: typing.NotRequired[ServiceCertificate | None]
+    """The certificate lemonfiber makes for it, where it declares one."""
     config_ro: typing.NotRequired[bool]
     """Whether its configuration directory is read-only."""
     env: typing.NotRequired[dict[str, ServiceValue]]
@@ -443,19 +456,6 @@ class SettingChoiceNeeding(typing.TypedDict):
     """The values."""
 
 
-class WiringContest(typing.TypedDict):
-    """An ask several services claim and nothing has chosen between, so it reaches
-    nothing.
-    """
-
-    by: str
-    """The service that asked."""
-    capability: str
-    """What it asked for."""
-    claimants: list[str]
-    """Every claimant, named — a plugin's with the plugin beside it."""
-
-
 PluginGranting = typing.TypedDict(
     "PluginGranting",
     {
@@ -526,6 +526,7 @@ __all__ = [
     "PluginVerdictUnproven",
     "PluginVerification",
     "RecordedWith",
+    "ServiceCertificate",
     "ServiceFields",
     "ServiceMount",
     "ServiceNetwork",
@@ -538,5 +539,4 @@ __all__ = [
     "ServiceValue",
     "SettingChoice",
     "SettingChoiceNeeding",
-    "WiringContest",
 ]

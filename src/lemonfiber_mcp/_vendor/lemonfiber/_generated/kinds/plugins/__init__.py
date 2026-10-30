@@ -7,13 +7,13 @@ and CI fails on any difference.
 
 from . import api_kind as _api_kind
 from . import plugin_granting as _plugin_granting
-from . import plugin_install as _plugin_install
+from . import wiring_contest as _wiring_contest
 
 from .api_kind import *
 from .plugin_granting import *
-from .plugin_install import *
+from .wiring_contest import *
 
 __all__: list[str] = []
 __all__ += _api_kind.__all__
 __all__ += _plugin_granting.__all__
-__all__ += _plugin_install.__all__
+__all__ += _wiring_contest.__all__
