@@ -158,6 +158,8 @@ class Rotation(typing.TypedDict):
     """Every consumer, and how far the rotation reached it."""
     credential: str
     """Which credential was to be replaced."""
+    offer: typing.NotRequired[str | None]
+    """The offer a replacement that takes one answers, where this reading named one."""
     settled: Settled
     """What became of the replacement."""
 
