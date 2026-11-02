@@ -11,7 +11,6 @@ from .api_kind import (
     Contribution,
     Expect,
     PluginAsking,
-    PluginChangedCheck,
     PluginDeclaration,
     PluginFailingAsDeclared,
     PluginRecipe,
@@ -262,7 +261,11 @@ class PluginTaking(typing.TypedDict):
 
 
 type PluginVerdict = (
-    PluginVerdictPassed | PluginVerdictFailed | PluginVerdictUnproven | PluginVerdictFailingAsDeclared
+    PluginVerdictPassed
+    | PluginVerdictFailed
+    | PluginVerdictUnproven
+    | PluginVerdictFailingAsDeclared
+    | PluginVerdictOpen
 )
 """What one assertion came to, whatever answered it."""
 
@@ -292,6 +295,20 @@ class PluginVerdictFailingAsDeclared(typing.TypedDict):
     outcome: typing.Literal["failing-as-declared"]
 
 
+class PluginVerdictOpen(typing.TypedDict):
+    """The part an adapter claims is left open, because nobody entered the code its claim
+    takes: whoever reaches it first can claim it.
+
+    Apart from passed and from failed, and counted as neither: the adapter holds to its
+    contract, and the part is not yet the household's. Only ever reached against the
+    live service, by an install's or a re-proof's claim.
+    """
+
+    outcome: typing.Literal["open"]
+    why: str
+    """The part, and the code its claim takes."""
+
+
 class PluginVerdictPassed(typing.TypedDict):
     """The recording answers what the binding declares."""
 
@@ -304,26 +321,6 @@ class PluginVerdictUnproven(typing.TypedDict):
     outcome: typing.Literal["unproven"]
     why: str
     """What stopped it being run."""
-
-
-class PluginVerification(typing.TypedDict):
-    """What the stack's own checks made of an install."""
-
-    broke: list[PluginChangedCheck]
-    """Every check this install made worse.
-
-    Empty is the answer an install needs, and it is the common one. What is here
-    is what takes the install back.
-    """
-    unsettled: list[PluginChangedCheck]
-    """Every check nothing could be concluded about across the two readings.
-
-    Reported and never acted on. *I could not tell* is not *it is still broken*,
-    and an install reversed because a check could not reach a provider it also
-    could not reach an hour ago would be punishing a plugin for the weather. It is
-    said out loud rather than dropped, because the assurance an operator thought
-    they had is the thing that went.
-    """
 
 
 type RecordedWith = str | int | bool
@@ -375,9 +372,13 @@ class ServiceFields(typing.TypedDict):
 
 
 class ServiceNetwork(typing.TypedDict):
-    """The network a service runs inside instead of its own."""
+    """The network a service runs inside instead of its own: its filler's, or a fence's."""
 
-    via: str
+    fenced: typing.NotRequired[bool]
+    """Whether it fetches whatever address it is handed, and so runs inside a fence that
+    refuses every private address.
+    """
+    via: typing.NotRequired[str | None]
     """The capability whose filler's network it runs inside."""
 
 
@@ -522,9 +523,9 @@ __all__ = [
     "PluginVerdict",
     "PluginVerdictFailed",
     "PluginVerdictFailingAsDeclared",
+    "PluginVerdictOpen",
     "PluginVerdictPassed",
     "PluginVerdictUnproven",
-    "PluginVerification",
     "RecordedWith",
     "ServiceCertificate",
     "ServiceFields",
