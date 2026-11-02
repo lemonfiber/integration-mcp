@@ -11,6 +11,19 @@ from ..shared.lifecycle__plugins__settings__substitution__update import Unvetted
 from ..shared.substitution__wiring import Unfilled
 
 
+class LeftBehind(typing.TypedDict):
+    """One kind of thing the part a substitution stops holds, and the replacement does not
+    receive.
+    """
+
+    capability: str
+    """The capability whose contract declares it held."""
+    kind: str
+    """The kind, by its stable id."""
+    said: str
+    """The words the rehearsal names it in."""
+
+
 class Substitution(typing.TypedDict):
     """One service standing in for another, worked out before anything is written."""
 
@@ -18,6 +31,10 @@ class Substitution(typing.TypedDict):
     """Every service that asks for it, so the reach of the change is visible."""
     capability: str
     """The capability whose filler changes."""
+    leaves_behind: list[LeftBehind]
+    """Each kind of thing the part it stops holds that its replacement is not carried,
+    read from what each contract declares its filler holds.
+    """
     leaves_unfilled: list[Unfilled]
     """What this would leave with nothing filling it, each naming what asked.
 
@@ -100,6 +117,7 @@ class SubstitutionUnran(typing.TypedDict):
 
 
 __all__ = [
+    "LeftBehind",
     "Substitution",
     "SubstitutionEnvelope",
     "SubstitutionReport",

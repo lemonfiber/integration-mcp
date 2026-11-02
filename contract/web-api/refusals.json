@@ -829,15 +829,15 @@
     "status": 400,
     "description": "Raised where the offer a reset answers is not the one a reading of it makes now."
   },
+  "STACK-15": {
+    "name": "SERVICE_UNFENCED",
+    "status": 409,
+    "description": "Raised where a start names a fenced service no fence can be written for."
+  },
   "STACK-2": {
     "name": "STACK_UNUSABLE",
     "status": 500,
     "description": "Raised when a manifest is readable and this build cannot use it."
-  },
-  "STACK-3": {
-    "name": "STACK_NOT_EMBEDDED",
-    "status": 500,
-    "description": "Raised when the embedded stack is not intact."
   },
   "STACK-4": {
     "name": "STACK_NOT_SET_UP",

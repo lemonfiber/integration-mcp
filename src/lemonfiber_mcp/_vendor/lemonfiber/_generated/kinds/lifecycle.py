@@ -35,6 +35,10 @@ class LifecycleReport(typing.TypedDict):
     """The exact command, so what happened is never a matter of trust."""
     condition: typing.NotRequired[Condition | None]
     """What those services amount to, as one word."""
+    fencing: typing.NotRequired[str | None]
+    """Why the addresses of the engine's host were not asked or not kept for a fence, where
+    a service is fenced and they were not. Absent for every other action.
+    """
     forwarding: typing.NotRequired[str | None]
     """What starting the stack did about the VPN's forwarded port, where it did
     anything. Absent in the ordinary case — the client was already on it, or
@@ -117,6 +121,10 @@ class LifecycleReport(typing.TypedDict):
     """What narrowing moved, where the command was a switch. Absent for every
     other action, which is what tells a reader that nothing was left running
     on purpose.
+    """
+    unfenced: typing.NotRequired[list[str]]
+    """Each fenced service a start holds back because no fence can be written for it, in
+    words naming it and why. Empty for every other action.
     """
     unvetted: typing.NotRequired[Unvetted | None]
     """The operator's overlay and every service it changes, where there is one: merged
