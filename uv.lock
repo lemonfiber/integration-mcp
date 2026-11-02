@@ -4,7 +4,7 @@ requires-python = ">=3.14.2"
 
 [[package]]
 name = "acme"
-version = "5.8.0"
+version = "5.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cryptography" },
@@ -13,9 +13,9 @@ dependencies = [
     { name = "pyrfc3339" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3a/b8/4ca6f1b0e04472d21b248d32a6abc5e24058dac68b513a8ab7526837b100/acme-5.8.0.tar.gz", hash = "sha256:44c4edb53acdd3fa8402cb29c78a6d1bd2005d777a4d2fcd12663bbc3c147b34", size = 91121, upload-time = "2026-09-01T21:15:36.946Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/dd/ad/da805f98b7b7fc0e9f9ec490ad743b2c8b5fca3fb8fcf3bf4a3012bc53f2/acme-5.9.0.tar.gz", hash = "sha256:bbfd9cf42797b5378a05833c0fd917de9418b69e03cbdb39abb7e85e5532fe75", size = 90758, upload-time = "2026-10-29T19:36:53.682Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/73/f8/4e40a19169b540aca57e5d1f260dfb184a2cf27c8a3c5165a28bcba975d9/acme-5.8.0-py3-none-any.whl", hash = "sha256:637501767248156545d85c23b806381ac346c5eac759f8e35052af85b7bb3933", size = 95024, upload-time = "2026-09-01T21:15:18.526Z" },
+    { url = "https://files.pythonhosted.org/packages/89/9d/16b9c80e6fff6d7f33d937a188ebdd6318177a34c6ac6b9e7ae470bbceda/acme-5.9.0-py3-none-any.whl", hash = "sha256:a646011d6c7c843d89c91a901a2bf450752621f6431f19851bec1222c94446bd", size = 95158, upload-time = "2026-10-29T19:36:32.2Z" },
 ]
 
 [[package]]
@@ -484,11 +484,11 @@ wheels = [
 
 [[package]]
 name = "dnspython"
-version = "2.9.0"
+version = "2.9.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/ef/4a/50822184bd67cc6493f0fb6a880749158fcd31ab3fa07409acfd91f9fc85/dnspython-2.9.0.tar.gz", hash = "sha256:b44dc6b18f07a8b1c56676a19fbfdb5209415b046a9cece286baafa87ff3f7f1", size = 423560, upload-time = "2026-10-09T00:07:24.352Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/91/21/7fcd6780f61e9756aafaea760560509bb4111375daa2e23c1be7a89f33f1/dnspython-2.9.1.tar.gz", hash = "sha256:9a6d30e55f8dc63e6052597666112bff0586b95a2474a9deda03afbbf820d37a", size = 455302, upload-time = "2026-10-29T18:05:12.156Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/10/02/cdcc9b7c051786a103c3b09e1003a82fa0c66bcb91ffbdabcfbf7b4163b9/dnspython-2.9.0-py3-none-any.whl", hash = "sha256:9a4aedb833c3c1b49214d04d44d3032ab7a9135f7c1d29a549b4ff78fd82fda9", size = 354822, upload-time = "2026-10-09T00:07:22.622Z" },
+    { url = "https://files.pythonhosted.org/packages/61/55/f90405bbbbd3dd8f788e92cec2d39964f5c09783f0570fc35f3bb3381485/dnspython-2.9.1-py3-none-any.whl", hash = "sha256:7c81caf8de1ed57b8cfc7e0ad4f528a0b8ceace473c7eb946df195dc9def751f", size = 360364, upload-time = "2026-10-29T18:05:10.206Z" },
 ]
 
 [[package]]
