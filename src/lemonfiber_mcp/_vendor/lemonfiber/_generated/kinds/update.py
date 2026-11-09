@@ -7,6 +7,7 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.lifecycle__plugins__reset__settings__substitution__update import StackMoveTaken
 from ..shared.lifecycle__plugins__settings__substitution__update import Unvetted
 from ..shared.lifecycle__quality__reset__update import StackEdit
 from ..shared.lifecycle__update import MoveOffered
@@ -25,19 +26,6 @@ that is the fact an operator weighs: a first-number change is where a project pu
 the work that breaks configurations, and the two behind it are where it puts the
 work that does not.
 """
-
-
-class StackMoveTaken(typing.TypedDict):
-    """A move in place this run took, or tried to take and could not."""
-
-    plugin: str
-    """The plugin the bundle installs."""
-    service: str
-    """The stack's own service it took, or would have taken, the place of."""
-    taken: bool
-    """Whether the plugin now runs in the service's place."""
-    why: typing.NotRequired[str | None]
-    """Why it was not taken, where it was not."""
 
 
 class StackUpdateReport(typing.TypedDict):
@@ -59,6 +47,11 @@ class StackUpdateReport(typing.TypedDict):
     """What would move, and what taking each step means."""
     confirmed: bool
     """Whether the steps were agreed to, or only shown."""
+    guards: typing.NotRequired[list[StackMoveTaken]]
+    """Each of lemonfiber's own guards this run moved onto its plugin, or would move once
+    confirmed, for good and with no yes of its own; one it could not move stays on
+    offer and says why.
+    """
     halted: typing.NotRequired[str | None]
     """Why the stack is not as the run found it, where it is not.
 
@@ -167,7 +160,6 @@ UpdateApplied = typing.TypedDict(
 __all__ = [
     "Ending",
     "Jump",
-    "StackMoveTaken",
     "StackUpdateReport",
     "UpdateApplied",
     "UpdateChange",

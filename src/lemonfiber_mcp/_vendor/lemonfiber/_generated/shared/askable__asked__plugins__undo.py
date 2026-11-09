@@ -1,5 +1,5 @@
 # Copyright (c) 2026 NightWorksIO
-"""The shapes `askable` and `asked` both carry.
+"""The shapes `askable`, `asked`, `plugins` and `undo` all carry.
 
 Generated from the contract vendored in `contract/`. Do not edit: `just generate` rewrites it,
 and CI fails on any difference.

@@ -11,11 +11,12 @@ from . import (
 from . import adoption__migration as _adoption__migration
 from . import alert__dashboard as _alert__dashboard
 from . import alert__dashboard__doctor__error__plugins as _alert__dashboard__doctor__error__plugins
-from . import askable__asked as _askable__asked
+from . import askable__asked__plugins__undo as _askable__asked__plugins__undo
 from . import askable__dashboard__household as _askable__dashboard__household
 from . import backup__restore as _backup__restore
 from . import bandwidth__pausing as _bandwidth__pausing
 from . import beside__migration as _beside__migration
+from . import boot__lifecycle as _boot__lifecycle
 from . import catalogue__dashboard__lifecycle__status as _catalogue__dashboard__lifecycle__status
 from . import (
     config__credentials__doctor__outbound__plugins__wiring__wizard as _config__credentials__doctor__outbound__plugins__wiring__wizard,
@@ -36,6 +37,9 @@ from . import import___migration as _import___migration
 from . import key_claim__keys__minted_key as _key_claim__keys__minted_key
 from . import lifecycle__migration as _lifecycle__migration
 from . import (
+    lifecycle__plugins__reset__settings__substitution__update as _lifecycle__plugins__reset__settings__substitution__update,
+)
+from . import (
     lifecycle__plugins__settings__substitution__update as _lifecycle__plugins__settings__substitution__update,
 )
 from . import lifecycle__preview as _lifecycle__preview
@@ -47,6 +51,7 @@ from . import music__quality as _music__quality
 from . import music__upgrade as _music__upgrade
 from . import news__news_items as _news__news_items
 from . import plugins__settings__status as _plugins__settings__status
+from . import plugins__substitution__wiring as _plugins__substitution__wiring
 from . import plugins__undo as _plugins__undo
 from . import plugins__wiring as _plugins__wiring
 from . import settings__wizard as _settings__wizard
@@ -60,11 +65,12 @@ from .adoption__beside__config__import___replacement import *
 from .adoption__migration import *
 from .alert__dashboard import *
 from .alert__dashboard__doctor__error__plugins import *
-from .askable__asked import *
+from .askable__asked__plugins__undo import *
 from .askable__dashboard__household import *
 from .backup__restore import *
 from .bandwidth__pausing import *
 from .beside__migration import *
+from .boot__lifecycle import *
 from .catalogue__dashboard__lifecycle__status import *
 from .config__credentials__doctor__outbound__plugins__wiring__wizard import *
 from .config__wizard import *
@@ -82,6 +88,7 @@ from .held__part_way__title import *
 from .import___migration import *
 from .key_claim__keys__minted_key import *
 from .lifecycle__migration import *
+from .lifecycle__plugins__reset__settings__substitution__update import *
 from .lifecycle__plugins__settings__substitution__update import *
 from .lifecycle__preview import *
 from .lifecycle__preview__status import *
@@ -92,6 +99,7 @@ from .music__quality import *
 from .music__upgrade import *
 from .news__news_items import *
 from .plugins__settings__status import *
+from .plugins__substitution__wiring import *
 from .plugins__undo import *
 from .plugins__wiring import *
 from .settings__wizard import *
@@ -106,11 +114,12 @@ __all__ += _adoption__beside__config__import___replacement.__all__
 __all__ += _adoption__migration.__all__
 __all__ += _alert__dashboard.__all__
 __all__ += _alert__dashboard__doctor__error__plugins.__all__
-__all__ += _askable__asked.__all__
+__all__ += _askable__asked__plugins__undo.__all__
 __all__ += _askable__dashboard__household.__all__
 __all__ += _backup__restore.__all__
 __all__ += _bandwidth__pausing.__all__
 __all__ += _beside__migration.__all__
+__all__ += _boot__lifecycle.__all__
 __all__ += _catalogue__dashboard__lifecycle__status.__all__
 __all__ += _config__credentials__doctor__outbound__plugins__wiring__wizard.__all__
 __all__ += _config__wizard.__all__
@@ -128,6 +137,7 @@ __all__ += _held__part_way__title.__all__
 __all__ += _import___migration.__all__
 __all__ += _key_claim__keys__minted_key.__all__
 __all__ += _lifecycle__migration.__all__
+__all__ += _lifecycle__plugins__reset__settings__substitution__update.__all__
 __all__ += _lifecycle__plugins__settings__substitution__update.__all__
 __all__ += _lifecycle__preview.__all__
 __all__ += _lifecycle__preview__status.__all__
@@ -138,6 +148,7 @@ __all__ += _music__quality.__all__
 __all__ += _music__upgrade.__all__
 __all__ += _news__news_items.__all__
 __all__ += _plugins__settings__status.__all__
+__all__ += _plugins__substitution__wiring.__all__
 __all__ += _plugins__undo.__all__
 __all__ += _plugins__wiring.__all__
 __all__ += _settings__wizard.__all__

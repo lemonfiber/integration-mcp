@@ -9,27 +9,7 @@ import typing
 
 from ...shared.doctor__error__plugins import StepCame
 from ...shared.doctor__plugins import DoctorVerdict, Finding
-
-
-type ApiKind = typing.Literal[
-    "servarr",
-    "sabnzbd",
-    "qbittorrent",
-    "seerr",
-    "bindery",
-    "jellyfin",
-    "bazarr",
-    "audiobookshelf",
-    "nzbhydra2",
-]
-"""The API shapes lemonfiber knows how to speak.
-
-Four services share the `servarr` shape, which is what makes one client
-enough for them. Bindery is its own kind deliberately: it is not a Servarr
-application and Prowlarr's app sync does not reach it. Bazarr is its own for
-the neighbouring reason: it is told about the \\*arrs rather than being one of
-them, in a form body a client of the shared shape could not send.
-"""
+from ...shared.plugins__substitution__wiring import Apis
 
 
 class Expect(typing.TypedDict):
@@ -107,15 +87,6 @@ two of them in one module is a definition nothing can be compiled against.
 """
 
 
-type PluginAdapterOwner = typing.Literal["lemonfiber"]
-"""Whose an adapter is.
-
-One answer, and the field exists so that the answer is on the wire: an adapter a
-plugin could bring would be code a stranger wrote running with lemonfiber's
-authority, which nothing here can load.
-"""
-
-
 class PluginAsking(typing.TypedDict):
     """One capability a placed service asks for."""
 
@@ -123,8 +94,14 @@ class PluginAsking(typing.TypedDict):
     """The core capability asked for."""
     each: typing.NotRequired[bool]
     """Whether every service that fills it is reached rather than one."""
-    native: typing.NotRequired[str | None]
-    """The upstream's own API it talks in, which it reaches in place of the adapter."""
+    files: typing.NotRequired[str | None]
+    """The medium the filler it reaches files, where it narrows the ask to one."""
+    media_types: typing.NotRequired[list[str]]
+    """The media it asks a filler of, where it narrows the ask to the fillers of those."""
+    native: typing.NotRequired[Apis | None]
+    """The upstream's own API it talks in, or every API it talks in any of, which it
+    reaches in place of the adapter.
+    """
 
 
 class PluginChange(typing.TypedDict):
@@ -142,6 +119,10 @@ class PluginChange(typing.TypedDict):
     to my machine* is answered by a path somebody can go and look at — and a
     relative one is right about a directory the reader has to work out for
     themselves.
+    """
+    placeholders: list[PluginPlaceholder]
+    """Each placeholder the file as shipped names a secret by, in the order it holds them:
+    none for anything but a starting file naming a secret, and never a value.
     """
     puts: PluginPuts
     """What lands there."""
@@ -314,6 +295,19 @@ class PluginOverriding(typing.TypedDict):
     """What changing it is for."""
 
 
+class PluginPlaceholder(typing.TypedDict):
+    """One placeholder a starting file names a secret by, as the plugin ships it."""
+
+    form: PluginPlaceholderForm
+    """The form its value is written in."""
+    secret: str
+    """The secret it names, by its id."""
+
+
+type PluginPlaceholderForm = typing.Literal["plain", "pbkdf2"]
+"""The form a placeholder asks its secret to be written in."""
+
+
 type PluginPuts = typing.Literal["directory", "document", "key", "secrets", "starting", "upstream"]
 """What an install puts at one path."""
 
@@ -406,29 +400,20 @@ class PluginRequest(typing.TypedDict):
 class PluginStep(typing.TypedDict):
     """One call a recipe makes, in the order it makes them."""
 
-    adapter: typing.NotRequired[PluginStepAdapter | None]
-    """The adapter the destination is reached through, or nothing where it is a name
-    outside the stack, which no adapter of lemonfiber's speaks to.
-    """
     id: str
     """The step's id within its recipe."""
     method: str
     """The HTTP method it calls with."""
+    native: typing.NotRequired[str | None]
+    """The API the destination is reached in, as the installed plugin providing it
+    declares it, or nothing where none does or it is a name outside the stack.
+    """
     path: str
     """The path it calls."""
     to: str
     """Where it calls: a service of this stack's or the plugin's own, or a name outside
     both, as the manifest wrote it. Never a resolved address.
     """
-
-
-class PluginStepAdapter(typing.TypedDict):
-    """The adapter a call reaches its destination through."""
-
-    kind: ApiKind
-    """Which of lemonfiber's adapters it is."""
-    owner: PluginAdapterOwner
-    """Whose it is, which is lemonfiber's."""
 
 
 class PluginStepRan(typing.TypedDict):
@@ -485,6 +470,18 @@ it carries nothing outside the union of the rows the published points take.
 """
 
 
+PluginGranting = typing.TypedDict(
+    "PluginGranting",
+    {
+        "approval": str,
+        "credential": str,
+        "for": str,
+        "of": str,
+    },
+)
+"""One credential that would cross to a plugin, as the reading states it."""
+
+
 PluginPair = typing.TypedDict(
     "PluginPair",
     {
@@ -502,6 +499,7 @@ PluginPair = typing.TypedDict(
 PluginSecret = typing.TypedDict(
     "PluginSecret",
     {
+        "captured": typing.NotRequired[bool],
         "for": typing.NotRequired[str | None],
         "id": str,
         "lapses_s": typing.NotRequired[int | None],
@@ -517,12 +515,10 @@ PluginSecret = typing.TypedDict(
 
 
 __all__ = [
-    "ApiKind",
     "Contribution",
     "Expect",
     "Expected",
     "ExpectedKind",
-    "PluginAdapterOwner",
     "PluginAsking",
     "PluginChange",
     "PluginChangedCheck",
@@ -533,8 +529,11 @@ __all__ = [
     "PluginEvidence",
     "PluginExpectedFailure",
     "PluginFailingAsDeclared",
+    "PluginGranting",
     "PluginOverriding",
     "PluginPair",
+    "PluginPlaceholder",
+    "PluginPlaceholderForm",
     "PluginPuts",
     "PluginRecipe",
     "PluginRecipeInput",
@@ -543,7 +542,6 @@ __all__ = [
     "PluginRequest",
     "PluginSecret",
     "PluginStep",
-    "PluginStepAdapter",
     "PluginStepRan",
     "ServiceConstant",
 ]

@@ -139,6 +139,41 @@
       ]
     },
     {
+      "description": "Write the value the secret store holds of a plugin's minted secret back into a\nstarting file, where the shipped file puts the placeholder.\n\nOnly where it still holds what was written. One written since is somebody else's\nwork now, and is left exactly as it is.",
+      "type": "object",
+      "properties": {
+        "does": {
+          "type": "string",
+          "const": "reseed"
+        },
+        "path": {
+          "description": "The file to write back.",
+          "type": "string"
+        },
+        "plugin": {
+          "description": "The plugin the secret is of.",
+          "type": "string"
+        },
+        "secret": {
+          "description": "The secret, by its id.",
+          "type": "string"
+        },
+        "written": {
+          "description": "The checksum of what lemonfiber wrote, which has to still be what is there.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "does",
+        "path",
+        "plugin",
+        "secret",
+        "written"
+      ]
+    },
+    {
       "description": "Move a service's state back to where it was.\n\nOnly where nothing has taken its old place, and only from where it was moved to.",
       "type": "object",
       "properties": {
@@ -338,6 +373,24 @@
       ]
     },
     {
+      "description": "Leave a push endpoint as it stands.\n\nWorked out so the record of a registration or a removal has a reversal to name, and\nnever carried out: only the phone holds what a registration is made from.",
+      "type": "object",
+      "properties": {
+        "does": {
+          "type": "string",
+          "const": "push-endpoint"
+        },
+        "name": {
+          "description": "The endpoint's name.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "does",
+        "name"
+      ]
+    },
+    {
       "description": "Put a setting in the settings store back to what it held.",
       "type": "object",
       "properties": {
@@ -374,6 +427,35 @@
       "required": [
         "does",
         "name"
+      ]
+    },
+    {
+      "description": "Ask a curator to grab a release again by its fingerprint and lift its blocklist\nentry.",
+      "type": "object",
+      "properties": {
+        "does": {
+          "type": "string",
+          "const": "regrab"
+        },
+        "kind": {
+          "description": "The kind of media the curator files it as.",
+          "$ref": "TitleKind.json"
+        },
+        "release": {
+          "description": "The release's fingerprint.",
+          "type": "string"
+        },
+        "title": {
+          "description": "The curator's id for the title.",
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "required": [
+        "does",
+        "kind",
+        "title",
+        "release"
       ]
     },
     {
@@ -453,6 +535,24 @@
         },
         "service": {
           "description": "The media server's service.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "does",
+        "service"
+      ]
+    },
+    {
+      "description": "Leave one of lemonfiber's own guards on its plugin.\n\nWorked out so the record of the move has a reversal to name, and never carried out:\nthe release that moved the guard moves it for good.",
+      "type": "object",
+      "properties": {
+        "does": {
+          "type": "string",
+          "const": "unmoved"
+        },
+        "service": {
+          "description": "The stack's own service the guard's plugin took the place of.",
           "type": "string"
         }
       },

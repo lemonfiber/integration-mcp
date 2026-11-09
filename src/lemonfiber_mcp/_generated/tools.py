@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Every tool the server offers, as the contract describes it.
 
-Generated from the contract lemonfiber f5e9c10fcb512d223cf0bbce893c404a513b8191 published, vendored in `contract/web-api/`.
+Generated from the contract lemonfiber aff1ba4ddac125d9a654e0ef1cb7ef9ee9b77521 published, vendored in `contract/web-api/`.
 Do not edit: `just generate` rewrites it, and CI fails on any difference.
 """
 
@@ -12,7 +12,7 @@ from lemonfiber_mcp.shapes import Reach, ToolShape
 API_VERSION: Final = 1
 """The `api_version` the tools were generated for."""
 
-CONTRACT: Final = 'f5e9c10fcb512d223cf0bbce893c404a513b8191'
+CONTRACT: Final = 'aff1ba4ddac125d9a654e0ef1cb7ef9ee9b77521'
 """The lemonfiber revision whose contract the tools were generated from."""
 
 TOOLS: Final[tuple[ToolShape, ...]] = (
@@ -239,6 +239,42 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
         parameters=(),
         input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
         resource='lemonfiber://read/stuck',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_boot',
+        reach=Reach.READ,
+        target='boot',
+        capability='/api/boot',
+        parameters=(),
+        input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
+        resource='lemonfiber://read/boot',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_watcher',
+        reach=Reach.READ,
+        target='watcher',
+        capability='/api/watcher',
+        parameters=(),
+        input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
+        resource='lemonfiber://read/watcher',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_queue',
+        reach=Reach.READ,
+        target='queue',
+        capability='/api/queue',
+        parameters=(),
+        input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
+        resource='lemonfiber://read/queue',
         read_only=True,
         destructive=False,
         idempotent=True,

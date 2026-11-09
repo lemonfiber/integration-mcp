@@ -18,6 +18,7 @@ from .kinds import (
     BackupEnvelope,
     BandwidthEnvelope,
     BesideEnvelope,
+    BootEnvelope,
     BundleEnvelope,
     CapabilitiesEnvelope,
     CatalogueEnvelope,
@@ -61,7 +62,10 @@ from .kinds import (
     PreviewEnvelope,
     ProvenanceEnvelope,
     PullEnvelope,
+    PushEndpointEnvelope,
+    PushEndpointsEnvelope,
     QualityEnvelope,
+    QueueEnvelope,
     RemovalEnvelope,
     RepairEnvelope,
     ReplacementEnvelope,
@@ -89,6 +93,7 @@ from .kinds import (
     WalkthroughEnvelope,
     WatchEnvelope,
     WatchedEnvelope,
+    WatcherEnvelope,
     WiringEnvelope,
     WizardEnvelope,
     WordEnvelope,
@@ -108,6 +113,7 @@ type Kind = typing.Literal[
     "backup",
     "bandwidth",
     "beside",
+    "boot",
     "bundle",
     "capabilities",
     "catalogue",
@@ -151,7 +157,10 @@ type Kind = typing.Literal[
     "preview",
     "provenance",
     "pull",
+    "push-endpoint",
+    "push-endpoints",
     "quality",
+    "queue",
     "removal",
     "repair",
     "replacement",
@@ -179,6 +188,7 @@ type Kind = typing.Literal[
     "walkthrough",
     "watch",
     "watched",
+    "watcher",
     "wiring",
     "wizard",
     "word",
@@ -199,6 +209,7 @@ type Envelope = (
     | BackupEnvelope
     | BandwidthEnvelope
     | BesideEnvelope
+    | BootEnvelope
     | BundleEnvelope
     | CapabilitiesEnvelope
     | CatalogueEnvelope
@@ -242,7 +253,10 @@ type Envelope = (
     | PreviewEnvelope
     | ProvenanceEnvelope
     | PullEnvelope
+    | PushEndpointEnvelope
+    | PushEndpointsEnvelope
     | QualityEnvelope
+    | QueueEnvelope
     | RemovalEnvelope
     | RepairEnvelope
     | ReplacementEnvelope
@@ -270,6 +284,7 @@ type Envelope = (
     | WalkthroughEnvelope
     | WatchEnvelope
     | WatchedEnvelope
+    | WatcherEnvelope
     | WiringEnvelope
     | WizardEnvelope
     | WordEnvelope

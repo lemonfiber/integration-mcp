@@ -7,6 +7,7 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.lifecycle__plugins__reset__settings__substitution__update import StackMoveTaken
 from ..shared.lifecycle__quality__reset__update import StackEdit
 
 
@@ -27,6 +28,11 @@ class ResetReport(typing.TypedDict):
 
     confirmed: bool
     """Whether the reset was carried out, or only previewed pending confirmation."""
+    guards: typing.NotRequired[list[StackMoveTaken]]
+    """Each of lemonfiber's own guards this act moved onto its plugin after its own
+    change, or on a reading would move, for good and with no yes of its own; one it
+    could not move stays on offer and says why.
+    """
     offer: str
     """The name of this reading, which the reset takes as its yes."""
     rehearsed: bool

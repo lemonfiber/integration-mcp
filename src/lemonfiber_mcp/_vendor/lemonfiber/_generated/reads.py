@@ -55,6 +55,12 @@ class Read(enum.StrEnum):
     """Answers with `trace`; takes `term` and `season`."""
     STUCK = "stuck"
     """Answers with `stuck`."""
+    BOOT = "boot"
+    """Answers with `boot`."""
+    WATCHER = "watcher"
+    """Answers with `watcher`."""
+    QUEUE = "queue"
+    """Answers with `queue`."""
     CONFIG = "config"
     """Answers with `config`; takes `key`."""
     QUALITY = "quality"
@@ -169,6 +175,9 @@ READS: typing.Final[typing.Mapping[Read, Readable]] = types.MappingProxyType(
         Read.NEWS: Readable(("news-items",), ()),
         Read.TRACE: Readable(("trace",), (ReadParameter("term", False), ReadParameter("season", False))),
         Read.STUCK: Readable(("stuck",), ()),
+        Read.BOOT: Readable(("boot",), ()),
+        Read.WATCHER: Readable(("watcher",), ()),
+        Read.QUEUE: Readable(("queue",), ()),
         Read.CONFIG: Readable(("config",), (ReadParameter("key", False),)),
         Read.QUALITY: Readable(("quality",), ()),
         Read.EXPLAIN: Readable(("glossary", "word"), (ReadParameter("word", False),)),

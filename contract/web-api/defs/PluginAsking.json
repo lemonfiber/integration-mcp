@@ -12,11 +12,29 @@
       "type": "boolean",
       "default": false
     },
-    "native": {
-      "description": "The upstream's own API it talks in, which it reaches in place of the adapter.",
+    "files": {
+      "description": "The medium the filler it reaches files, where it narrows the ask to one.",
       "type": [
         "string",
         "null"
+      ]
+    },
+    "media_types": {
+      "description": "The media it asks a filler of, where it narrows the ask to the fillers of those.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "native": {
+      "description": "The upstream's own API it talks in, or every API it talks in any of, which it\nreaches in place of the adapter.",
+      "anyOf": [
+        {
+          "$ref": "Apis.json"
+        },
+        {
+          "type": "null"
+        }
       ]
     }
   },
