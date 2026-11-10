@@ -100,11 +100,22 @@ operator = "Search for titles one member may ask for, under their own limits: ea
 member = "Who is searching, by the name they are known by."
 term = "The words to search for."
 after = "Where the next page begins, as the previous page's `next` gave it. Leave out for the first page."
+kind = "`music` or `books` to search for music or books. Leave out to search for series and films."
+unit = "Within music or books, what to search for: `album` or `artist` for music, `book`, `author` or `series` for books. Leave out for an album or a book."
 [read_askable.household]
 description = "Search for something to ask for: each title found, whether the house already has it or it is on its way, and how much more you can ask for right now."
 [read_askable.household.parameters]
 term = "What to search for."
 after = "Where the next page begins, as the last page said. Leave out for the first page."
+kind = "`music` or `books` to look for music or books. Leave out to look for series and films."
+unit = "For music, `album` or `artist`; for books, `book`, `author` or `series`. Leave out for one album or one book."
+
+[read_askable_kinds]
+operator = "Which kinds of title one member may ask for now, each with what a title of it is asked for as: series and films whole, music as an album or a whole artist, and books as a book, a whole author or a series."
+[read_askable_kinds.parameters]
+member = "Who is asking, by the name they are known by."
+[read_askable_kinds.household]
+description = "What you can ask for right now: series, films, music or books, and for music and books whether you can ask for one album or book, or a whole artist, author or series."
 
 [read_askable_poster]
 operator = "The poster of a title one member's search found, by the id the search lists it under, as the image it is."
@@ -128,6 +139,9 @@ description = "What you are watching right now."
 [read_hosting]
 operator = "What this machine keeps running with no terminal open: the data-location guard and the request clock, whether each is installed and actually running, and where its output goes."
 
+[read_stack]
+operator = "How the stack runs without lemonfiber: whether it is the stack this build ships or the operator's own, the directory its Compose project is written to and the `.env` beside it, the `docker compose` words that bring it up, how an action runs without a question, and each part those words alone do not bring up, with why."
+
 [read_front_door]
 operator = "The one address to give somebody who lives here, why it is that one, or that there is none yet."
 
@@ -142,6 +156,15 @@ season = "One season to narrow a show to, as a whole number."
 
 [read_stuck]
 operator = "Downloads that are stuck, each named so `read_trace` can follow it."
+
+[read_boot]
+operator = "What became of the last restart: when this machine last started, the post-boot verification kept for that start and the newest kept for any, why a verification against it started nothing, and since when and for how many starts the stack has not come back."
+
+[read_watcher]
+operator = "What the outside watcher sees: which plugin watches the stack, whether its monitor answers and why not, every monitor it holds with what it sees, and every critical service and household entry point no active monitor covers."
+
+[read_queue]
+operator = "What the download queue holds: whether healing acts, the strikes and grace in force, every unhealthy download with why and what the next run would do to it, every curator or download client that could not be reached, and the newest runs."
 
 [read_config]
 operator = "lemonfiber's settings, or one setting, with its value and where that value came from."

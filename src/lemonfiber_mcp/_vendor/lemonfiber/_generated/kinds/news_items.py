@@ -16,7 +16,7 @@ class News(typing.TypedDict):
     problems: list[NewsProblem]
     """The checks found wrong, the most recent onset first."""
     requests: list[NewsRequest]
-    """What the household has asked for, highest number first."""
+    """What the household has asked for, the most recently asked first."""
     unread: list[NewsKind]
     """The kinds that could not be read.
 
@@ -52,12 +52,16 @@ class NewsProblem(typing.TypedDict):
 
 
 class NewsRequest(typing.TypedDict):
-    """One request, by its number."""
+    """One request, by its reference."""
 
+    asked: typing.NotRequired[str | None]
+    """When it was asked for, where that is known."""
     by: str
     """Who asked for it, by the name the media server holds them under."""
-    number: int
-    """The number the request service files it under."""
+    request: str
+    """The reference the household list names it with: the request service's number
+    (`42`), or `music-<n>` or `books-<n>` for an ask the core keeps.
+    """
     title: typing.NotRequired[str | None]
     """What it is called, where a service has been told about it."""
 

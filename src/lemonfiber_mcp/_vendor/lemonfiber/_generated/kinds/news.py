@@ -19,8 +19,8 @@ class Newest(typing.TypedDict):
 
     problems: list[NewsCheck]
     """The checks most recently found wrong, each with its onset."""
-    requests: list[int]
-    """The numbers of the household's newest requests."""
+    requests: list[str]
+    """The references of the household's newest requests."""
     unread: list[NewsKind]
     """The kinds that could not be read, as [`News::unread`] names them."""
     updates: list[str]

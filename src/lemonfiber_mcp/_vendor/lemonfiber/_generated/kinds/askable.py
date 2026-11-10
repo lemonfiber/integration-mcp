@@ -7,21 +7,27 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.askable__asked import TitleKind
+from ..shared.askable__askable_kinds__asked import TitleKind, TitleUnit
 from ..shared.askable__dashboard__household import MemberAsking
 
 
 class Askable(typing.TypedDict):
     """One title a member's search found."""
 
+    by: typing.NotRequired[str | None]
+    """Its artist or author, where it is music or books and one is known."""
+    cover: typing.NotRequired[str | None]
+    """Where its cover is published, where it is music or books and has one."""
     id: str
     """The id it is asked for by."""
     kind: TitleKind
-    """Whether it is a series or a film."""
+    """Whether it is a series, a film, music or books."""
     stands: Stands
     """Where it stands in the house."""
     title: str
     """What it is called."""
+    unit: typing.NotRequired[TitleUnit | None]
+    """What it is within music or books, and nothing for a series or a film."""
     year: typing.NotRequired[int | None]
     """The year it came out, where that is known."""
 

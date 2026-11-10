@@ -11,10 +11,12 @@ from . import alert as _alert
 from . import alerts as _alerts
 from . import archives as _archives
 from . import askable as _askable
+from . import askable_kinds as _askable_kinds
 from . import asked as _asked
 from . import backup as _backup
 from . import bandwidth as _bandwidth
 from . import beside as _beside
+from . import boot as _boot
 from . import bundle as _bundle
 from . import capabilities as _capabilities
 from . import catalogue as _catalogue
@@ -58,7 +60,10 @@ from . import plugins as _plugins
 from . import preview as _preview
 from . import provenance as _provenance
 from . import pull as _pull
+from . import push_endpoint as _push_endpoint
+from . import push_endpoints as _push_endpoints
 from . import quality as _quality
+from . import queue as _queue
 from . import removal as _removal
 from . import repair as _repair
 from . import replacement as _replacement
@@ -69,6 +74,7 @@ from . import self_update as _self_update
 from . import settings as _settings
 from . import setup as _setup
 from . import space as _space
+from . import stack as _stack
 from . import start as _start
 from . import status as _status
 from . import step as _step
@@ -86,6 +92,7 @@ from . import version as _version
 from . import walkthrough as _walkthrough
 from . import watch as _watch
 from . import watched as _watched
+from . import watcher as _watcher
 from . import wiring as _wiring
 from . import wizard as _wizard
 from . import word as _word
@@ -96,10 +103,12 @@ from .alert import *
 from .alerts import *
 from .archives import *
 from .askable import *
+from .askable_kinds import *
 from .asked import *
 from .backup import *
 from .bandwidth import *
 from .beside import *
+from .boot import *
 from .bundle import *
 from .capabilities import *
 from .catalogue import *
@@ -143,7 +152,10 @@ from .plugins import *
 from .preview import *
 from .provenance import *
 from .pull import *
+from .push_endpoint import *
+from .push_endpoints import *
 from .quality import *
+from .queue import *
 from .removal import *
 from .repair import *
 from .replacement import *
@@ -154,6 +166,7 @@ from .self_update import *
 from .settings import *
 from .setup import *
 from .space import *
+from .stack import *
 from .start import *
 from .status import *
 from .step import *
@@ -171,6 +184,7 @@ from .version import *
 from .walkthrough import *
 from .watch import *
 from .watched import *
+from .watcher import *
 from .wiring import *
 from .wizard import *
 from .word import *
@@ -182,10 +196,12 @@ __all__ += _alert.__all__
 __all__ += _alerts.__all__
 __all__ += _archives.__all__
 __all__ += _askable.__all__
+__all__ += _askable_kinds.__all__
 __all__ += _asked.__all__
 __all__ += _backup.__all__
 __all__ += _bandwidth.__all__
 __all__ += _beside.__all__
+__all__ += _boot.__all__
 __all__ += _bundle.__all__
 __all__ += _capabilities.__all__
 __all__ += _catalogue.__all__
@@ -229,7 +245,10 @@ __all__ += _plugins.__all__
 __all__ += _preview.__all__
 __all__ += _provenance.__all__
 __all__ += _pull.__all__
+__all__ += _push_endpoint.__all__
+__all__ += _push_endpoints.__all__
 __all__ += _quality.__all__
+__all__ += _queue.__all__
 __all__ += _removal.__all__
 __all__ += _repair.__all__
 __all__ += _replacement.__all__
@@ -240,6 +259,7 @@ __all__ += _self_update.__all__
 __all__ += _settings.__all__
 __all__ += _setup.__all__
 __all__ += _space.__all__
+__all__ += _stack.__all__
 __all__ += _start.__all__
 __all__ += _status.__all__
 __all__ += _step.__all__
@@ -257,6 +277,7 @@ __all__ += _version.__all__
 __all__ += _walkthrough.__all__
 __all__ += _watch.__all__
 __all__ += _watched.__all__
+__all__ += _watcher.__all__
 __all__ += _wiring.__all__
 __all__ += _wizard.__all__
 __all__ += _word.__all__

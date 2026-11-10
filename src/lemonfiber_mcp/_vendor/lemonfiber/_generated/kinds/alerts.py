@@ -15,6 +15,10 @@ class AlertReport(typing.TypedDict):
     """Whether this call changed the answer."""
     exceptions: list[ExceptionReport]
     """Events set apart from the preset, quietest name first."""
+    kinds: list[NotificationKind]
+    """The notification kinds this stack raises as it is configured, so a client offers a
+    switch for each of those and for nothing else.
+    """
     means: str
     """What that preset means, in the operator's terms."""
     preset: str
@@ -42,8 +46,13 @@ class ExceptionReport(typing.TypedDict):
     """Whether it is heard about, whatever the preset would say."""
 
 
+type NotificationKind = typing.Literal["problem", "completion", "update", "backup", "request", "member"]
+"""What sort of thing an alert tells the operator."""
+
+
 __all__ = [
     "AlertReport",
     "AlertsEnvelope",
     "ExceptionReport",
+    "NotificationKind",
 ]

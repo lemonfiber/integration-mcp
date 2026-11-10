@@ -22,10 +22,10 @@ KEY: Final = "lfk_" + "0123456789abcdef" * 4
 """A key shaped as the core mints one, so a test can look for it in everything the server says."""
 VERSION: Final = "0.0.0-test"
 MEMBER_READS: Final = frozenset(
-    {Read.REQUESTS, Read.HELD, Read.HELD_ID, Read.WATCHING, Read.PLAYING, Read.ASKABLE},
+    {Read.REQUESTS, Read.HELD, Read.HELD_ID, Read.WATCHING, Read.PLAYING, Read.ASKABLE, Read.ASKABLE_KINDS},
 )
 """The reads a member's key reaches: their own row of the household, their own shelf and each title on it, what
-they are part-way through, their own sessions, and their own search."""
+they are part-way through, their own sessions, their own search, and the kinds they may ask for."""
 EVERY_READ: Final = frozenset(Read)
 
 

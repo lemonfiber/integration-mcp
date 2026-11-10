@@ -22,5 +22,10 @@ SPACE: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
     "SPACE-6": ListedRefusal(
         "ANOTHER_OFFER", 400, "Raised when an agreement names an offer that is not the one standing now."
     ),
+    "SPACE-8": ListedRefusal(
+        "NOT_ON_OFFER",
+        400,
+        "Raised when an answer narrows to a category its offer does not hold as costing nothing.",
+    ),
 }
 """What the contract says of each `SPACE` code."""

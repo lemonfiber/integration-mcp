@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Every tool the server offers, as the contract describes it.
 
-Generated from the contract lemonfiber f5e9c10fcb512d223cf0bbce893c404a513b8191 published, vendored in `contract/web-api/`.
+Generated from the contract lemonfiber f493bb8c4ef878445062bb225d93e92296bb89df published, vendored in `contract/web-api/`.
 Do not edit: `just generate` rewrites it, and CI fails on any difference.
 """
 
@@ -12,7 +12,7 @@ from lemonfiber_mcp.shapes import Reach, ToolShape
 API_VERSION: Final = 1
 """The `api_version` the tools were generated for."""
 
-CONTRACT: Final = 'f5e9c10fcb512d223cf0bbce893c404a513b8191'
+CONTRACT: Final = 'f493bb8c4ef878445062bb225d93e92296bb89df'
 """The lemonfiber revision whose contract the tools were generated from."""
 
 TOOLS: Final[tuple[ToolShape, ...]] = (
@@ -158,13 +158,27 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
         reach=Reach.READ,
         target='askable',
         capability='/api/askable',
-        parameters=('member', 'term', 'after'),
+        parameters=('member', 'term', 'after', 'kind', 'unit'),
         input_schema={'type': 'object',
                       'properties': {'member': {'type': 'string'},
                                      'term': {'type': 'string'},
-                                     'after': {'type': 'string'}},
+                                     'after': {'type': 'string'},
+                                     'kind': {'type': 'string'},
+                                     'unit': {'type': 'string'}},
                       'additionalProperties': False},
-        resource='lemonfiber://read/askable{?member,term,after}',
+        resource='lemonfiber://read/askable{?member,term,after,kind,unit}',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_askable_kinds',
+        reach=Reach.READ,
+        target='askable/kinds',
+        capability='/api/askable/kinds',
+        parameters=('member',),
+        input_schema={'type': 'object', 'properties': {'member': {'type': 'string'}}, 'additionalProperties': False},
+        resource='lemonfiber://read/askable/kinds{?member}',
         read_only=True,
         destructive=False,
         idempotent=True,
@@ -206,6 +220,18 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
         idempotent=True,
     ),
     ToolShape(
+        name='read_stack',
+        reach=Reach.READ,
+        target='stack',
+        capability='/api/stack',
+        parameters=(),
+        input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
+        resource='lemonfiber://read/stack',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
         name='read_news',
         reach=Reach.READ,
         target='news',
@@ -239,6 +265,42 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
         parameters=(),
         input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
         resource='lemonfiber://read/stuck',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_boot',
+        reach=Reach.READ,
+        target='boot',
+        capability='/api/boot',
+        parameters=(),
+        input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
+        resource='lemonfiber://read/boot',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_watcher',
+        reach=Reach.READ,
+        target='watcher',
+        capability='/api/watcher',
+        parameters=(),
+        input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
+        resource='lemonfiber://read/watcher',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_queue',
+        reach=Reach.READ,
+        target='queue',
+        capability='/api/queue',
+        parameters=(),
+        input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
+        resource='lemonfiber://read/queue',
         read_only=True,
         destructive=False,
         idempotent=True,

@@ -11,11 +11,29 @@
       "description": "What it asked for.",
       "type": "string"
     },
-    "native": {
-      "description": "The upstream's own API it asked in, where no upstream filling it declares that API.",
+    "files": {
+      "description": "The medium it asked a filler of, where nothing filling it files that medium.",
       "type": [
         "string",
         "null"
+      ]
+    },
+    "media_types": {
+      "description": "The media it asked a filler of, where nothing filling it files one of them.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "native": {
+      "description": "The upstream's own API it asked in, or every API it asked in any of, where no\nupstream filling it declares one of them.",
+      "anyOf": [
+        {
+          "$ref": "Apis.json"
+        },
+        {
+          "type": "null"
+        }
       ]
     }
   },

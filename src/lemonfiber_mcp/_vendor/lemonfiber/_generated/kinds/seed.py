@@ -78,6 +78,7 @@ type SeedState = (
     | SeedStateRestarted
     | SeedStateAlreadyWired
     | SeedStateDrifted
+    | SeedStateKept
     | SeedStateStale
     | SeedStateConflicted
     | SeedStateAdopted
@@ -140,6 +141,17 @@ class SeedStateFailed(typing.TypedDict):
     detail: str
     """What the service said."""
     state: typing.Literal["failed"]
+
+
+class SeedStateKept(typing.TypedDict):
+    """A hand edit to the configuration a preset is held through, left in place: a run
+    holding the curators to their preset does not write over it, and only
+    `lemonfiber quality reapply` puts the preset back.
+    """
+
+    path: str
+    """The edited configuration, as its upstream's configuration directory names it."""
+    state: typing.Literal["kept"]
 
 
 class SeedStateObserved(typing.TypedDict):
@@ -302,6 +314,7 @@ __all__ = [
     "SeedStateConflicted",
     "SeedStateDrifted",
     "SeedStateFailed",
+    "SeedStateKept",
     "SeedStateObserved",
     "SeedStateRefused",
     "SeedStateRestarted",

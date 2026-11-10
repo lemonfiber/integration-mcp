@@ -7,15 +7,18 @@ and CI fails on any difference.
 
 import typing
 
-from .api_kind import (
+from .expected import (
     PluginChange,
     PluginChangedCheck,
     PluginDemand,
     PluginEvidence,
+    PluginGranting,
     PluginOverriding,
+    PluginPlaceholder,
     PluginRecipeRan,
 )
-from .plugin_granting import PluginGranting, PluginInstalled, PluginProving, PluginSharing, PluginTaking
+from .plugin_reached_household import PluginInstalled, PluginProving, PluginSharing, PluginTaking
+from ...shared.lifecycle__plugins__reset__settings__substitution__update import StackMoveTaken
 from ...shared.lifecycle__plugins__settings__substitution__update import Unvetted
 from ...shared.plugins__settings__status import Waiting
 from ...shared.plugins__undo import UndoReversal
@@ -138,6 +141,11 @@ class PluginInstalls(typing.TypedDict):
 
     Boxed for the reason the install is: it carries a whole recipe, and every other
     run's report would otherwise be as large as the one run that asks for one.
+    """
+    guards: typing.NotRequired[list[StackMoveTaken]]
+    """Each of lemonfiber's own guards this run moved onto its plugin after its own
+    change, or on a reading would move, for good and with no yes of its own; one it
+    could not move stays on offer and says why.
     """
     install: typing.NotRequired[PluginInstall | None]
     """What this run's install came to, or nothing where it only read.
@@ -271,6 +279,20 @@ class PluginReproof(typing.TypedDict):
     """The plugin proved."""
     proofs: list[PluginProving]
     """Each proof asked, or that would be asked, with what it came to."""
+
+
+class PluginReshipped(typing.TypedDict):
+    """One starting file whose placeholders an update changes, as the version installed
+    shipped it and as the one coming ships it: the placeholders alone, never what the
+    file on the machine holds.
+    """
+
+    becomes: list[PluginPlaceholder]
+    """Its placeholders as the version coming ships it, none where it ships none."""
+    path: str
+    """Where the file is, in full."""
+    was: list[PluginPlaceholder]
+    """Its placeholders as the version installed shipped it, none where it shipped none."""
 
 
 class PluginRestored(typing.TypedDict):
@@ -415,6 +437,7 @@ PluginUpdate = typing.TypedDict(
         "install": PluginInstall,
         "interrupts": list[str],
         "plugin": str,
+        "reshipped": list[PluginReshipped],
         "restored": typing.NotRequired[PluginRestored | None],
         "stopped": typing.NotRequired[str | None],
         "to": str,
@@ -439,6 +462,7 @@ __all__ = [
     "PluginNonconforming",
     "PluginRemoval",
     "PluginReproof",
+    "PluginReshipped",
     "PluginRestored",
     "PluginSource",
     "PluginSourceStanding",
