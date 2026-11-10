@@ -32,6 +32,17 @@
         "null"
       ]
     },
+    "forwarded": {
+      "description": "The VPN's forwarded port before the start and after it, and whether every client\ntakes it, where the guard forwards one or the clients took one before.",
+      "anyOf": [
+        {
+          "$ref": "Forwarded.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "forwarding": {
       "description": "What starting the stack did about the VPN's forwarded port, where it did\nanything. Absent in the ordinary case — the client was already on it, or\nthere is no tunnel to forward through — and a sentence where the client was\nmoved, or could not be.",
       "type": [
@@ -39,12 +50,26 @@
         "null"
       ]
     },
+    "guards": {
+      "description": "Each of lemonfiber's own guards this act moved onto its plugin, or on a rehearsal\nwould move, for good and with no yes of its own; one it could not move stays on\noffer and says why.",
+      "type": "array",
+      "items": {
+        "$ref": "StackMoveTaken.json"
+      }
+    },
     "held": {
       "description": "Why nothing was run, where a start declined to run anything.\n\nAbsent for every ordinary command, which is what makes it readable: a\nlifecycle report with an empty plan and a status of nothing is a report of\nsomething that did not happen, and without this there is nowhere to say\nwhether that was a fault or the correct answer. A start at a login declines\nfor three reasons the operator would each act on differently — the stack was\nstopped on purpose, autostart was never asked for, or this machine is on its\nbattery and nobody said to start anyway — and a run nobody is watching has to\nleave the reason somewhere a reader finds later.",
       "type": [
         "string",
         "null"
       ]
+    },
+    "installing": {
+      "description": "Each part this build carries that the forms hold and this machine has never run,\noffered as an install from the build, offline, before anything of the forms is\nwritten or started; answered by [`Self::offer`].",
+      "type": "array",
+      "items": {
+        "$ref": "UpInstallOffered.json"
+      }
     },
     "moves": {
       "description": "Each part this release installs as a plugin that the stack still runs as its own\nservice: a move in place on offer, named by every start and taken by none.",
@@ -82,6 +107,13 @@
     "rehearsed": {
       "description": "Whether this was a rehearsal.",
       "type": "boolean"
+    },
+    "rendering": {
+      "description": "Why the group owning the render devices of the engine's host was not asked or not\nkept, where a service takes `render` and it was not. Absent for every other action.",
+      "type": [
+        "string",
+        "null"
+      ]
     },
     "secured": {
       "description": "What asking the egress guard to hold its control server to the credential its\nadapter was handed came to, where it was more than held at once: the guard\nrestarted to take it up, or why it did not. Absent where it held it at once or no\nguard speaks its contract.",
@@ -137,6 +169,13 @@
         "type": "string"
       }
     },
+    "unrendered": {
+      "description": "Each service taking `render` a start writes without the host's render devices, in\nwords naming it. Empty for every other action.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "unvetted": {
       "description": "The operator's overlay and every service it changes, where there is one: merged\nover the project this run starts, and held to nothing lemonfiber vets.",
       "anyOf": [
@@ -146,6 +185,13 @@
         {
           "type": "null"
         }
+      ]
+    },
+    "watched": {
+      "description": "What holding the outside watcher to the stack's monitors came to, where it was\nmore than held already: given them, or why not. Absent where it already held them\nor nothing fills `status.watch`.",
+      "type": [
+        "string",
+        "null"
       ]
     }
   },

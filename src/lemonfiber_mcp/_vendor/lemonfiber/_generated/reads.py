@@ -42,19 +42,29 @@ class Read(enum.StrEnum):
     WATCHING = "watching"
     """Answers with `part-way`; takes `member` and `most`."""
     ASKABLE = "askable"
-    """Answers with `askable`; takes `member`, `term` and `after`."""
+    """Answers with `askable`; takes `member`, `term`, `after`, `kind` and `unit`."""
+    ASKABLE_KINDS = "askable/kinds"
+    """Answers with `askable-kinds`; takes `member`."""
     PLAYING = "playing"
     """Answers with `playing`; takes `member`."""
     HOSTING = "hosting"
     """Answers with `hosting`."""
     FRONT_DOOR = "front-door"
     """Answers with `front-door`."""
+    STACK = "stack"
+    """Answers with `stack`."""
     NEWS = "news"
     """Answers with `news-items`."""
     TRACE = "trace"
     """Answers with `trace`; takes `term` and `season`."""
     STUCK = "stuck"
     """Answers with `stuck`."""
+    BOOT = "boot"
+    """Answers with `boot`."""
+    WATCHER = "watcher"
+    """Answers with `watcher`."""
+    QUEUE = "queue"
+    """Answers with `queue`."""
     CONFIG = "config"
     """Answers with `config`; takes `key`."""
     QUALITY = "quality"
@@ -161,14 +171,25 @@ READS: typing.Final[typing.Mapping[Read, Readable]] = types.MappingProxyType(
         ),
         Read.ASKABLE: Readable(
             ("askable",),
-            (ReadParameter("member", False), ReadParameter("term", False), ReadParameter("after", False)),
+            (
+                ReadParameter("member", False),
+                ReadParameter("term", False),
+                ReadParameter("after", False),
+                ReadParameter("kind", False),
+                ReadParameter("unit", False),
+            ),
         ),
+        Read.ASKABLE_KINDS: Readable(("askable-kinds",), (ReadParameter("member", False),)),
         Read.PLAYING: Readable(("playing",), (ReadParameter("member", False),)),
         Read.HOSTING: Readable(("hosting",), ()),
         Read.FRONT_DOOR: Readable(("front-door",), ()),
+        Read.STACK: Readable(("stack",), ()),
         Read.NEWS: Readable(("news-items",), ()),
         Read.TRACE: Readable(("trace",), (ReadParameter("term", False), ReadParameter("season", False))),
         Read.STUCK: Readable(("stuck",), ()),
+        Read.BOOT: Readable(("boot",), ()),
+        Read.WATCHER: Readable(("watcher",), ()),
+        Read.QUEUE: Readable(("queue",), ()),
         Read.CONFIG: Readable(("config",), (ReadParameter("key", False),)),
         Read.QUALITY: Readable(("quality",), ()),
         Read.EXPLAIN: Readable(("glossary", "word"), (ReadParameter("word", False),)),

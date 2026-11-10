@@ -179,7 +179,17 @@ PLUGIN: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
         400,
         "Raised when a plugin's setting or secret names, as the variable an earlier release kept its value under, one another installed plugin's setting or secret names.",
     ),
+    "PLUGIN-49": ListedRefusal(
+        "ANOTHER_SOURCE",
+        403,
+        "Raised when a plugin carrying the id of a part this build pins comes from anywhere but that pin.",
+    ),
     "PLUGIN-5": ListedRefusal("ALREADY", 400, "The plugin is installed already."),
+    "PLUGIN-50": ListedRefusal(
+        "UNCONFORMING",
+        400,
+        "Raised when a case of a contract a plugin's adapter speaks fails, or no recording the plugin ships answers it.",
+    ),
     "PLUGIN-6": ListedRefusal(
         "NOWHERE", 500, "There is no stack on this machine to put a plugin's container in."
     ),

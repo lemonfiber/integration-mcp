@@ -15,10 +15,12 @@ from .kinds import (
     AlertsEnvelope,
     ArchivesEnvelope,
     AskableEnvelope,
+    AskableKindsEnvelope,
     AskedEnvelope,
     BackupEnvelope,
     BandwidthEnvelope,
     BesideEnvelope,
+    BootEnvelope,
     BundleEnvelope,
     CapabilitiesEnvelope,
     CatalogueEnvelope,
@@ -62,7 +64,10 @@ from .kinds import (
     PreviewEnvelope,
     ProvenanceEnvelope,
     PullEnvelope,
+    PushEndpointEnvelope,
+    PushEndpointsEnvelope,
     QualityEnvelope,
+    QueueEnvelope,
     RemovalEnvelope,
     RepairEnvelope,
     ReplacementEnvelope,
@@ -73,6 +78,7 @@ from .kinds import (
     SettingsEnvelope,
     SetupEnvelope,
     SpaceEnvelope,
+    StackEnvelope,
     StartEnvelope,
     StatusEnvelope,
     StepEnvelope,
@@ -90,6 +96,7 @@ from .kinds import (
     WalkthroughEnvelope,
     WatchEnvelope,
     WatchedEnvelope,
+    WatcherEnvelope,
     WiringEnvelope,
     WizardEnvelope,
     WordEnvelope,
@@ -112,6 +119,10 @@ class KindNarrowing(typing.Protocol):
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["askable"], /) -> AskableEnvelope: ...
     @typing.overload
+    def __call__(
+        self, envelope: Envelope, kind: typing.Literal["askable-kinds"], /
+    ) -> AskableKindsEnvelope: ...
+    @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["asked"], /) -> AskedEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["backup"], /) -> BackupEnvelope: ...
@@ -119,6 +130,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["bandwidth"], /) -> BandwidthEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["beside"], /) -> BesideEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["boot"], /) -> BootEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["bundle"], /) -> BundleEnvelope: ...
     @typing.overload
@@ -210,7 +223,17 @@ class KindNarrowing(typing.Protocol):
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["pull"], /) -> PullEnvelope: ...
     @typing.overload
+    def __call__(
+        self, envelope: Envelope, kind: typing.Literal["push-endpoint"], /
+    ) -> PushEndpointEnvelope: ...
+    @typing.overload
+    def __call__(
+        self, envelope: Envelope, kind: typing.Literal["push-endpoints"], /
+    ) -> PushEndpointsEnvelope: ...
+    @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["quality"], /) -> QualityEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["queue"], /) -> QueueEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["removal"], /) -> RemovalEnvelope: ...
     @typing.overload
@@ -231,6 +254,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["setup"], /) -> SetupEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["space"], /) -> SpaceEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["stack"], /) -> StackEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["start"], /) -> StartEnvelope: ...
     @typing.overload
@@ -269,6 +294,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["watch"], /) -> WatchEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["watched"], /) -> WatchedEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["watcher"], /) -> WatcherEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["wiring"], /) -> WiringEnvelope: ...
     @typing.overload

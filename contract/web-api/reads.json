@@ -149,10 +149,31 @@
       {
         "name": "after",
         "repeatable": false
+      },
+      {
+        "name": "kind",
+        "repeatable": false
+      },
+      {
+        "name": "unit",
+        "repeatable": false
       }
     ],
     "kinds": [
       "askable"
+    ],
+    "file": false
+  },
+  {
+    "path": "/api/askable/kinds",
+    "parameters": [
+      {
+        "name": "member",
+        "repeatable": false
+      }
+    ],
+    "kinds": [
+      "askable-kinds"
     ],
     "file": false
   },
@@ -186,6 +207,14 @@
     "file": false
   },
   {
+    "path": "/api/stack",
+    "parameters": [],
+    "kinds": [
+      "stack"
+    ],
+    "file": false
+  },
+  {
     "path": "/api/news",
     "parameters": [],
     "kinds": [
@@ -215,6 +244,30 @@
     "parameters": [],
     "kinds": [
       "stuck"
+    ],
+    "file": false
+  },
+  {
+    "path": "/api/boot",
+    "parameters": [],
+    "kinds": [
+      "boot"
+    ],
+    "file": false
+  },
+  {
+    "path": "/api/watcher",
+    "parameters": [],
+    "kinds": [
+      "watcher"
+    ],
+    "file": false
+  },
+  {
+    "path": "/api/queue",
+    "parameters": [],
+    "kinds": [
+      "queue"
     ],
     "file": false
   },

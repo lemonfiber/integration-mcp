@@ -31,11 +31,13 @@ HOUSEHOLD_TOOLS: Final = frozenset(
         "read_playing",
         "read_askable",
         "read_askable_poster",
+        "read_askable_kinds",
         "connection",
     },
 )
 """The tools a household member is offered words for: their requests, their shelf and each title on it with its
-pictures, what they are part-way through and playing, their search and its posters, and the connection."""
+pictures, what they are part-way through and playing, their search and its posters, the kinds they may ask for,
+and the connection."""
 
 
 def capability_set(states: dict[str, CapabilityState], scope: CredentialScope = "operator") -> CapabilitySet:

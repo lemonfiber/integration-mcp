@@ -14,10 +14,12 @@ from .kinds import (
     AlertsEnvelope,
     ArchivesEnvelope,
     AskableEnvelope,
+    AskableKindsEnvelope,
     AskedEnvelope,
     BackupEnvelope,
     BandwidthEnvelope,
     BesideEnvelope,
+    BootEnvelope,
     BundleEnvelope,
     CapabilitiesEnvelope,
     CatalogueEnvelope,
@@ -61,7 +63,10 @@ from .kinds import (
     PreviewEnvelope,
     ProvenanceEnvelope,
     PullEnvelope,
+    PushEndpointEnvelope,
+    PushEndpointsEnvelope,
     QualityEnvelope,
+    QueueEnvelope,
     RemovalEnvelope,
     RepairEnvelope,
     ReplacementEnvelope,
@@ -72,6 +77,7 @@ from .kinds import (
     SettingsEnvelope,
     SetupEnvelope,
     SpaceEnvelope,
+    StackEnvelope,
     StartEnvelope,
     StatusEnvelope,
     StepEnvelope,
@@ -89,6 +95,7 @@ from .kinds import (
     WalkthroughEnvelope,
     WatchEnvelope,
     WatchedEnvelope,
+    WatcherEnvelope,
     WiringEnvelope,
     WizardEnvelope,
     WordEnvelope,
@@ -104,10 +111,12 @@ type Kind = typing.Literal[
     "alerts",
     "archives",
     "askable",
+    "askable-kinds",
     "asked",
     "backup",
     "bandwidth",
     "beside",
+    "boot",
     "bundle",
     "capabilities",
     "catalogue",
@@ -151,7 +160,10 @@ type Kind = typing.Literal[
     "preview",
     "provenance",
     "pull",
+    "push-endpoint",
+    "push-endpoints",
     "quality",
+    "queue",
     "removal",
     "repair",
     "replacement",
@@ -162,6 +174,7 @@ type Kind = typing.Literal[
     "settings",
     "setup",
     "space",
+    "stack",
     "start",
     "status",
     "step",
@@ -179,6 +192,7 @@ type Kind = typing.Literal[
     "walkthrough",
     "watch",
     "watched",
+    "watcher",
     "wiring",
     "wizard",
     "word",
@@ -195,10 +209,12 @@ type Envelope = (
     | AlertsEnvelope
     | ArchivesEnvelope
     | AskableEnvelope
+    | AskableKindsEnvelope
     | AskedEnvelope
     | BackupEnvelope
     | BandwidthEnvelope
     | BesideEnvelope
+    | BootEnvelope
     | BundleEnvelope
     | CapabilitiesEnvelope
     | CatalogueEnvelope
@@ -242,7 +258,10 @@ type Envelope = (
     | PreviewEnvelope
     | ProvenanceEnvelope
     | PullEnvelope
+    | PushEndpointEnvelope
+    | PushEndpointsEnvelope
     | QualityEnvelope
+    | QueueEnvelope
     | RemovalEnvelope
     | RepairEnvelope
     | ReplacementEnvelope
@@ -253,6 +272,7 @@ type Envelope = (
     | SettingsEnvelope
     | SetupEnvelope
     | SpaceEnvelope
+    | StackEnvelope
     | StartEnvelope
     | StatusEnvelope
     | StepEnvelope
@@ -270,6 +290,7 @@ type Envelope = (
     | WalkthroughEnvelope
     | WatchEnvelope
     | WatchedEnvelope
+    | WatcherEnvelope
     | WiringEnvelope
     | WizardEnvelope
     | WordEnvelope

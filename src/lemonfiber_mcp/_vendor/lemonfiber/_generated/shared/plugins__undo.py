@@ -14,6 +14,7 @@ type Action = (
     | ActionDelete
     | ActionWithdraw
     | ActionRewind
+    | ActionReseed
     | ActionMoveBack
     | ActionRenameBack
     | ActionKeepCopy
@@ -23,10 +24,13 @@ type Action = (
     | ActionReinstate
     | ActionRevokeDevice
     | ActionReinstateDevice
+    | ActionPushEndpoint
     | ActionResettle
+    | ActionRegrab
     | ActionRegrant
     | ActionRehold
     | ActionUnreplaced
+    | ActionUnmoved
     | ActionRun
     | ActionLeave
 )
@@ -69,6 +73,18 @@ class ActionLeave(typing.TypedDict):
     """The overlay."""
 
 
+class ActionPushEndpoint(typing.TypedDict):
+    """Leave a push endpoint as it stands.
+
+    Worked out so the record of a registration or a removal has a reversal to name, and
+    never carried out: only the phone holds what a registration is made from.
+    """
+
+    does: typing.Literal["push-endpoint"]
+    name: str
+    """The endpoint's name."""
+
+
 class ActionReconfigure(typing.TypedDict):
     """Put one field of a service's own resource back to what it held.
 
@@ -86,6 +102,20 @@ class ActionReconfigure(typing.TypedDict):
     """The kind of resource."""
     value: typing.NotRequired[str | None]
     """What to put back, or `None` where it held nothing."""
+
+
+class ActionRegrab(typing.TypedDict):
+    """Ask a curator to grab a release again by its fingerprint and lift its blocklist
+    entry.
+    """
+
+    does: typing.Literal["regrab"]
+    kind: VideoKind
+    """The kind of media the curator files it as."""
+    release: str
+    """The release's fingerprint."""
+    title: int
+    """The curator's id for the title."""
 
 
 class ActionRegrant(typing.TypedDict):
@@ -168,6 +198,25 @@ class ActionRepin(typing.TypedDict):
     """The version to put back."""
 
 
+class ActionReseed(typing.TypedDict):
+    """Write the value the secret store holds of a plugin's minted secret back into a
+    starting file, where the shipped file puts the placeholder.
+
+    Only where it still holds what was written. One written since is somebody else's
+    work now, and is left exactly as it is.
+    """
+
+    does: typing.Literal["reseed"]
+    path: str
+    """The file to write back."""
+    plugin: str
+    """The plugin the secret is of."""
+    secret: str
+    """The secret, by its id."""
+    written: int
+    """The checksum of what lemonfiber wrote, which has to still be what is there."""
+
+
 class ActionResettle(typing.TypedDict):
     """Put a setting in the settings store back to what it held."""
 
@@ -243,6 +292,18 @@ class ActionRun(typing.TypedDict):
     """Whether it is left running."""
     service: str
     """The service."""
+
+
+class ActionUnmoved(typing.TypedDict):
+    """Leave one of lemonfiber's own guards on its plugin.
+
+    Worked out so the record of the move has a reversal to name, and never carried out:
+    the release that moved the guard moves it for good.
+    """
+
+    does: typing.Literal["unmoved"]
+    service: str
+    """The stack's own service the guard's plugin took the place of."""
 
 
 class ActionUnreplaced(typing.TypedDict):
@@ -351,6 +412,12 @@ class UndoReversal(typing.TypedDict):
     """
 
 
+type VideoKind = typing.Literal["tv", "movies"]
+"""Whether a title a curator of video files is a series or a film, as a document that
+names one of those two alone publishes it.
+"""
+
+
 ActionMoveBack = typing.TypedDict(
     "ActionMoveBack",
     {
@@ -400,7 +467,9 @@ __all__ = [
     "ActionKeepCopy",
     "ActionLeave",
     "ActionMoveBack",
+    "ActionPushEndpoint",
     "ActionReconfigure",
+    "ActionRegrab",
     "ActionRegrant",
     "ActionRehold",
     "ActionReinstate",
@@ -408,12 +477,14 @@ __all__ = [
     "ActionRemove",
     "ActionRenameBack",
     "ActionRepin",
+    "ActionReseed",
     "ActionResettle",
     "ActionRestore",
     "ActionRevoke",
     "ActionRevokeDevice",
     "ActionRewind",
     "ActionRun",
+    "ActionUnmoved",
     "ActionUnreplaced",
     "ActionWithdraw",
     "PluginGrant",
@@ -421,4 +492,5 @@ __all__ = [
     "UndoLeft",
     "UndoNoted",
     "UndoReversal",
+    "VideoKind",
 ]

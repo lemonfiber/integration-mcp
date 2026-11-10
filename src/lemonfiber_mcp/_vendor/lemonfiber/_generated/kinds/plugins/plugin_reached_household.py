@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from .api_kind import (
+from .expected import (
     Contribution,
     Expect,
     PluginAsking,
@@ -254,6 +254,8 @@ class PluginTaking(typing.TypedDict):
     """The devices it is given."""
     grants: list[str]
     """The kernel capabilities it is given."""
+    grouped: bool
+    """Whether it is added to the group owning those devices on the engine's host."""
     service: str
     """The service taking it."""
     shape: PluginShape
@@ -367,8 +369,17 @@ class ServiceFields(typing.TypedDict):
     """Where the whole configuration directory of the service it fronts lands in it."""
     tmpfs: typing.NotRequired[list[str]]
     """Its scratch paths in memory."""
-    user_mode: typing.NotRequired[ServiceUserMode | None]
+    user_mode: typing.NotRequired[ServiceUserModeWritten | None]
     """Who it runs as, where declared."""
+
+
+class ServiceIdVariables(typing.TypedDict):
+    """The two variables an image reads the operator's uid and gid from."""
+
+    gid_env: str
+    """The variable it reads the operator's gid from."""
+    uid_env: str
+    """The variable it reads the operator's uid from."""
 
 
 class ServiceNetwork(typing.TypedDict):
@@ -435,7 +446,13 @@ class ServiceUrlOf(typing.TypedDict):
 
 
 type ServiceUserMode = typing.Literal["image", "puid-env", "uid"]
-"""Who the container runs as."""
+"""A user mode a manifest writes by name."""
+
+
+type ServiceUserModeWritten = ServiceUserMode | ServiceIdVariables
+"""How a manifest writes [`UserMode`]: a mode by name, or the variables an image reads
+the operator's ids from.
+"""
 
 
 type ServiceValue = ServiceConstant | ServiceSetting | ServiceUrlOf | ServiceSecretOf
@@ -455,18 +472,6 @@ class SettingChoiceNeeding(typing.TypedDict):
     """What they are choices under."""
     values: list[ServiceConstant]
     """The values."""
-
-
-PluginGranting = typing.TypedDict(
-    "PluginGranting",
-    {
-        "approval": str,
-        "credential": str,
-        "for": str,
-        "of": str,
-    },
-)
-"""One credential that would cross to a plugin, as the reading states it."""
 
 
 PluginInstalled = typing.TypedDict(
@@ -507,7 +512,6 @@ ServiceMount = typing.TypedDict(
 
 
 __all__ = [
-    "PluginGranting",
     "PluginInstalled",
     "PluginPlaced",
     "PluginProving",
@@ -529,6 +533,7 @@ __all__ = [
     "RecordedWith",
     "ServiceCertificate",
     "ServiceFields",
+    "ServiceIdVariables",
     "ServiceMount",
     "ServiceNetwork",
     "ServicePosture",
@@ -537,6 +542,7 @@ __all__ = [
     "ServiceSetting",
     "ServiceUrlOf",
     "ServiceUserMode",
+    "ServiceUserModeWritten",
     "ServiceValue",
     "SettingChoice",
     "SettingChoiceNeeding",

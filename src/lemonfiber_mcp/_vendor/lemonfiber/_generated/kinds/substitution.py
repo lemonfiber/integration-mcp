@@ -7,6 +7,7 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.lifecycle__plugins__reset__settings__substitution__update import StackMoveTaken
 from ..shared.lifecycle__plugins__settings__substitution__update import Unvetted
 from ..shared.substitution__wiring import Unfilled
 
@@ -90,6 +91,11 @@ class SubstitutionReport(typing.TypedDict):
     A run that only says what it would do writes nothing and reports the same
     answer, so the two are told apart here rather than by the caller remembering
     which flags it passed.
+    """
+    guards: typing.NotRequired[list[StackMoveTaken]]
+    """Each of lemonfiber's own guards this act moved onto its plugin after its own
+    change, or on a reading would move, for good and with no yes of its own; one it
+    could not move stays on offer and says why.
     """
     rehearsed: bool
     """Whether this was a rehearsal: what would have happened, with none of it done.

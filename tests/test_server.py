@@ -97,6 +97,7 @@ async def test_a_member_key_is_offered_no_technical_tool_and_reads_the_household
         "read_watching",
         "read_playing",
         "read_askable",
+        "read_askable_kinds",
     }
     assert {tool.name: tool.description for tool in listed.tools} == {
         name: written[name].household for name in names(listed)

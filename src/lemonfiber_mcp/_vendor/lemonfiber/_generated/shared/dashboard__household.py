@@ -155,6 +155,8 @@ class MemberRequest(typing.TypedDict):
     """When the title arrived on the media server, as the request service timestamps it.
     Absent, not null, until it is there.
     """
+    asked: typing.NotRequired[str | None]
+    """When it was asked for, where the request service or the core says."""
     estimate: typing.NotRequired[Estimate | None]
     """About how much room it will want, at the quality in force.
 
@@ -162,9 +164,10 @@ class MemberRequest(typing.TypedDict):
     request service names a kind this build does not know, since there is nothing to
     guess the length of.
     """
-    id: int
-    """The number the request service files it under, which is how one is named again
-    when somebody rules on it.
+    id: str
+    """The reference it is named by again when somebody rules on it: the number the
+    request service files it under (`42`), or `music-<n>` or `books-<n>` for an ask
+    for music or books the core keeps itself.
     """
     media: typing.NotRequired[str | None]
     """What kind of thing it is — a series, a film — in the household's own words.

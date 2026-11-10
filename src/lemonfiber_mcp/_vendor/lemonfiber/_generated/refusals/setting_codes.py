@@ -37,5 +37,10 @@ SETTING: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
         400,
         "Raised where a change would leave a setting holding a value outside its choices.",
     ),
+    "SETTING-9": ListedRefusal(
+        "OWNER_SET_UP",
+        409,
+        "Raised where `PLEX_LINK_MODE` would enter or leave `owner` for a request service already set up.",
+    ),
 }
 """What the contract says of each `SETTING` code."""

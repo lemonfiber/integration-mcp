@@ -7,6 +7,8 @@ and CI fails on any difference.
 
 import typing
 
+from .plugins__substitution__wiring import Apis
+
 
 class Unfilled(typing.TypedDict):
     """A capability something asks for and nothing fills, and what asked for it.
@@ -21,8 +23,14 @@ class Unfilled(typing.TypedDict):
     """The service that asked."""
     capability: str
     """What it asked for."""
-    native: typing.NotRequired[str | None]
-    """The upstream's own API it asked in, where no upstream filling it declares that API."""
+    files: typing.NotRequired[str | None]
+    """The medium it asked a filler of, where nothing filling it files that medium."""
+    media_types: typing.NotRequired[list[str]]
+    """The media it asked a filler of, where nothing filling it files one of them."""
+    native: typing.NotRequired[Apis | None]
+    """The upstream's own API it asked in, or every API it asked in any of, where no
+    upstream filling it declares one of them.
+    """
 
 
 __all__ = [

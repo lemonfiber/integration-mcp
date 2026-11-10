@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.askable__asked import TitleKind
+from ..shared.askable__askable_kinds__asked import TitleKind, TitleUnit
 
 
 class AskedEnvelope(typing.TypedDict):
@@ -24,7 +24,7 @@ class AskedReport(typing.TypedDict):
     """What asking for one title came to, or would come to under a rehearsal."""
 
     kind: TitleKind
-    """Whether it is a series or a film."""
+    """Whether it is a series, a film, music or books."""
     leaves: LeftAfter
     """What is left of the member's allowance once it is counted."""
     member: str
@@ -37,12 +37,16 @@ class AskedReport(typing.TypedDict):
     """Whether the title has come out yet. One that has not is asked for, and arrives
     once it is out.
     """
+    request: typing.NotRequired[str | None]
+    """The reference the ask is named by on the household list, where the core keeps it."""
     said: str
     """All of it, in one household sentence."""
     seasons: list[int]
-    """The seasons asked for, none for a film."""
+    """The seasons asked for, none for a film, music or books."""
     title: str
     """The id of the title asked for."""
+    unit: typing.NotRequired[TitleUnit | None]
+    """What it is within music or books, and nothing for a series or a film."""
 
 
 type Became = typing.Literal["asked", "waiting", "on-its-way"]
@@ -54,8 +58,12 @@ class LeftAfter(typing.TypedDict):
     holds them to.
     """
 
+    books: typing.NotRequired[int | None]
+    """Books, authors and series still to ask for, absent where nothing limits them."""
     films: typing.NotRequired[int | None]
     """Films still to ask for, absent where nothing limits them."""
+    music: typing.NotRequired[int | None]
+    """Albums and artists still to ask for, absent where nothing limits them."""
     television: typing.NotRequired[int | None]
     """Seasons of television still to ask for, absent where nothing limits them."""
 
