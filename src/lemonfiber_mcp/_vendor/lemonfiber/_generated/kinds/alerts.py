@@ -7,6 +7,8 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.alerts__notify import NotificationKind
+
 
 class AlertReport(typing.TypedDict):
     """What the operator will be told about, and what changing it came to."""
@@ -46,13 +48,8 @@ class ExceptionReport(typing.TypedDict):
     """Whether it is heard about, whatever the preset would say."""
 
 
-type NotificationKind = typing.Literal["problem", "completion", "update", "backup", "request", "member"]
-"""What sort of thing an alert tells the operator."""
-
-
 __all__ = [
     "AlertReport",
     "AlertsEnvelope",
     "ExceptionReport",
-    "NotificationKind",
 ]

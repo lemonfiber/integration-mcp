@@ -9,10 +9,8 @@ import typing
 
 
 type TitleKind = typing.Literal["tv", "movies", "music", "books"]
-"""What kind of title a member's search and ask name: a series, a film, music or books.
-
-The web surface's own name for what a member asks for, whose name an SDK already gives
-to the kinds of envelope: the same words on the wire, under a name nothing else takes.
+"""What kind of title a curator files, a member asks for and a media server holds: a
+series, a film, music or books.
 """
 
 

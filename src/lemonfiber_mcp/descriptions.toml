@@ -122,12 +122,24 @@ operator = "The poster of a title one member's search found, by the id the searc
 [read_askable_poster.parameters]
 id = "The title's id, as the search lists it."
 member = "Whose search, by the name they are known by."
-kind = "Whether the title is a series or a film, as the search names it: `tv` or `movies`."
+kind = "What kind of title it is, as the search names it: `tv`, `movies`, `music` or `books`."
+unit = "For music or books, what the title is within its kind, as the search names it: `album`, `artist`, `book`, `author` or `series`."
 [read_askable_poster.household]
 description = "The poster of a title your search found."
 [read_askable_poster.household.parameters]
 id = "Which title, as your search shows it."
-kind = "Whether it is a series or a film, as your search shows it: `tv` or `movies`."
+kind = "What kind of title it is, as your search shows it: `tv`, `movies`, `music` or `books`."
+unit = "For music or books, what it is, as your search shows it: `album`, `artist`, `book`, `author` or `series`."
+
+[read_requests_poster]
+operator = "The cover of a request for music or books the stack keeps, by its reference, as the image it is."
+[read_requests_poster.parameters]
+reference = "The request's reference, as the household lists it: `music-3`."
+member = "Whose request, by the name they are known by."
+[read_requests_poster.household]
+description = "The cover of music or a book you asked for."
+[read_requests_poster.household.parameters]
+reference = "Which request, as your list of what you asked for shows it."
 
 [read_playing]
 operator = "What is playing now: who is watching what, and on which device."
@@ -141,6 +153,14 @@ operator = "What this machine keeps running with no terminal open: the data-loca
 
 [read_stack]
 operator = "How the stack runs without lemonfiber: whether it is the stack this build ships or the operator's own, the directory its Compose project is written to and the `.env` beside it, the `docker compose` words that bring it up, how an action runs without a question, and each part those words alone do not bring up, with why."
+
+[read_notify]
+operator = "Where a message goes: how delivery as a whole stands, every back-end the stack delivers to in the order it was added, and each back-end whose record could not be read, with why."
+
+[read_notify_mine]
+operator = "The ways one member may be told that something they asked for is ready, as the household was offered them, whether they receive on each, and whether their own phone is registered to be woken."
+[read_notify_mine.parameters]
+member = "Whose, by the name they are known by."
 
 [read_front_door]
 operator = "The one address to give somebody who lives here, why it is that one, or that there is none yet."
