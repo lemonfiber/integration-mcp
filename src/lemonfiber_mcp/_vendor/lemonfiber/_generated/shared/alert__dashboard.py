@@ -46,7 +46,7 @@ class Alert(typing.TypedDict):
     moment: Moment
     """Which way it went."""
     notification: typing.NotRequired[
-        typing.Literal["problem", "completion", "update", "backup", "request", "member"]
+        typing.Literal["problem", "completion", "update", "backup", "request", "member", "ready"]
     ]
     """Which of the closed list of notification kinds this alert is, so a client can
     offer a switch for it. A problem on an alert recorded before alerts carried one.

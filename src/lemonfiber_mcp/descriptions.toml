@@ -122,12 +122,24 @@ operator = "The poster of a title one member's search found, by the id the searc
 [read_askable_poster.parameters]
 id = "The title's id, as the search lists it."
 member = "Whose search, by the name they are known by."
-kind = "Whether the title is a series or a film, as the search names it: `tv` or `movies`."
+kind = "What kind of title it is, as the search names it: `tv` or `movies` for a series or a film, `music` or `books` for music or books."
+unit = "For music or books, what the search found it as: `album` or `artist` for music, `book`, `author` or `series` for books. Leave out for an album or a book."
 [read_askable_poster.household]
 description = "The poster of a title your search found."
 [read_askable_poster.household.parameters]
 id = "Which title, as your search shows it."
-kind = "Whether it is a series or a film, as your search shows it: `tv` or `movies`."
+kind = "What kind of title it is, as your search shows it: `tv`, `movies`, `music` or `books`."
+unit = "For music, `album` or `artist`; for books, `book`, `author` or `series`, as your search shows it. Leave out for one album or one book."
+
+[read_requests_poster]
+operator = "The cover of something one member asked for in music or books, by the reference the household list names the ask by, as the image it is."
+[read_requests_poster.parameters]
+reference = "The ask's reference, as the household list names it."
+member = "Whose ask, by the name they are known by."
+[read_requests_poster.household]
+description = "The cover of music or a book you asked for."
+[read_requests_poster.household.parameters]
+reference = "Which of your asks, as your list of what you asked for names it."
 
 [read_playing]
 operator = "What is playing now: who is watching what, and on which device."
@@ -210,6 +222,16 @@ operator = "Which app to watch on for each kind of device, and what to do where 
 
 [read_alerts]
 operator = "What lemonfiber is set to tell the operator about, and the alerts standing now."
+
+[read_notify]
+operator = "Where lemonfiber sends what it tells people: every back-end, whether each is proven to arrive, its newest delivery, the failures since its last confirmed one, and who chose it."
+
+[read_notify_mine]
+operator = "The ways one member may be told that something they asked for is ready, which of them they are told on, and whether their own phone is registered to be woken."
+[read_notify_mine.parameters]
+member = "Whose, by the name they are known by."
+[read_notify_mine.household]
+description = "The ways you can be told that something you asked for is ready, which of them you are told on, and whether your phone is set up for it."
 
 [read_credentials]
 operator = "Every credential the stack holds: what each is, what uses it, where it lives and where it stands. Never a value."

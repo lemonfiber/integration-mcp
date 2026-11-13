@@ -53,6 +53,10 @@ class Read(enum.StrEnum):
     """Answers with `front-door`."""
     STACK = "stack"
     """Answers with `stack`."""
+    NOTIFY = "notify"
+    """Answers with `notify`."""
+    NOTIFY_MINE = "notify/mine"
+    """Answers with `notify-mine`; takes `member`."""
     NEWS = "news"
     """Answers with `news-items`."""
     TRACE = "trace"
@@ -125,7 +129,10 @@ HELD_ID_BACKDROP: typing.Final = "/api/held/{id}/backdrop"
 """Answers with a file, for the `id` in its path; takes `member` and `defaults`."""
 
 ASKABLE_ID_POSTER: typing.Final = "/api/askable/{id}/poster"
-"""Answers with a file, for the `id` in its path; takes `member` and `kind`."""
+"""Answers with a file, for the `id` in its path; takes `member`, `kind` and `unit`."""
+
+REQUESTS_REFERENCE_POSTER: typing.Final = "/api/requests/{reference}/poster"
+"""Answers with a file, for the `reference` in its path; takes `member`."""
 
 
 class ReadParameter(typing.NamedTuple):
@@ -184,6 +191,8 @@ READS: typing.Final[typing.Mapping[Read, Readable]] = types.MappingProxyType(
         Read.HOSTING: Readable(("hosting",), ()),
         Read.FRONT_DOOR: Readable(("front-door",), ()),
         Read.STACK: Readable(("stack",), ()),
+        Read.NOTIFY: Readable(("notify",), ()),
+        Read.NOTIFY_MINE: Readable(("notify-mine",), (ReadParameter("member", False),)),
         Read.NEWS: Readable(("news-items",), ()),
         Read.TRACE: Readable(("trace",), (ReadParameter("term", False), ReadParameter("season", False))),
         Read.STUCK: Readable(("stuck",), ()),
@@ -225,6 +234,7 @@ __all__ = [
     "HELD_ID_POSTER",
     "LOGS",
     "READS",
+    "REQUESTS_REFERENCE_POSTER",
     "Read",
     "ReadParameter",
     "Readable",
