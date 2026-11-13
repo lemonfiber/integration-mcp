@@ -54,6 +54,8 @@ from .kinds import (
     MusicEnvelope,
     NewsEnvelope,
     NewsItemsEnvelope,
+    NotifyEnvelope,
+    NotifyMineEnvelope,
     OutboundEnvelope,
     PairingEnvelope,
     PartWayEnvelope,
@@ -151,6 +153,8 @@ type Kind = typing.Literal[
     "music",
     "news",
     "news-items",
+    "notify",
+    "notify-mine",
     "outbound",
     "pairing",
     "part-way",
@@ -249,6 +253,8 @@ type Envelope = (
     | MusicEnvelope
     | NewsEnvelope
     | NewsItemsEnvelope
+    | NotifyEnvelope
+    | NotifyMineEnvelope
     | OutboundEnvelope
     | PairingEnvelope
     | PartWayEnvelope

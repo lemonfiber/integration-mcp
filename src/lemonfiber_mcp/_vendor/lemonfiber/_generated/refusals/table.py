@@ -19,6 +19,7 @@ from .key_codes import KEY
 from .life_codes import LIFE
 from .listed import ListedRefusal, RefusalCode
 from .migrate_codes import MIGRATE
+from .notify_codes import NOTIFY
 from .play_codes import PLAY
 from .plugin_codes import PLUGIN
 from .push_codes import PUSH
@@ -53,6 +54,7 @@ REFUSAL_CODES: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = types.
         **KEY,
         **LIFE,
         **MIGRATE,
+        **NOTIFY,
         **PLAY,
         **PLUGIN,
         **PUSH,

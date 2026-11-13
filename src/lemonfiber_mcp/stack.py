@@ -14,7 +14,13 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Final, cast
 
 from lemonfiber import Ended, Finished, Read, Running, StillRunningError
-from lemonfiber.reads import ASKABLE_ID_POSTER, BUNDLE, HELD_ID_BACKDROP, HELD_ID_POSTER
+from lemonfiber.reads import (
+    ASKABLE_ID_POSTER,
+    BUNDLE,
+    HELD_ID_BACKDROP,
+    HELD_ID_POSTER,
+    REQUESTS_REFERENCE_POSTER,
+)
 
 from lemonfiber_mcp.shapes import Reach
 
@@ -99,11 +105,22 @@ async def askable_poster(
     return answer.content, answer.media_type
 
 
+async def request_poster(
+    client: AsyncClient,
+    arguments: Mapping[str, object],
+    query: Query,
+) -> tuple[bytes, str | None]:
+    """Fetch the cover of an ask for music or books the core keeps, by the reference in its path."""
+    answer = await client.request_poster(str(arguments["reference"]), query)
+    return answer.content, answer.media_type
+
+
 FETCHERS: Final[Mapping[str, Fetcher]] = {
     f"{BUNDLE}/{{name}}": bundle,
     HELD_ID_POSTER: poster,
     HELD_ID_BACKDROP: backdrop,
     ASKABLE_ID_POSTER: askable_poster,
+    REQUESTS_REFERENCE_POSTER: request_poster,
 }
 """Each file read the contract lists, by the path its capability names, to the client call that fetches it."""
 

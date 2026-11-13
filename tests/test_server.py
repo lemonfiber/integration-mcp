@@ -312,6 +312,20 @@ async def test_a_found_titles_poster_is_fetched_where_the_search_lists_it(
     assert stack.asked("/api/askable/603/poster")[-1].query == {"member": ["ana"], "kind": ["movies"]}
 
 
+async def test_a_kept_asks_cover_is_fetched_by_its_reference(stack: Stack, mcp_client: Client) -> None:
+    stack.reply(
+        "/api/capabilities",
+        Reply(body=capabilities("operator", **{"/api/requests/{reference}/poster": "available"})),
+    )
+    stack.reply("/api/requests/music-3/poster", Reply(raw=b"cover", content_type="image/png"))
+    await mcp_client.list_tools()
+    result = await mcp_client.call_tool("read_requests_poster", {"reference": "music-3", "member": "ana"})
+    _, embedded = result.content
+    assert isinstance(embedded, types.EmbeddedResource)
+    assert embedded.resource.uri == "lemonfiber://requests/music-3/poster"
+    assert stack.asked("/api/requests/music-3/poster")[-1].query == {"member": ["ana"]}
+
+
 async def test_a_rehearsal_asks_the_action_to_write_nothing(stack: Stack, mcp_client: Client) -> None:
     rehearsed = envelope("lifecycle", {"rehearsal": True, "offer": "o-1"})
     stack.reply("/api/actions/restart", Reply(body=rehearsed))
