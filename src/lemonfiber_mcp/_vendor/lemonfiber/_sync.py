@@ -15,13 +15,22 @@ import urllib3
 import urllib3.exceptions
 
 from lemonfiber._protocol import operation
-from lemonfiber._protocol.calls import DEFAULT_TIMEOUT, Answer, Call, declared_over, received, with_credential
+from lemonfiber._protocol.calls import (
+    DEFAULT_TIMEOUT,
+    REFERENCE,
+    TITLE,
+    Answer,
+    Call,
+    declared_over,
+    received,
+    with_credential,
+)
 from lemonfiber._protocol.following import DEFAULT_EVERY, job_name, next_wait
 from lemonfiber._protocol.refusals import CERTIFICATE_REFUSED, LAPSED, NOT_ANSWERING, opening_refusal
 from lemonfiber._protocol.retry import Attempts
 from lemonfiber.jobs import Ended, Finished, Running
 from lemonfiber.problems import CertificateRefusedError, ClaimLapsedError, LemonfiberError, UnreachableError
-from lemonfiber.reads import ASKABLE_ID_POSTER, HELD_ID_BACKDROP, HELD_ID_POSTER
+from lemonfiber.reads import ASKABLE_ID_POSTER, HELD_ID_BACKDROP, HELD_ID_POSTER, REQUESTS_REFERENCE_POSTER
 from lemonfiber.stream import FIRST_WAIT, OPENED, RECONNECTS_ALLOWED, SILENCE_ALLOWED, Break, Following
 
 if TYPE_CHECKING:
@@ -245,19 +254,27 @@ class SyncClient:
         `query` takes `member` and `defaults`, as the title read does. A title outside
         the member's limits is `PLAY-2`, and one with no poster is `PLAY-9`.
         """
-        return self._run(operation.picture(HELD_ID_POSTER, title, query))
+        return self._run(operation.picture(HELD_ID_POSTER, TITLE, title, query))
 
     def backdrop(self, title: str, query: Query | None = None) -> Picture:
         """Fetch a title's backdrop, as `poster` fetches its poster."""
-        return self._run(operation.picture(HELD_ID_BACKDROP, title, query))
+        return self._run(operation.picture(HELD_ID_BACKDROP, TITLE, title, query))
 
     def askable_poster(self, title: str, query: Query | None = None) -> Picture:
         """Fetch the poster of a title a member may ask for, by the id their search lists it under.
 
-        `query` takes `member` and `kind`. A title the member may not ask for is `WISH-3`,
-        and one with no poster is `WISH-13`.
+        `query` takes `member`, `kind` and, for music or books, `unit`. A title the member may not
+        ask for is `WISH-3`, and one with no poster is `WISH-13`.
         """
-        return self._run(operation.picture(ASKABLE_ID_POSTER, title, query))
+        return self._run(operation.picture(ASKABLE_ID_POSTER, TITLE, title, query))
+
+    def request_poster(self, reference: str, query: Query | None = None) -> Picture:
+        """Fetch the cover of an ask for music or books the core keeps, by the reference the household list names it by.
+
+        `query` takes `member`. A reference no kept ask goes by, or another member's, is `WISH-3`,
+        and an ask with no cover is `WISH-13`.
+        """
+        return self._run(operation.picture(REQUESTS_REFERENCE_POSTER, REFERENCE, reference, query))
 
     def act(self, action: str, arguments: Mapping[str, Json] | None = None) -> Envelope:
         """Tell lemonfiber to do something the command line could also do. Sent once, never retried."""

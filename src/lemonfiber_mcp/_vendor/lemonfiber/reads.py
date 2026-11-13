@@ -10,7 +10,16 @@ doors integration keys are kept and collected through.
 
 from typing import Final
 
-from lemonfiber._generated import API, ASKABLE_ID_POSTER, BUNDLE, HELD_ID_BACKDROP, HELD_ID_POSTER, LOGS, Read
+from lemonfiber._generated import (
+    API,
+    ASKABLE_ID_POSTER,
+    BUNDLE,
+    HELD_ID_BACKDROP,
+    HELD_ID_POSTER,
+    LOGS,
+    REQUESTS_REFERENCE_POSTER,
+    Read,
+)
 
 __all__ = [
     "ACTIONS",
@@ -26,6 +35,7 @@ __all__ = [
     "KEYS",
     "KEY_CLAIMS",
     "LOGS",
+    "REQUESTS_REFERENCE_POSTER",
     "SESSION",
     "Read",
 ]
