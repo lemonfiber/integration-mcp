@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.doctor__error__plugins__repair import Remedy
+from ..shared.remedy import Remedy
 
 
 class Beyond(typing.TypedDict):

@@ -7,15 +7,15 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.boot__lifecycle import Forwarded
-from ..shared.dashboard__lifecycle__status import Service
-from ..shared.lifecycle__migration import ConflictReport
-from ..shared.lifecycle__plugins__reset__settings__substitution__update import StackMoveTaken
-from ..shared.lifecycle__plugins__settings__substitution__update import Unvetted
-from ..shared.lifecycle__preview import Plan
-from ..shared.lifecycle__quality__reset__update import StackEdit
-from ..shared.lifecycle__status import Condition
-from ..shared.lifecycle__update import MoveOffered
+from ..shared.condition import Condition
+from ..shared.conflict_report import ConflictReport
+from ..shared.dropped import Plan
+from ..shared.forwarded import Forwarded
+from ..shared.move_offered import MoveOffered
+from ..shared.service import Service
+from ..shared.stack_edit import StackEdit
+from ..shared.stack_move_taken import StackMoveTaken
+from ..shared.unvetted import Unvetted
 
 
 class LifecycleEnvelope(typing.TypedDict):

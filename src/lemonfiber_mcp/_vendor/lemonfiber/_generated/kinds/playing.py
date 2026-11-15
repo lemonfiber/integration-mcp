@@ -7,7 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.held__part_way__playing__title import Medium
+from ..shared.medium import Medium
+from ..shared.obstacle import Obstacle
 
 
 class Playback(typing.TypedDict):
@@ -60,8 +61,8 @@ class PlayingReport(typing.TypedDict):
     collapsing them would report a quiet house on the day the media server was down.
     Anything that could not be read is said in `findings` and this goes false.
     """
-    findings: list[str]
-    """What is worth saying about this reading, in the words its reader would use.
+    findings: list[Obstacle]
+    """What stood in the way of this reading, each by the code that names it.
 
     Always written, empty or not, so a reader never has to guess what an absent
     field means.

@@ -152,16 +152,12 @@ def collected_of(answer: Answer) -> MintedKey:
     return expect(envelope_of(answer), "minted-key")["data"]
 
 
-def instant(written: str) -> dt.datetime:
-    """Read an instant as this product writes one, in UTC."""
-    try:
-        read = dt.datetime.fromisoformat(written)
-    except ValueError as unreadable:
-        msg = f"{written!r} is not an instant"
-        raise UnreadableResponseError(msg) from unreadable
-    if read.tzinfo is None:
-        return read.replace(tzinfo=dt.UTC)
-    if read.utcoffset() != dt.timedelta(0):
-        msg = f"{written!r} names an offset other than UTC"
+def instant(written: object) -> dt.datetime:
+    """Read an instant as this product writes one, whole seconds since the Unix epoch, in UTC."""
+    msg = f"{written!r} is not an instant"
+    if isinstance(written, bool) or not isinstance(written, int) or written < 0:
         raise UnreadableResponseError(msg)
-    return read.astimezone(dt.UTC)
+    try:
+        return dt.datetime.fromtimestamp(written, dt.UTC)
+    except (OverflowError, OSError, ValueError) as unreadable:
+        raise UnreadableResponseError(msg) from unreadable

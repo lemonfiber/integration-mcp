@@ -7,9 +7,9 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.lifecycle__plugins__reset__settings__substitution__update import StackMoveTaken
-from ..shared.lifecycle__plugins__settings__substitution__update import Unvetted
-from ..shared.substitution__wiring import Unfilled
+from ..shared.stack_move_taken import StackMoveTaken
+from ..shared.unfilled import Unfilled
+from ..shared.unvetted import Unvetted
 
 
 class LeftBehind(typing.TypedDict):

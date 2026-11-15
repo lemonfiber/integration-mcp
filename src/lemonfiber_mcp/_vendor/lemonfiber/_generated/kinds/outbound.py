@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.config__credentials__doctor__outbound__plugins__wiring__wizard import ValueOrigin
+from ..shared.value_origin import ValueOrigin
 
 
 class Elsewhere(typing.TypedDict):
@@ -58,12 +58,18 @@ class Leaving(typing.TypedDict):
 class OnBehalf(typing.TypedDict):
     """A request lemonfiber makes on an installed plugin's behalf, attributed to it."""
 
+    allowed: bool
+    """Whether this machine's settings allow it."""
+    cost: str
+    """What stops working once it is refused."""
     destination: str
     """Where it goes, as the plugin declared it."""
     plugin: str
     """The plugin that declared it, by its id."""
     purpose: str
     """Why it may be made."""
+    switch: str
+    """The setting that refuses it: `plugin.<id>.reach.<host>`."""
 
 
 class Outbound(typing.TypedDict):

@@ -7,8 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.adoption__beside__config__import___replacement import Stance
-from ..shared.beside__migration import MovedReport
+from ..shared.moved_report import MovedReport
+from ..shared.stance import Stance
 
 
 class BesideEnvelope(typing.TypedDict):

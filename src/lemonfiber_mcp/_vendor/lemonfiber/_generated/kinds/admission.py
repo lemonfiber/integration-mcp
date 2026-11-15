@@ -7,6 +7,8 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.instant import Instant
+
 
 class AdmissionEnvelope(typing.TypedDict):
     """The envelope carrying `admission`."""
@@ -32,16 +34,13 @@ class Admitted(typing.TypedDict):
     **Absent is the operator**, which is the whole of the discriminator. A second
     field naming which kind of person this is could disagree with this one, and
     the day they disagreed a client would have to choose which to believe.
-
-    The id and nothing else. What that member is called, what they may watch and
-    what they have left are read from the household report, which already carries
-    all of it per member — so there is one fact here and no second copy of
-    anything that could go stale against the read.
     """
+    name: typing.NotRequired[str | None]
+    """The member's display name as the media server holds it, where it is a member's."""
     token: str
     """The secret this session is carried by, sent in the header the per-run token is."""
-    until: str
-    """When it stops being one, written as every other instant this product writes."""
+    until: Instant
+    """When it stops being one."""
 
 
 __all__ = [

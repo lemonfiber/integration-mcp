@@ -13,7 +13,7 @@
     },
     "registered": {
       "description": "When it was registered.",
-      "type": "string"
+      "$ref": "Instant.json"
     },
     "rehearsed": {
       "description": "Whether this was a rehearsal: what registering would come to, with nothing kept.",

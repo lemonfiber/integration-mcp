@@ -7,7 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.config__credentials__doctor__outbound__plugins__wiring__wizard import ValueOrigin
+from ..shared.instant import Instant
+from ..shared.value_origin import ValueOrigin
 
 
 type CredentialReach = CredentialReachUpdated | CredentialReachPending | CredentialReachFailed
@@ -268,7 +269,7 @@ class SettledUnproven(typing.TypedDict):
 CredentialGranted = typing.TypedDict(
     "CredentialGranted",
     {
-        "at": str,
+        "at": typing.NotRequired[Instant | None],
         "credential": str,
         "for": str,
         "of": str,

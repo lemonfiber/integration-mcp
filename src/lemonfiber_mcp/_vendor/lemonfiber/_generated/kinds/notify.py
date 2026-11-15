@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.alerts__notify import NotificationKind
+from ..shared.notification_kind import NotificationKind
 
 
 class NotifyBackend(typing.TypedDict):

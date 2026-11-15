@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.dashboard__household__invitation import Unrated
+from ..shared.unrated import Unrated
 
 
 class Invitation(typing.TypedDict):

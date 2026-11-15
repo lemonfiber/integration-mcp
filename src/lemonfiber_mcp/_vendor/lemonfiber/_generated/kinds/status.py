@@ -7,10 +7,10 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.dashboard__lifecycle__status import Service, ServiceState
-from ..shared.lifecycle__preview__status import Filtered
-from ..shared.lifecycle__status import Condition
-from ..shared.plugins__settings__status import Waiting
+from ..shared.condition import Condition
+from ..shared.filtered import Filtered
+from ..shared.service import Service, ServiceState
+from ..shared.waiting import Waiting
 
 
 type Awaiting = typing.Literal["downloads", "images"]

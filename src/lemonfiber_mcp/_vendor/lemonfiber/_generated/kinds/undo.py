@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.plugins__undo import UndoReversal
+from ..shared.action import UndoReversal
 
 
 class UndoEnvelope(typing.TypedDict):

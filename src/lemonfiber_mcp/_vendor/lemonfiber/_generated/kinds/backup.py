@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.backup__restore import Scope
+from ..shared.scope import Scope
 
 
 class BackupEnvelope(typing.TypedDict):

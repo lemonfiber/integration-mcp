@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.step__walkthrough import Line, WalkthroughStep
+from ..shared.line import Line, WalkthroughStep
 
 
 class Handover(typing.TypedDict):

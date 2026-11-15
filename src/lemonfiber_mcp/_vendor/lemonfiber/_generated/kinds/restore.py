@@ -7,7 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.backup__restore import Scope
+from ..shared.instant import Instant
+from ..shared.scope import Scope
 
 
 class BackupManifest(typing.TypedDict):
@@ -19,8 +20,8 @@ class BackupManifest(typing.TypedDict):
     value the capture wrote is the value the restore reads.
     """
 
-    created_at: str
-    """When it was taken. Opaque here; the surface stamps it from the clock."""
+    created_at: Instant
+    """When it was taken."""
     data_root: str
     """The data root it was taken against, to notice a restore to a different one."""
     members: list[Member]

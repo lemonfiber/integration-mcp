@@ -7,8 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.music__quality import Disposition, MusicChoice
-from ..shared.music__upgrade import Triggered
+from ..shared.disposition import Disposition, MusicChoice
+from ..shared.triggered import Triggered
 
 
 class MusicEnvelope(typing.TypedDict):

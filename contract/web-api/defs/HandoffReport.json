@@ -25,10 +25,14 @@
       }
     },
     "issued": {
-      "description": "When a code was first issued for them, as an instant. Absent until one is.",
-      "type": [
-        "string",
-        "null"
+      "description": "When a code was first issued for them. Absent until one is.",
+      "anyOf": [
+        {
+          "$ref": "Instant.json"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "name": {

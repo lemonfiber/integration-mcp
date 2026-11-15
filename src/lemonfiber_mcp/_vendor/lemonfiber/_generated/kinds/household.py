@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.dashboard__household import HouseholdReport
+from ..shared.estimate import HouseholdReport
 
 
 class HouseholdEnvelope(typing.TypedDict):

@@ -31,9 +31,13 @@
     },
     "onset": {
       "description": "When the stack first saw this check wrong since it last saw it right, in whole\nseconds since the epoch.\n\nSet after the run from the store of conditions, like [`Self::said`], so it is\nthe moment the health summary names for the same check and a restart does not\nmove it. Absent where the finding says nothing is wrong, and where the checks\nran for something other than a diagnosis.",
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "$ref": "Instant.json"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "origin": {

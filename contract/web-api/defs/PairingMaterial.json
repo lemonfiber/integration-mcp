@@ -8,10 +8,8 @@
       "type": "string"
     },
     "expires": {
-      "description": "When the material stops being good, in seconds since the Unix epoch.",
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
+      "description": "When the material stops being good.",
+      "$ref": "Instant.json"
     },
     "fingerprint": {
       "description": "The certificate that address presents: SHA-256 over its DER encoding, in\nlower-case hex. Not the digest of its public key.",

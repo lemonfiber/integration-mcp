@@ -7,9 +7,10 @@ and CI fails on any difference.
 
 import typing
 
-from ...shared.doctor__error__plugins import StepCame
-from ...shared.doctor__plugins import DoctorVerdict, Finding
-from ...shared.plugins__substitution__wiring import Apis
+from ...shared.apis import Apis
+from ...shared.disruptive import DoctorVerdict, Finding
+from ...shared.plugin_constraint import PluginConstraint
+from ...shared.problem import StepCame
 
 
 class Expect(typing.TypedDict):
@@ -148,28 +149,6 @@ class PluginChangedCheck(typing.TypedDict):
     """
 
 
-type PluginConstraint = typing.Literal[
-    "status",
-    "json",
-    "json_has_keys",
-    "json_types",
-    "json_at_least",
-    "json_array_min",
-    "json_is_absent",
-    "content_type",
-    "body_starts_with",
-    "exit",
-    "stdout_starts_with",
-]
-"""A kind of constraint an expectation can put on a body.
-
-The same vocabulary a proof's expectation and a contributed check's use, so that
-\"a status alone is not evidence\" is one rule rather than three. Read as well as
-written: a declaration that an assertion fails on a recording names the one of these
-that fails there.
-"""
-
-
 class PluginDeclaration(typing.TypedDict):
     """What a plugin declared about itself, as its install read it."""
 
@@ -202,6 +181,8 @@ class PluginDeclaration(typing.TypedDict):
     """
     secrets: typing.NotRequired[list[PluginSecret]]
     """Every credential it says it will hold."""
+    stops: typing.NotRequired[list[PluginStopping]]
+    """What refusing each of [`Self::reaches`] stops, in the same order."""
     upstream: typing.NotRequired[str]
     """Where its source is published, as the plugin names it."""
 
@@ -221,20 +202,6 @@ class PluginDemand(typing.TypedDict):
     """The recipe as the operator agrees to it: its calls, what it asks for, and every
     value it would carry where.
     """
-
-
-type PluginEvidence = typing.Literal["recordings", "service"]
-"""What the verdicts in a report were reached against.
-
-One value, because one is all this build can produce: nothing here asks a service
-anything. It is a field rather than a sentence for the reason a verdict is one — a
-reader handed `demonstrated` has nothing else in the document to tell a recording
-that answered from a service that did, and the weaker of those two claims must not
-be readable as the stronger. The prose says it on the page; this says it to
-whatever consumes the report: an author's own CI, a catalogue, anything counting
-passes. Naming the axis now is what made the second kind of evidence a change the
-compiler walked somebody through rather than one they had to remember.
-"""
 
 
 class PluginExpectedFailure(typing.TypedDict):
@@ -271,21 +238,6 @@ class PluginExpectedFailure(typing.TypedDict):
     """
 
 
-class PluginFailingAsDeclared(typing.TypedDict):
-    """One recording an assertion fails on as its manifest declares."""
-
-    constraint: PluginConstraint
-    """The constraint of the expectation that fails there."""
-    fixture: str
-    """The recording."""
-    held: str
-    """What the recording held there."""
-    place: typing.NotRequired[str | None]
-    """Where within that constraint, for one that looks at places."""
-    reason: str
-    """Why the manifest says this recording is one the assertion fails on."""
-
-
 class PluginOverriding(typing.TypedDict):
     """One bundled thing a plugin declares it will change."""
 
@@ -310,6 +262,28 @@ type PluginPlaceholderForm = typing.Literal["plain", "pbkdf2", "bcrypt"]
 
 type PluginPuts = typing.Literal["directory", "document", "key", "secrets", "starting", "upstream"]
 """What an install puts at one path."""
+
+
+class PluginReachedHousehold(typing.TypedDict):
+    """From the household, through the stack's own proxy, at this label."""
+
+    group: typing.NotRequired[str | None]
+    """The group on the bundled dashboard, where the manifest named one."""
+    hostname: str
+    """The single label in front of the operator's domain."""
+    port: int
+    """The port the service listens on."""
+    tier: typing.Literal["household"]
+
+
+class PluginReachedLoopback(typing.TypedDict):
+    """From this machine and nowhere else. No route, and no label to route to."""
+
+    group: typing.NotRequired[str | None]
+    """The group on the bundled dashboard, where the manifest named one."""
+    port: int
+    """The port the service listens on."""
+    tier: typing.Literal["loopback"]
 
 
 class PluginRecipe(typing.TypedDict):
@@ -437,6 +411,28 @@ class PluginStepRan(typing.TypedDict):
     """Why it came to what it did, where that wants saying."""
 
 
+class PluginStopped(typing.TypedDict):
+    """One recipe step refusing a host stops."""
+
+    recipe: str
+    """The recipe's id."""
+    step: str
+    """The step's id."""
+    title: str
+    """What the recipe accomplishes, in its author's words."""
+
+
+class PluginStopping(typing.TypedDict):
+    """What refusing one host a plugin's recipes reach stops."""
+
+    host: str
+    """The host, as the recipes name it."""
+    said: typing.NotRequired[str | None]
+    """What stops, in its author's words, where the manifest says."""
+    steps: typing.NotRequired[list[PluginStopped]]
+    """Every recipe step refusing it stops: each calling it, and each depending on one."""
+
+
 type ServiceConstant = str | int | bool
 """A value written exactly as declared."""
 
@@ -522,19 +518,18 @@ __all__ = [
     "PluginAsking",
     "PluginChange",
     "PluginChangedCheck",
-    "PluginConstraint",
     "PluginDeclaration",
     "PluginDeclaredVerdict",
     "PluginDemand",
-    "PluginEvidence",
     "PluginExpectedFailure",
-    "PluginFailingAsDeclared",
     "PluginGranting",
     "PluginOverriding",
     "PluginPair",
     "PluginPlaceholder",
     "PluginPlaceholderForm",
     "PluginPuts",
+    "PluginReachedHousehold",
+    "PluginReachedLoopback",
     "PluginRecipe",
     "PluginRecipeInput",
     "PluginRecipeOn",
@@ -543,5 +538,7 @@ __all__ = [
     "PluginSecret",
     "PluginStep",
     "PluginStepRan",
+    "PluginStopped",
+    "PluginStopping",
     "ServiceConstant",
 ]

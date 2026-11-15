@@ -7,7 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.device_key__device_keys import DeviceKeyBacking
+from ..shared.device_key_backing import DeviceKeyBacking
+from ..shared.instant import Instant
 
 
 class DeviceKeyEnvelope(typing.TypedDict):
@@ -31,7 +32,7 @@ class RegisteredDeviceKey(typing.TypedDict):
     """The SHA-256 of its public half's `SubjectPublicKeyInfo`, in lower-case hex."""
     name: str
     """The name it was registered under."""
-    registered: str
+    registered: Instant
     """When it was registered."""
 
 

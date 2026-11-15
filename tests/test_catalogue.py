@@ -29,16 +29,19 @@ HOUSEHOLD_TOOLS: Final = frozenset(
         "read_held_backdrop",
         "read_watching",
         "read_playing",
+        "read_channels",
         "read_askable",
         "read_askable_poster",
         "read_askable_kinds",
         "read_requests_poster",
+        "read_notify_mine",
         "connection",
     },
 )
 """The tools a household member is offered words for: their requests, their shelf and each title on it with its
-pictures, what they are part-way through and playing, their search and its posters, the kinds they may ask for,
-the covers of their own requests, and the connection."""
+pictures, what they are part-way through and playing, the live TV they may watch, their search and its posters, the
+kinds they may ask for, the covers of their own requests, how they are told what they asked for is ready, and the
+connection."""
 
 
 def capability_set(states: dict[str, CapabilityState], scope: CredentialScope = "operator") -> CapabilitySet:

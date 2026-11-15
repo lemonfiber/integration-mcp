@@ -13,7 +13,7 @@
     },
     "registered": {
       "description": "When it was registered.",
-      "type": "string"
+      "$ref": "Instant.json"
     }
   },
   "required": [

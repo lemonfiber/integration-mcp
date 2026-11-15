@@ -7,10 +7,11 @@ and CI fails on any difference.
 
 import typing
 
-from ...shared.alert__dashboard__doctor__error__plugins import ProblemSeverity
-from ...shared.dashboard__front_door import FrontDoorReport
-from ...shared.dashboard__household import HouseholdReport
-from ...shared.dashboard__lifecycle__status import Service
+from ...shared.address import FrontDoorReport
+from ...shared.estimate import HouseholdReport
+from ...shared.instant import Instant
+from ...shared.problem_severity import ProblemSeverity
+from ...shared.service import Service
 
 
 class Affected(typing.TypedDict):
@@ -35,7 +36,7 @@ class Affected(typing.TypedDict):
     on, and an item that states only the event leaves the judgement it was
     supposed to save them.
     """
-    onset: str
+    onset: Instant
     """When the stack first saw it wrong since it last saw it right, in whole
     seconds since the epoch.
 
@@ -142,14 +143,24 @@ class HealthSummary(typing.TypedDict):
     """
 
 
-type PanelArray_of_Downloader = PanelArray_of_DownloaderReady | PanelArray_of_DownloaderUnavailable
-"""A panel's content, or the reason its source could not fill it.
+type PanelArray_of_Downloader = (
+    PanelArray_of_DownloaderReady | PanelArray_of_DownloaderUnavailable | PanelArray_of_DownloaderPending
+)
+"""A panel's content, the reason its source could not fill it, or that its source
+is still being read.
 
 The difference between \"this panel is up to date\" and \"this panel's source is
 unreachable\" is the whole of degrading honestly: an unavailable panel says so,
 in its own words, rather than showing stale data as current or blank data as
-zero — and the panels beside it stay live.
+zero — and the panels beside it stay live. A pending panel is neither: its source
+has not answered within the first wave of a gather, and the second fills it in.
 """
+
+
+class PanelArray_of_DownloaderPending(typing.TypedDict):
+    """The source has not answered yet; a snapshot that follows fills the panel."""
+
+    panel: typing.Literal["pending"]
 
 
 class PanelArray_of_DownloaderReady(typing.TypedDict):
@@ -171,14 +182,24 @@ class PanelArray_of_DownloaderUnavailableData(typing.TypedDict):
     """Why the panel could not be filled, in the operator's terms."""
 
 
-type PanelArray_of_Queue = PanelArray_of_QueueReady | PanelArray_of_QueueUnavailable
-"""A panel's content, or the reason its source could not fill it.
+type PanelArray_of_Queue = (
+    PanelArray_of_QueueReady | PanelArray_of_QueueUnavailable | PanelArray_of_QueuePending
+)
+"""A panel's content, the reason its source could not fill it, or that its source
+is still being read.
 
 The difference between \"this panel is up to date\" and \"this panel's source is
 unreachable\" is the whole of degrading honestly: an unavailable panel says so,
 in its own words, rather than showing stale data as current or blank data as
-zero — and the panels beside it stay live.
+zero — and the panels beside it stay live. A pending panel is neither: its source
+has not answered within the first wave of a gather, and the second fills it in.
 """
+
+
+class PanelArray_of_QueuePending(typing.TypedDict):
+    """The source has not answered yet; a snapshot that follows fills the panel."""
+
+    panel: typing.Literal["pending"]
 
 
 class PanelArray_of_QueueReady(typing.TypedDict):
@@ -200,14 +221,24 @@ class PanelArray_of_QueueUnavailableData(typing.TypedDict):
     """Why the panel could not be filled, in the operator's terms."""
 
 
-type PanelArray_of_Service = PanelArray_of_ServiceReady | PanelArray_of_ServiceUnavailable
-"""A panel's content, or the reason its source could not fill it.
+type PanelArray_of_Service = (
+    PanelArray_of_ServiceReady | PanelArray_of_ServiceUnavailable | PanelArray_of_ServicePending
+)
+"""A panel's content, the reason its source could not fill it, or that its source
+is still being read.
 
 The difference between \"this panel is up to date\" and \"this panel's source is
 unreachable\" is the whole of degrading honestly: an unavailable panel says so,
 in its own words, rather than showing stale data as current or blank data as
-zero — and the panels beside it stay live.
+zero — and the panels beside it stay live. A pending panel is neither: its source
+has not answered within the first wave of a gather, and the second fills it in.
 """
+
+
+class PanelArray_of_ServicePending(typing.TypedDict):
+    """The source has not answered yet; a snapshot that follows fills the panel."""
+
+    panel: typing.Literal["pending"]
 
 
 class PanelArray_of_ServiceReady(typing.TypedDict):
@@ -229,14 +260,24 @@ class PanelArray_of_ServiceUnavailableData(typing.TypedDict):
     """Why the panel could not be filled, in the operator's terms."""
 
 
-type PanelArray_of_Transfer = PanelArray_of_TransferReady | PanelArray_of_TransferUnavailable
-"""A panel's content, or the reason its source could not fill it.
+type PanelArray_of_Transfer = (
+    PanelArray_of_TransferReady | PanelArray_of_TransferUnavailable | PanelArray_of_TransferPending
+)
+"""A panel's content, the reason its source could not fill it, or that its source
+is still being read.
 
 The difference between \"this panel is up to date\" and \"this panel's source is
 unreachable\" is the whole of degrading honestly: an unavailable panel says so,
 in its own words, rather than showing stale data as current or blank data as
-zero — and the panels beside it stay live.
+zero — and the panels beside it stay live. A pending panel is neither: its source
+has not answered within the first wave of a gather, and the second fills it in.
 """
+
+
+class PanelArray_of_TransferPending(typing.TypedDict):
+    """The source has not answered yet; a snapshot that follows fills the panel."""
+
+    panel: typing.Literal["pending"]
 
 
 class PanelArray_of_TransferReady(typing.TypedDict):
@@ -258,14 +299,24 @@ class PanelArray_of_TransferUnavailableData(typing.TypedDict):
     """Why the panel could not be filled, in the operator's terms."""
 
 
-type PanelFrontDoorReport = PanelFrontDoorReportReady | PanelFrontDoorReportUnavailable
-"""A panel's content, or the reason its source could not fill it.
+type PanelFrontDoorReport = (
+    PanelFrontDoorReportReady | PanelFrontDoorReportUnavailable | PanelFrontDoorReportPending
+)
+"""A panel's content, the reason its source could not fill it, or that its source
+is still being read.
 
 The difference between \"this panel is up to date\" and \"this panel's source is
 unreachable\" is the whole of degrading honestly: an unavailable panel says so,
 in its own words, rather than showing stale data as current or blank data as
-zero — and the panels beside it stay live.
+zero — and the panels beside it stay live. A pending panel is neither: its source
+has not answered within the first wave of a gather, and the second fills it in.
 """
+
+
+class PanelFrontDoorReportPending(typing.TypedDict):
+    """The source has not answered yet; a snapshot that follows fills the panel."""
+
+    panel: typing.Literal["pending"]
 
 
 class PanelFrontDoorReportReady(typing.TypedDict):
@@ -287,14 +338,24 @@ class PanelFrontDoorReportUnavailableData(typing.TypedDict):
     """Why the panel could not be filled, in the operator's terms."""
 
 
-type PanelHouseholdReport = PanelHouseholdReportReady | PanelHouseholdReportUnavailable
-"""A panel's content, or the reason its source could not fill it.
+type PanelHouseholdReport = (
+    PanelHouseholdReportReady | PanelHouseholdReportUnavailable | PanelHouseholdReportPending
+)
+"""A panel's content, the reason its source could not fill it, or that its source
+is still being read.
 
 The difference between \"this panel is up to date\" and \"this panel's source is
 unreachable\" is the whole of degrading honestly: an unavailable panel says so,
 in its own words, rather than showing stale data as current or blank data as
-zero — and the panels beside it stay live.
+zero — and the panels beside it stay live. A pending panel is neither: its source
+has not answered within the first wave of a gather, and the second fills it in.
 """
+
+
+class PanelHouseholdReportPending(typing.TypedDict):
+    """The source has not answered yet; a snapshot that follows fills the panel."""
+
+    panel: typing.Literal["pending"]
 
 
 class PanelHouseholdReportReady(typing.TypedDict):
@@ -316,14 +377,22 @@ class PanelHouseholdReportUnavailableData(typing.TypedDict):
     """Why the panel could not be filled, in the operator's terms."""
 
 
-type PanelStorage = PanelStorageReady | PanelStorageUnavailable
-"""A panel's content, or the reason its source could not fill it.
+type PanelStorage = PanelStorageReady | PanelStorageUnavailable | PanelStoragePending
+"""A panel's content, the reason its source could not fill it, or that its source
+is still being read.
 
 The difference between \"this panel is up to date\" and \"this panel's source is
 unreachable\" is the whole of degrading honestly: an unavailable panel says so,
 in its own words, rather than showing stale data as current or blank data as
-zero — and the panels beside it stay live.
+zero — and the panels beside it stay live. A pending panel is neither: its source
+has not answered within the first wave of a gather, and the second fills it in.
 """
+
+
+class PanelStoragePending(typing.TypedDict):
+    """The source has not answered yet; a snapshot that follows fills the panel."""
+
+    panel: typing.Literal["pending"]
 
 
 class PanelStorageReady(typing.TypedDict):
@@ -345,14 +414,10 @@ class PanelStorageUnavailableData(typing.TypedDict):
     """Why the panel could not be filled, in the operator's terms."""
 
 
-type PanelVpn = PanelVpnReady | PanelVpnUnavailable
-"""A panel's content, or the reason its source could not fill it.
+class PanelVpnPending(typing.TypedDict):
+    """The source has not answered yet; a snapshot that follows fills the panel."""
 
-The difference between \"this panel is up to date\" and \"this panel's source is
-unreachable\" is the whole of degrading honestly: an unavailable panel says so,
-in its own words, rather than showing stale data as current or blank data as
-zero — and the panels beside it stay live.
-"""
+    panel: typing.Literal["pending"]
 
 
 class PanelVpnReady(typing.TypedDict):
@@ -360,18 +425,6 @@ class PanelVpnReady(typing.TypedDict):
 
     data: Vpn
     panel: typing.Literal["ready"]
-
-
-class PanelVpnUnavailable(typing.TypedDict):
-    """The source could not be reached, for this stated reason."""
-
-    data: PanelVpnUnavailableData
-    panel: typing.Literal["unavailable"]
-
-
-class PanelVpnUnavailableData(typing.TypedDict):
-    reason: str
-    """Why the panel could not be filled, in the operator's terms."""
 
 
 class Queue(typing.TypedDict):
@@ -383,22 +436,6 @@ class Queue(typing.TypedDict):
     """The service whose queue this is."""
     stuck: int
     """How many of them are stuck rather than progressing."""
-
-
-type Stall = typing.Literal[
-    "redownload-loop",
-    "repeated-import-failure",
-    "completed-not-imported",
-    "orphaned",
-    "stalled-download",
-    "waiting-indefinitely",
-    "slow",
-]
-"""Why an item is not moving.
-
-Ordered by how much of the operator's attention each deserves, worst first, so
-a summary that leads with the worst category needs no second ranking.
-"""
 
 
 class Storage(typing.TypedDict):
@@ -419,42 +456,6 @@ class Storage(typing.TypedDict):
     """
     hardlink: Hardlink
     """Whether imports are linking or copying."""
-
-
-class Stuck(typing.TypedDict):
-    """One thing that is wrong, and why."""
-
-    blocking: typing.NotRequired[str | None]
-    """What the service said was blocking it, in its own words, where it said
-    anything. A permission denial from an import log is worth more than any
-    interpretation of it, and it is the difference between \"stuck\" and
-    something an operator can fix.
-    """
-    held_for: int
-    """How long it has been that way, in seconds — what turns \"stuck\" into a
-    sentence an operator can weigh.
-    """
-    items: int
-    """How many items this stands for. One in the ordinary case; more where they
-    share a cause and the cause is what is wrong — twenty downloads stopped by
-    a full disk are one thing to fix, and twenty alerts about it are how an
-    operator learns to mute the queue check.
-    """
-    name: str
-    """Which item — or, where several share one cause, that cause."""
-    stall: Stall
-    """What is wrong with it."""
-
-
-type Telemetry = typing.Literal["live", "degraded", "disconnected", "no-stack", "unconfigured"]
-"""How the screen itself is doing, which is a different question from how the
-stack is doing.
-
-The stack's own verdict is [`crate::health::Standing`]; this is only whether the
-picture can be trusted to be current. Kept apart because they disagree in both
-directions: a healthy stack can be shown through half-failing telemetry, and a
-perfectly refreshing screen can be reporting a stack that is on fire.
-"""
 
 
 class Transfer(typing.TypedDict):
@@ -504,42 +505,44 @@ __all__ = [
     "HealthStanding",
     "HealthSummary",
     "PanelArray_of_Downloader",
+    "PanelArray_of_DownloaderPending",
     "PanelArray_of_DownloaderReady",
     "PanelArray_of_DownloaderUnavailable",
     "PanelArray_of_DownloaderUnavailableData",
     "PanelArray_of_Queue",
+    "PanelArray_of_QueuePending",
     "PanelArray_of_QueueReady",
     "PanelArray_of_QueueUnavailable",
     "PanelArray_of_QueueUnavailableData",
     "PanelArray_of_Service",
+    "PanelArray_of_ServicePending",
     "PanelArray_of_ServiceReady",
     "PanelArray_of_ServiceUnavailable",
     "PanelArray_of_ServiceUnavailableData",
     "PanelArray_of_Transfer",
+    "PanelArray_of_TransferPending",
     "PanelArray_of_TransferReady",
     "PanelArray_of_TransferUnavailable",
     "PanelArray_of_TransferUnavailableData",
     "PanelFrontDoorReport",
+    "PanelFrontDoorReportPending",
     "PanelFrontDoorReportReady",
     "PanelFrontDoorReportUnavailable",
     "PanelFrontDoorReportUnavailableData",
     "PanelHouseholdReport",
+    "PanelHouseholdReportPending",
     "PanelHouseholdReportReady",
     "PanelHouseholdReportUnavailable",
     "PanelHouseholdReportUnavailableData",
     "PanelStorage",
+    "PanelStoragePending",
     "PanelStorageReady",
     "PanelStorageUnavailable",
     "PanelStorageUnavailableData",
-    "PanelVpn",
+    "PanelVpnPending",
     "PanelVpnReady",
-    "PanelVpnUnavailable",
-    "PanelVpnUnavailableData",
     "Queue",
-    "Stall",
     "Storage",
-    "Stuck",
-    "Telemetry",
     "Transfer",
     "Vpn",
 ]

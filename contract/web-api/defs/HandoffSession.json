@@ -13,9 +13,13 @@
     },
     "last_seen": {
       "description": "When the media server last heard from it, where it says.",
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "$ref": "Instant.json"
+        },
+        {
+          "type": "null"
+        }
       ]
     }
   },

@@ -7,7 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.update__version import Notes
+from ..shared.changelog_state import Notes
+from ..shared.instant import Instant
 
 
 class VersionEnvelope(typing.TypedDict):
@@ -30,7 +31,7 @@ class VersionReport(typing.TypedDict):
     reaches both halves, and none of the three had to learn a new question.
     """
 
-    attestation_status: typing.NotRequired[str | None]
+    attestation_status: typing.NotRequired[Instant | None]
     """When the snapshot of Google's attestation status list this build carries was
     taken, which an Android device key's chain is checked against; nothing where it
     does not read.

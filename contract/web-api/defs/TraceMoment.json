@@ -4,8 +4,15 @@
   "type": "object",
   "properties": {
     "at": {
-      "description": "When the service reported it.",
-      "type": "string"
+      "description": "When it happened, where the service reported it.",
+      "anyOf": [
+        {
+          "$ref": "Instant.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "outcome": {
       "description": "What happened.",
@@ -13,7 +20,6 @@
     }
   },
   "required": [
-    "outcome",
-    "at"
+    "outcome"
   ]
 }

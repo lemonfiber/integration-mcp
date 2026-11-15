@@ -7,8 +7,9 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.held__part_way__playing__title import Medium
-from ..shared.held__part_way__title import Pinned
+from ..shared.medium import Medium
+from ..shared.obstacle import Obstacle
+from ..shared.pinned import Pinned
 
 
 class Episode(typing.TypedDict):
@@ -36,8 +37,8 @@ class Episode(typing.TypedDict):
     """Where it streams from, where it plays."""
     title: str
     """What it is called, in the words the server holds it under."""
-    unlocated: typing.NotRequired[str | None]
-    """Why no location is stated, where none is."""
+    unlocated: typing.NotRequired[Obstacle | None]
+    """Why no location is stated, where none is, by the code that names it."""
     year: typing.NotRequired[int | None]
     """The year it came out, where the server knows one. Absent rather than guessed:
     two films share a title far more often than they share a title and a year.
@@ -92,8 +93,8 @@ class Title(typing.TypedDict):
     """Where it streams from, where it plays."""
     title: str
     """What it is called, in the words the server holds it under."""
-    unlocated: typing.NotRequired[str | None]
-    """Why no location is stated, where none is."""
+    unlocated: typing.NotRequired[Obstacle | None]
+    """Why no location is stated, where none is, by the code that names it."""
     year: typing.NotRequired[int | None]
     """The year it came out, where the server knows one. Absent rather than guessed:
     two films share a title far more often than they share a title and a year.

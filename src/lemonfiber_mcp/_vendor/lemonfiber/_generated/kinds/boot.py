@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.boot__lifecycle import Forwarded
+from ..shared.forwarded import Forwarded
 
 
 class BootEnvelope(typing.TypedDict):

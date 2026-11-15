@@ -7,10 +7,10 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.lifecycle__plugins__reset__settings__substitution__update import StackMoveTaken
-from ..shared.lifecycle__plugins__settings__substitution__update import Unvetted
-from ..shared.plugins__settings__status import Waiting
-from ..shared.settings__wizard import Choosable
+from ..shared.choosable import Choosable
+from ..shared.stack_move_taken import StackMoveTaken
+from ..shared.unvetted import Unvetted
+from ..shared.waiting import Waiting
 
 
 type Owner = OwnerCore | OwnerNamespace

@@ -7,8 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.config__wizard import SettingReport, Validation
-from ..shared.settings__wizard import Choosable
+from ..shared.choosable import Choosable
+from ..shared.setting_report import SettingReport, Validation
 
 
 type GuardQuestion = GuardQuestionChoice | GuardQuestionValue | GuardQuestionSecret

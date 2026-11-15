@@ -7,6 +7,8 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.instant import Instant
+
 
 class ListedPushEndpoint(typing.TypedDict):
     """One push endpoint as the listing shows it."""
@@ -15,7 +17,7 @@ class ListedPushEndpoint(typing.TypedDict):
     """The `https` address its distributor gave."""
     name: str
     """The name it was registered under."""
-    registered: str
+    registered: Instant
     """When it was registered."""
 
 

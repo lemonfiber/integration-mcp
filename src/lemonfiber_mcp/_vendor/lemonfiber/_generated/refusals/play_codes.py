@@ -13,6 +13,19 @@ PLAY: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
     "PLAY-1": ListedRefusal(
         "NOT_AN_ITEM", 400, "Said where the title named is not something the media server could hold."
     ),
+    "PLAY-10": ListedRefusal(
+        "NO_LIVE_TV",
+        404,
+        "Said where the member's own account may not watch live TV, or the server has none.",
+    ),
+    "PLAY-11": ListedRefusal(
+        "NOT_THEIR_STREAM",
+        404,
+        "Said where the live stream named is not one the core opened for this member.",
+    ),
+    "PLAY-12": ListedRefusal(
+        "NOT_THEIR_PASS", 403, "Said where the pass handed back does not open for this member and title."
+    ),
     "PLAY-2": ListedRefusal(
         "NOT_ON_THEIR_SHELF",
         404,

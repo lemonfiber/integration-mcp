@@ -4,8 +4,8 @@
   "type": "object",
   "properties": {
     "at": {
-      "description": "When, as a service writes a moment.",
-      "type": "string"
+      "description": "When it was written.",
+      "$ref": "Instant.json"
     },
     "lemonfiber": {
       "description": "The lemonfiber that wrote it.",

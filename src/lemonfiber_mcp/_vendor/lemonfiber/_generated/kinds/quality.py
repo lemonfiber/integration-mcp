@@ -7,8 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.lifecycle__quality__reset__update import StackEdit
-from ..shared.music__quality import Disposition, MusicChoice
+from ..shared.disposition import Disposition, MusicChoice
+from ..shared.stack_edit import StackEdit
 
 
 class PresetChoice(typing.TypedDict):

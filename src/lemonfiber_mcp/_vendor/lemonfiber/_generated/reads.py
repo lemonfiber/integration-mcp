@@ -41,6 +41,8 @@ class Read(enum.StrEnum):
     """Answers with `title`, for the `id` in its path; takes `member` and `defaults`."""
     WATCHING = "watching"
     """Answers with `part-way`; takes `member` and `most`."""
+    CHANNELS = "channels"
+    """Answers with `channels`; takes `member`."""
     ASKABLE = "askable"
     """Answers with `askable`; takes `member`, `term`, `after`, `kind` and `unit`."""
     ASKABLE_KINDS = "askable/kinds"
@@ -53,6 +55,8 @@ class Read(enum.StrEnum):
     """Answers with `front-door`."""
     STACK = "stack"
     """Answers with `stack`."""
+    SETTLED = "settled"
+    """Answers with `settled`."""
     NOTIFY = "notify"
     """Answers with `notify`."""
     NOTIFY_MINE = "notify/mine"
@@ -176,6 +180,7 @@ READS: typing.Final[typing.Mapping[Read, Readable]] = types.MappingProxyType(
         Read.WATCHING: Readable(
             ("part-way",), (ReadParameter("member", False), ReadParameter("most", False))
         ),
+        Read.CHANNELS: Readable(("channels",), (ReadParameter("member", False),)),
         Read.ASKABLE: Readable(
             ("askable",),
             (
@@ -191,6 +196,7 @@ READS: typing.Final[typing.Mapping[Read, Readable]] = types.MappingProxyType(
         Read.HOSTING: Readable(("hosting",), ()),
         Read.FRONT_DOOR: Readable(("front-door",), ()),
         Read.STACK: Readable(("stack",), ()),
+        Read.SETTLED: Readable(("settled",), ()),
         Read.NOTIFY: Readable(("notify",), ()),
         Read.NOTIFY_MINE: Readable(("notify-mine",), (ReadParameter("member", False),)),
         Read.NEWS: Readable(("news-items",), ()),

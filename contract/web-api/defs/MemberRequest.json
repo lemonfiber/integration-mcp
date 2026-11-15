@@ -4,17 +4,25 @@
   "type": "object",
   "properties": {
     "arrived": {
-      "description": "When the title arrived on the media server, as the request service timestamps it.\nAbsent, not null, until it is there.",
-      "type": [
-        "string",
-        "null"
+      "description": "When the title arrived on the media server, as the request service says. Absent,\nnot null, until it is there.",
+      "anyOf": [
+        {
+          "$ref": "Instant.json"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "asked": {
       "description": "When it was asked for, where the request service or the core says.",
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "$ref": "Instant.json"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "estimate": {
@@ -31,6 +39,17 @@
     "id": {
       "description": "The reference it is named by again when somebody rules on it: the number the\nrequest service files it under (`42`), or `music-<n>` or `books-<n>` for an ask\nfor music or books the core keeps itself.",
       "type": "string"
+    },
+    "kind": {
+      "description": "The kind of title it asks for: a series, a film, music or books. Absent, not\nnull, where the request service names a kind this build does not know.",
+      "anyOf": [
+        {
+          "$ref": "TitleKind.json"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "media": {
       "description": "What kind of thing it is — a series, a film — in the household's own words.\nAbsent where the request service names a kind this build does not know.",
@@ -73,6 +92,17 @@
       "type": [
         "string",
         "null"
+      ]
+    },
+    "unit": {
+      "description": "What an ask for music or books asks for: one album or book, or a whole artist,\nauthor or series. Absent, not null, on a series or a film.",
+      "anyOf": [
+        {
+          "$ref": "TitleUnit.json"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "waiting_days": {

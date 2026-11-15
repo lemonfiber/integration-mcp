@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.askable__askable_kinds__asked import TitleKind, TitleUnit
+from ..shared.title_kind import TitleKind, TitleUnit
 
 
 class AskedEnvelope(typing.TypedDict):

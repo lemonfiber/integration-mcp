@@ -7,6 +7,8 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.instant import Instant
+
 
 class Pairing(typing.TypedDict):
     """Pairing material, and what the operator is told beside it."""
@@ -24,8 +26,8 @@ class Pairing(typing.TypedDict):
     discovered then. In words any surface can show: how the certificate is replaced
     is each surface's own to say, so this names no command.
     """
-    until: str
-    """When it stops being good, as a date and a time of day."""
+    until: Instant
+    """When it stops being good."""
     written: str
     """The material as the one line a code carries and a person types."""
 
@@ -49,8 +51,8 @@ class PairingMaterial(typing.TypedDict):
 
     address: str
     """Where the phone reaches the stack: an `https` address on the household network."""
-    expires: int
-    """When the material stops being good, in seconds since the Unix epoch."""
+    expires: Instant
+    """When the material stops being good."""
     fingerprint: str
     """The certificate that address presents: SHA-256 over its DER encoding, in
     lower-case hex. Not the digest of its public key.

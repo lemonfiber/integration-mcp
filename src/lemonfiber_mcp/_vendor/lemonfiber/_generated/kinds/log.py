@@ -37,14 +37,6 @@ class LogLine(typing.TypedDict):
     second answer, and the two would disagree about some service's spelling.
     """
 
-    at: typing.NotRequired[str | None]
-    """When the container itself says it wrote the line, where it said so.
-
-    Kept verbatim and unparsed. Containers disagree with the host clock and
-    with each other, and the only defensible ordering is each container's own
-    account of itself — which a reader can only apply if it is carried
-    rather than replaced by an arrival time.
-    """
     level: typing.NotRequired[LogLevel | None]
     """How bad the line says it is, in one lowercase word.
 
@@ -57,6 +49,15 @@ class LogLine(typing.TypedDict):
     """The line, without its trailing newline."""
     service: str
     """The Compose service it came from."""
+    stamped: typing.NotRequired[str | None]
+    """The container's own text stamped on the line, where it stamped one: not one
+    of lemonfiber's instants.
+
+    Kept verbatim and unparsed. Containers disagree with the host clock and
+    with each other, and the only defensible ordering is each container's own
+    account of itself — which a reader can only apply if it is carried
+    rather than replaced by an arrival time.
+    """
     stream: Stream
     """Which stream it arrived on."""
 

@@ -24,6 +24,7 @@ from .kinds import (
     CapabilitiesEnvelope,
     CatalogueEnvelope,
     CertificateEnvelope,
+    ChannelsEnvelope,
     ClientsEnvelope,
     ConfigEnvelope,
     CredentialsEnvelope,
@@ -32,6 +33,7 @@ from .kinds import (
     DeviceKeyEnvelope,
     DeviceKeysEnvelope,
     DoctorEnvelope,
+    EndedEnvelope,
     ErrorEnvelope,
     FormsEnvelope,
     FrontDoorEnvelope,
@@ -60,7 +62,12 @@ from .kinds import (
     PairingEnvelope,
     PartWayEnvelope,
     PausingEnvelope,
+    PlayEnvelope,
     PlayingEnvelope,
+    PluginClaimsEnvelope,
+    PluginConformanceEnvelope,
+    PluginProvenanceEnvelope,
+    PluginRecordingEnvelope,
     PluginsEnvelope,
     PreviewEnvelope,
     ProvenanceEnvelope,
@@ -77,6 +84,7 @@ from .kinds import (
     SeedEnvelope,
     SelfUpdateEnvelope,
     SettingsEnvelope,
+    SettledEnvelope,
     SetupEnvelope,
     SpaceEnvelope,
     StackEnvelope,
@@ -89,6 +97,7 @@ from .kinds import (
     SubstitutionEnvelope,
     TitleEnvelope,
     TraceEnvelope,
+    TunedEnvelope,
     UndoEnvelope,
     UninstallEnvelope,
     UpdateEnvelope,
@@ -123,6 +132,7 @@ type Kind = typing.Literal[
     "capabilities",
     "catalogue",
     "certificate",
+    "channels",
     "clients",
     "config",
     "credentials",
@@ -131,6 +141,7 @@ type Kind = typing.Literal[
     "device-key",
     "device-keys",
     "doctor",
+    "ended",
     "error",
     "forms",
     "front-door",
@@ -159,7 +170,12 @@ type Kind = typing.Literal[
     "pairing",
     "part-way",
     "pausing",
+    "play",
     "playing",
+    "plugin-claims",
+    "plugin-conformance",
+    "plugin-provenance",
+    "plugin-recording",
     "plugins",
     "preview",
     "provenance",
@@ -176,6 +192,7 @@ type Kind = typing.Literal[
     "seed",
     "self-update",
     "settings",
+    "settled",
     "setup",
     "space",
     "stack",
@@ -188,6 +205,7 @@ type Kind = typing.Literal[
     "substitution",
     "title",
     "trace",
+    "tuned",
     "undo",
     "uninstall",
     "update",
@@ -223,6 +241,7 @@ type Envelope = (
     | CapabilitiesEnvelope
     | CatalogueEnvelope
     | CertificateEnvelope
+    | ChannelsEnvelope
     | ClientsEnvelope
     | ConfigEnvelope
     | CredentialsEnvelope
@@ -231,6 +250,7 @@ type Envelope = (
     | DeviceKeyEnvelope
     | DeviceKeysEnvelope
     | DoctorEnvelope
+    | EndedEnvelope
     | ErrorEnvelope
     | FormsEnvelope
     | FrontDoorEnvelope
@@ -259,7 +279,12 @@ type Envelope = (
     | PairingEnvelope
     | PartWayEnvelope
     | PausingEnvelope
+    | PlayEnvelope
     | PlayingEnvelope
+    | PluginClaimsEnvelope
+    | PluginConformanceEnvelope
+    | PluginProvenanceEnvelope
+    | PluginRecordingEnvelope
     | PluginsEnvelope
     | PreviewEnvelope
     | ProvenanceEnvelope
@@ -276,6 +301,7 @@ type Envelope = (
     | SeedEnvelope
     | SelfUpdateEnvelope
     | SettingsEnvelope
+    | SettledEnvelope
     | SetupEnvelope
     | SpaceEnvelope
     | StackEnvelope
@@ -288,6 +314,7 @@ type Envelope = (
     | SubstitutionEnvelope
     | TitleEnvelope
     | TraceEnvelope
+    | TunedEnvelope
     | UndoEnvelope
     | UninstallEnvelope
     | UpdateEnvelope

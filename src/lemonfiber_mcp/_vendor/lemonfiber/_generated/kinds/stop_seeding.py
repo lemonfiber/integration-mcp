@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.space__stop_seeding import Candidate
+from ..shared.candidate import Candidate
 
 
 class Gone(typing.TypedDict):
