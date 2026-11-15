@@ -148,6 +148,16 @@ member = "One member's sessions only, by the name they are known by."
 [read_playing.household]
 description = "What you are watching right now."
 
+[read_channels]
+operator = "The live TV channels one member may watch, each with the programme on it now, leaving out a channel whose programme now is outside their limits."
+[read_channels.parameters]
+member = "Whose, by the name they are known by."
+[read_channels.household]
+description = "The live TV channels you can watch, and what is on each now."
+
+[read_settled]
+operator = "What setup settled, read from the configuration as it stands: where the library is kept, which ways of downloading are configured, the user and group the services run as, and whether this stack is set up."
+
 [read_hosting]
 operator = "What this machine keeps running with no terminal open: the data-location guard and the request clock, whether each is installed and actually running, and where its output goes."
 
@@ -161,6 +171,8 @@ operator = "Where a message goes: how delivery as a whole stands, every back-end
 operator = "The ways one member may be told that something they asked for is ready, as the household was offered them, whether they receive on each, and whether their own phone is registered to be woken."
 [read_notify_mine.parameters]
 member = "Whose, by the name they are known by."
+[read_notify_mine.household]
+description = "The ways you can be told that something you asked for is ready, which of them you are told on, and whether your phone is set up for it."
 
 [read_front_door]
 operator = "The one address to give somebody who lives here, why it is that one, or that there is none yet."

@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.catalogue__dashboard__lifecycle__status import Criticality
+from ..shared.criticality import Criticality
 
 
 class CatalogueEnvelope(typing.TypedDict):

@@ -21,6 +21,7 @@ from . import bundle as _bundle
 from . import capabilities as _capabilities
 from . import catalogue as _catalogue
 from . import certificate as _certificate
+from . import channels as _channels
 from . import clients as _clients
 from . import config as _config
 from . import credentials as _credentials
@@ -29,6 +30,7 @@ from . import device_challenge as _device_challenge
 from . import device_key as _device_key
 from . import device_keys as _device_keys
 from . import doctor as _doctor
+from . import ended as _ended
 from . import error as _error
 from . import forms as _forms
 from . import front_door as _front_door
@@ -57,7 +59,12 @@ from . import outbound as _outbound
 from . import pairing as _pairing
 from . import part_way as _part_way
 from . import pausing as _pausing
+from . import play as _play
 from . import playing as _playing
+from . import plugin_claims as _plugin_claims
+from . import plugin_conformance as _plugin_conformance
+from . import plugin_provenance as _plugin_provenance
+from . import plugin_recording as _plugin_recording
 from . import plugins as _plugins
 from . import preview as _preview
 from . import provenance as _provenance
@@ -74,6 +81,7 @@ from . import restore as _restore
 from . import seed as _seed
 from . import self_update as _self_update
 from . import settings as _settings
+from . import settled as _settled
 from . import setup as _setup
 from . import space as _space
 from . import stack as _stack
@@ -86,6 +94,7 @@ from . import stuck as _stuck
 from . import substitution as _substitution
 from . import title as _title
 from . import trace as _trace
+from . import tuned as _tuned
 from . import undo as _undo
 from . import uninstall as _uninstall
 from . import update as _update
@@ -115,6 +124,7 @@ from .bundle import *
 from .capabilities import *
 from .catalogue import *
 from .certificate import *
+from .channels import *
 from .clients import *
 from .config import *
 from .credentials import *
@@ -123,6 +133,7 @@ from .device_challenge import *
 from .device_key import *
 from .device_keys import *
 from .doctor import *
+from .ended import *
 from .error import *
 from .forms import *
 from .front_door import *
@@ -151,7 +162,12 @@ from .outbound import *
 from .pairing import *
 from .part_way import *
 from .pausing import *
+from .play import *
 from .playing import *
+from .plugin_claims import *
+from .plugin_conformance import *
+from .plugin_provenance import *
+from .plugin_recording import *
 from .plugins import *
 from .preview import *
 from .provenance import *
@@ -168,6 +184,7 @@ from .restore import *
 from .seed import *
 from .self_update import *
 from .settings import *
+from .settled import *
 from .setup import *
 from .space import *
 from .stack import *
@@ -180,6 +197,7 @@ from .stuck import *
 from .substitution import *
 from .title import *
 from .trace import *
+from .tuned import *
 from .undo import *
 from .uninstall import *
 from .update import *
@@ -210,6 +228,7 @@ __all__ += _bundle.__all__
 __all__ += _capabilities.__all__
 __all__ += _catalogue.__all__
 __all__ += _certificate.__all__
+__all__ += _channels.__all__
 __all__ += _clients.__all__
 __all__ += _config.__all__
 __all__ += _credentials.__all__
@@ -218,6 +237,7 @@ __all__ += _device_challenge.__all__
 __all__ += _device_key.__all__
 __all__ += _device_keys.__all__
 __all__ += _doctor.__all__
+__all__ += _ended.__all__
 __all__ += _error.__all__
 __all__ += _forms.__all__
 __all__ += _front_door.__all__
@@ -246,7 +266,12 @@ __all__ += _outbound.__all__
 __all__ += _pairing.__all__
 __all__ += _part_way.__all__
 __all__ += _pausing.__all__
+__all__ += _play.__all__
 __all__ += _playing.__all__
+__all__ += _plugin_claims.__all__
+__all__ += _plugin_conformance.__all__
+__all__ += _plugin_provenance.__all__
+__all__ += _plugin_recording.__all__
 __all__ += _plugins.__all__
 __all__ += _preview.__all__
 __all__ += _provenance.__all__
@@ -263,6 +288,7 @@ __all__ += _restore.__all__
 __all__ += _seed.__all__
 __all__ += _self_update.__all__
 __all__ += _settings.__all__
+__all__ += _settled.__all__
 __all__ += _setup.__all__
 __all__ += _space.__all__
 __all__ += _stack.__all__
@@ -275,6 +301,7 @@ __all__ += _stuck.__all__
 __all__ += _substitution.__all__
 __all__ += _title.__all__
 __all__ += _trace.__all__
+__all__ += _tuned.__all__
 __all__ += _undo.__all__
 __all__ += _uninstall.__all__
 __all__ += _update.__all__

@@ -7,7 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.space__stop_seeding import Candidate
+from ..shared.candidate import Candidate
+from ..shared.instant import Instant
 
 
 class Consumption(typing.TypedDict):
@@ -250,12 +251,12 @@ FreshnessAsOf = typing.TypedDict(
     "FreshnessAsOf",
     {
         "as": typing.Literal["as_of"],
-        "at": int,
+        "at": Instant,
     },
 )
 """Read across a network share, which answers with what it was last told —
-carrying the moment it was taken, in seconds since the epoch, so a figure
-nobody can refresh is at least dated.
+carrying the moment it was taken, so a figure nobody can refresh is at least
+dated.
 """
 
 

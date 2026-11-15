@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.stuck__trace import Stage
+from ..shared.stage import Stage
 
 
 class StuckEntry(typing.TypedDict):

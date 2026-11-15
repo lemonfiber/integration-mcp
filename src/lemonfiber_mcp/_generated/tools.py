@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Every tool the server offers, as the contract describes it.
 
-Generated from the contract lemonfiber 13659f53d634c9d3ae05141706a9a910a1b3b614 published, vendored in `contract/web-api/`.
+Generated from the contract lemonfiber 6a2d9bbd6d8c0b7a09258f6352d427c89b8bc2b6 published, vendored in `contract/web-api/`.
 Do not edit: `just generate` rewrites it, and CI fails on any difference.
 """
 
@@ -12,7 +12,7 @@ from lemonfiber_mcp.shapes import Reach, ToolShape
 API_VERSION: Final = 1
 """The `api_version` the tools were generated for."""
 
-CONTRACT: Final = '13659f53d634c9d3ae05141706a9a910a1b3b614'
+CONTRACT: Final = '6a2d9bbd6d8c0b7a09258f6352d427c89b8bc2b6'
 """The lemonfiber revision whose contract the tools were generated from."""
 
 TOOLS: Final[tuple[ToolShape, ...]] = (
@@ -154,6 +154,18 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
         idempotent=True,
     ),
     ToolShape(
+        name='read_channels',
+        reach=Reach.READ,
+        target='channels',
+        capability='/api/channels',
+        parameters=('member',),
+        input_schema={'type': 'object', 'properties': {'member': {'type': 'string'}}, 'additionalProperties': False},
+        resource='lemonfiber://read/channels{?member}',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
         name='read_askable',
         reach=Reach.READ,
         target='askable',
@@ -227,6 +239,18 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
         parameters=(),
         input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
         resource='lemonfiber://read/stack',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_settled',
+        reach=Reach.READ,
+        target='settled',
+        capability='/api/settled',
+        parameters=(),
+        input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
+        resource='lemonfiber://read/settled',
         read_only=True,
         destructive=False,
         idempotent=True,

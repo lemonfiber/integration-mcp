@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.doctor__plugins import Finding
+from ..shared.disruptive import Finding
 
 
 class DoctorEnvelope(typing.TypedDict):

@@ -7,11 +7,11 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.lifecycle__plugins__reset__settings__substitution__update import StackMoveTaken
-from ..shared.lifecycle__plugins__settings__substitution__update import Unvetted
-from ..shared.lifecycle__quality__reset__update import StackEdit
-from ..shared.lifecycle__update import MoveOffered
-from ..shared.update__version import Notes
+from ..shared.changelog_state import Notes
+from ..shared.move_offered import MoveOffered
+from ..shared.stack_edit import StackEdit
+from ..shared.stack_move_taken import StackMoveTaken
+from ..shared.unvetted import Unvetted
 
 
 type Ending = typing.Literal["updated", "not-fetched", "not-started", "not-reached"]

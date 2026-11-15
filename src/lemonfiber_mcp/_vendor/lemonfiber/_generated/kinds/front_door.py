@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.dashboard__front_door import FrontDoorReport
+from ..shared.address import FrontDoorReport
 
 
 class FrontDoorEnvelope(typing.TypedDict):

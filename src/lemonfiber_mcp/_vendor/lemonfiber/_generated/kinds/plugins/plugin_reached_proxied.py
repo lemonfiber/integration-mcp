@@ -1,0 +1,521 @@
+# Copyright (c) 2026 NightWorksIO
+"""Some of the shapes only `plugins` carries; `kinds.plugins` gathers them all.
+
+Generated from the contract vendored in `contract/`. Do not edit: `just generate` rewrites it,
+and CI fails on any difference.
+"""
+
+import typing
+
+from .expected import (
+    Contribution,
+    Expect,
+    PluginAsking,
+    PluginChangedCheck,
+    PluginDeclaration,
+    PluginReachedHousehold,
+    PluginReachedLoopback,
+    PluginRecipe,
+    PluginRequest,
+    ServiceConstant,
+)
+from ...shared.action import PluginGrant
+from ...shared.instant import Instant
+from ...shared.plugin_constraint import PluginVerdict
+
+
+class PluginPlaced(typing.TypedDict):
+    """One service of an installed plugin, as it was placed."""
+
+    asks: typing.NotRequired[list[PluginAsking]]
+    """Every capability it asks for."""
+    asks_for: typing.NotRequired[str | None]
+    """What it asks for there, where it says."""
+    config_path: str
+    """Where inside the container its one configuration directory is mounted.
+
+    Resolved rather than optional. The record answers where the directory is, and
+    a run that re-derived the fallback would answer for a container it did not
+    write the day that fallback moved.
+    """
+    contract: typing.NotRequired[int | None]
+    """The port inside its container it speaks its contracts on, where it declared one
+    apart from where it listens.
+    """
+    description: typing.NotRequired[str]
+    """The line its dashboard entry shows beside it: the one its wiring names, or what
+    the plugin says it does for the operator.
+    """
+    digest: str
+    """The digest that fixes what runs."""
+    fields: typing.NotRequired[ServiceFields]
+    """Its container fields beyond those above."""
+    fronts: typing.NotRequired[str | None]
+    """The service of the same plugin it stands in front of, as an adapter."""
+    health: typing.NotRequired[str | None]
+    """The path it answers over HTTP to say it is up, where its health is asked that way."""
+    hidden: typing.NotRequired[bool]
+    """Whether its wiring hid it from the dashboard."""
+    icon: typing.NotRequired[str | None]
+    """The icon its dashboard entry shows, where its wiring names one."""
+    image: str
+    """The registry path, carrying no pin of its own."""
+    listens: typing.NotRequired[int | None]
+    """The port it answers on inside the stack's network, where it declared one."""
+    media_types: typing.NotRequired[list[str]]
+    """The media it files, in the stack manifest's vocabulary, which decides what it
+    comes to in each service that asks for what it provides; none in an older record.
+    """
+    name: typing.NotRequired[str]
+    """What it is called, for a reader, which is what its dashboard entry is listed as;
+    a record written before this was kept lists it by its id.
+    """
+    native: typing.NotRequired[str | None]
+    """The API it answers the stack's other services in, where it names one."""
+    networks: typing.NotRequired[list[str]]
+    """Networks an older record named for it. Nothing reads them: each service's place on
+    the networks is derived with the project, and a record written now holds none.
+    """
+    provides: typing.NotRequired[list[str]]
+    """Every core capability this one service fills, which is what makes it a candidate
+    when the stack asks for one.
+
+    Per service rather than read off the plugin's whole list, because a wiring
+    reaches a service and not a plugin: of a plugin's two services, the one that
+    fills a capability is the one an ask for it would reach. Defaulted for a record
+    written before this was kept, which reads as filling nothing — a service nothing
+    is wired to, rather than one wired to on a guess.
+    """
+    reached: typing.NotRequired[PluginReached | None]
+    """How it is reached, or nothing where it has no listener."""
+    reaches: typing.NotRequired[str | None]
+    """Where it reaches outside the machine, where it says."""
+    replaces: typing.NotRequired[str | None]
+    """The stack's own service it moves in place of, where it names one."""
+    service: str
+    """The service's id, which is the name its container is written under."""
+    shape: typing.NotRequired[PluginShape | None]
+    """The privileged shape lemonfiber writes for it, where it took one."""
+    speaks: typing.NotRequired[list[str]]
+    """Each capability contract it answers as an adapter, as `capability@major`."""
+    starting: typing.NotRequired[str | None]
+    """The digest of the starting files kept for its run proofs, where it has any."""
+    tag: str
+    """The readable name that digest went by when it was installed."""
+    takes_data: bool
+    """Whether the library is mounted for it."""
+    upstream: typing.NotRequired[dict[str, str]]
+    """Each field of the `upstream.json` lemonfiber writes for it as an adapter, to the
+    id of the plugin's secret that field holds.
+    """
+
+
+class PluginProving(typing.TypedDict):
+    """One proof that has to hold before a plugin is reported installed."""
+
+    asks: str
+    """What it asks, as the method and the path it is asked at."""
+    came_to: typing.NotRequired[PluginVerdict | None]
+    """What asking it came to, or nothing where it was not asked.
+
+    Absent on a rehearsal, which asks nothing. That is a different fact from a
+    proof that was asked and established nothing, and the two must not read alike:
+    one is an account of what would happen, the other is a service that did not
+    answer.
+    """
+    establishes: str
+    """What it establishes, in one line."""
+    of: typing.NotRequired[str | None]
+    """Which of the plugin's services it asks, where the manifest settles that.
+
+    Nothing where it does not, which is a manifest the reader has already refused
+    — carried as an absence rather than as a guess, so that a report built from a
+    manifest nobody held to the reader says *this was not settled* instead of
+    naming whichever service came first.
+    """
+    proof: str
+    """The proof's id, which its verdict is reported against."""
+    why: str
+    """Why it is worth asserting."""
+
+
+type PluginReached = PluginReachedLoopback | PluginReachedProxied | PluginReachedHousehold
+"""How an installed service is reached, where it is reached at all.
+
+The tier is the arm, so the label a tier earns lives only in the arm entitled to
+one. Only a household or a proxied service has a label — the bundled policy is that an
+admin surface does not get a name on the household network — and a record able to carry
+a loopback service with a hostname would be a record able to describe the thing
+that policy exists to prevent.
+
+**The group is on both arms, and that is not an oversight.** Only the proxy is
+the household tier's alone; the bundled dashboard carries an entry for an
+operator surface too, with the address it links to rendered from the tier — nine
+of the shipped stack's own entries point at this machine. A record that kept the
+group for the wider tier alone would leave a loopback service off the panel its
+bundled neighbours are on.
+
+A tier and never an address, either way: lemonfiber renders one from the other
+exactly as it does for a bundled service, so the two-tier policy stays a property
+of the system rather than a request a plugin made.
+"""
+
+
+class PluginReachedProxied(typing.TypedDict):
+    """From this machine on its port, and from the household by name through the stack's
+    own proxy alone.
+    """
+
+    group: typing.NotRequired[str | None]
+    """The group on the bundled dashboard, where the manifest named one."""
+    hostname: str
+    """The single label in front of the operator's domain."""
+    port: int
+    """The port the service listens on."""
+    tier: typing.Literal["proxied"]
+
+
+class PluginRequestProof(typing.TypedDict):
+    """One proof that asks one of the plugin's services a question, kept so the doctor can ask
+    it again without the plugin's source.
+    """
+
+    expect: Expect
+    """What the answer must be."""
+    proof: str
+    """The proof's id."""
+    request: PluginRequest
+    """What it asks."""
+    service: str
+    """The service it asks."""
+    title: str
+    """What it establishes, in one line."""
+    why: str
+    """Why it is worth asserting."""
+
+
+class PluginRun(typing.TypedDict):
+    """A run of the image's own program, as a proof declares it."""
+
+    args: list[str]
+    """Each argument handed to the image's entrypoint, one string each: one to 64, each at
+    most 4096 bytes and none holding a NUL.
+    """
+    timeout_s: typing.NotRequired[int | None]
+    """How long the run may take, from 1 to 120 seconds. Default 30."""
+
+
+class PluginRunProof(typing.TypedDict):
+    """One proof that runs the image's own program, kept so the doctor and a later proof can
+    run it again without the plugin's source.
+    """
+
+    expect: Expect
+    """What the run must come to."""
+    proof: str
+    """The proof's id."""
+    run: PluginRun
+    """What the image's own program is handed."""
+    service: str
+    """The service whose image it runs."""
+    title: str
+    """What it establishes, in one line."""
+    why: str
+    """Why it is worth asserting."""
+
+
+type PluginShape = typing.Literal["egress-guard", "render"]
+"""A privileged shape lemonfiber writes for a service."""
+
+
+class PluginSharing(typing.TypedDict):
+    """An adapter that writes the files of the service it fronts, through that service's
+    whole configuration directory mounted into it.
+    """
+
+    adapter: str
+    """The adapter."""
+    at: str
+    """Where that service's configuration directory lands inside the adapter."""
+    upstream: str
+    """The service whose files it writes."""
+
+
+class PluginTaking(typing.TypedDict):
+    """One service taking a privileged shape, as the reading states it."""
+
+    approval: str
+    """What approving it is written as, apart from the offer."""
+    devices: list[str]
+    """The devices it is given."""
+    grants: list[str]
+    """The kernel capabilities it is given."""
+    grouped: bool
+    """Whether it is added to the group owning those devices on the engine's host."""
+    service: str
+    """The service taking it."""
+    shape: PluginShape
+    """The shape it takes."""
+
+
+class PluginVerification(typing.TypedDict):
+    """What the stack's own checks made of an install."""
+
+    broke: list[PluginChangedCheck]
+    """Every check this install made worse.
+
+    Empty is the answer an install needs, and it is the common one. What is here
+    is what takes the install back.
+    """
+    unsettled: list[PluginChangedCheck]
+    """Every check nothing could be concluded about across the two readings.
+
+    Reported and never acted on. *I could not tell* is not *it is still broken*,
+    and an install reversed because a check could not reach a provider it also
+    could not reach an hour ago would be punishing a plugin for the weather. It is
+    said out loud rather than dropped, because the assurance an operator thought
+    they had is the thing that went.
+    """
+
+
+type RecordedWith = str | int | bool
+"""What a recording gives a service in the operator's place: a constant reaching no third
+party, or, written `\"minted\"`, a value made for that run alone.
+"""
+
+
+class ServiceCertificate(typing.TypedDict):
+    """The certificate lemonfiber makes for a service before it first starts."""
+
+    certificate: str
+    """Where the certificate is written, relative to the configuration directory."""
+    key: str
+    """Where its private key is written, relative to the configuration directory."""
+    names: list[str]
+    """The host names it is made out to."""
+
+
+class ServiceFields(typing.TypedDict):
+    """The container fields an install record keeps for a service, beyond those every
+    record already holds.
+    """
+
+    args: typing.NotRequired[list[str]]
+    """The arguments its image's own entrypoint is handed, in order."""
+    certificate: typing.NotRequired[ServiceCertificate | None]
+    """The certificate lemonfiber makes for it, where it declares one."""
+    config_ro: typing.NotRequired[bool]
+    """Whether its configuration directory is read-only."""
+    container_hostname: typing.NotRequired[str | None]
+    """The name its container knows itself by, where it declares one."""
+    env: typing.NotRequired[dict[str, ServiceValue]]
+    """Its environment."""
+    mem_limit_mib: typing.NotRequired[int | None]
+    """Its memory ceiling."""
+    mount: typing.NotRequired[list[ServiceMount]]
+    """Its further mounts."""
+    network: typing.NotRequired[ServiceNetwork | None]
+    """The network it runs inside."""
+    posture: typing.NotRequired[ServicePosture]
+    """How tightly it is held."""
+    publish: typing.NotRequired[list[ServicePublish]]
+    """Its further published ports."""
+    rebuilt: typing.NotRequired[list[str]]
+    """The paths beneath its configuration directory it rebuilds when they are missing."""
+    shares_config: typing.NotRequired[str | None]
+    """Where the whole configuration directory of the service it fronts lands in it."""
+    tmpfs: typing.NotRequired[list[str]]
+    """Its scratch paths in memory."""
+    user_mode: typing.NotRequired[ServiceUserModeWritten | None]
+    """Who it runs as, where declared."""
+
+
+class ServiceIdVariables(typing.TypedDict):
+    """The two variables an image reads the operator's uid and gid from."""
+
+    gid_env: str
+    """The variable it reads the operator's gid from."""
+    uid_env: str
+    """The variable it reads the operator's uid from."""
+
+
+class ServiceNetwork(typing.TypedDict):
+    """The network a service runs inside instead of its own, its filler's or a fence's, or the
+    sibling it carries out of the machine.
+    """
+
+    egress_for: typing.NotRequired[str | None]
+    """The service of its own plugin it carries out of the machine, holding nothing, where
+    it is that service's egress.
+    """
+    fenced: typing.NotRequired[bool]
+    """Whether it fetches whatever address it is handed, and so runs inside a fence that
+    refuses every private address.
+    """
+    via: typing.NotRequired[str | None]
+    """The capability whose filler's network it runs inside."""
+
+
+type ServicePosture = typing.Literal["standard", "confined"]
+"""How tightly the container is held."""
+
+
+class ServicePublish(typing.TypedDict):
+    """A further port a service publishes on its tier."""
+
+    listens: typing.NotRequired[int | None]
+    """Where it answers inside the container, `port` where absent."""
+    port: int
+    """Where it is published on the host."""
+
+
+class ServiceSecretOf(typing.TypedDict):
+    """A secret the manifest declares."""
+
+    secret: str
+    """The declared secret's name."""
+
+
+class ServiceSetting(typing.TypedDict):
+    """An operator setting, with what is written while none is recorded."""
+
+    default: ServiceConstant
+    """What is written while the operator has recorded no value."""
+    needs: typing.NotRequired[dict[str, list[ServiceConstant]]]
+    """The values of other settings under which it is written."""
+    one_of: typing.NotRequired[list[SettingChoice] | None]
+    """The values its service accepts, where it says."""
+    recorded_with: typing.NotRequired[RecordedWith | None]
+    """What a recording gives the service in the operator's place, where only the
+    operator holds the value and the service needs one to start.
+    """
+    setting: str
+    """The setting's name."""
+    was: typing.NotRequired[str | None]
+    """The variable an earlier release kept its value under in the stack's environment
+    file.
+    """
+
+
+class ServiceUrlOf(typing.TypedDict):
+    """The address of a capability's filler."""
+
+    files: typing.NotRequired[str | None]
+    """The medium the filler asked for files."""
+    native: typing.NotRequired[str | None]
+    """The upstream's own API, where the ask reaches the upstream an adapter fronts."""
+    url_of: str
+    """The capability asked for."""
+
+
+type ServiceUserMode = typing.Literal["image", "puid-env", "uid"]
+"""A user mode a manifest writes by name."""
+
+
+type ServiceUserModeWritten = ServiceUserMode | ServiceIdVariables
+"""How a manifest writes [`UserMode`]: a mode by name, or the variables an image reads
+the operator's ids from.
+"""
+
+
+type ServiceValue = ServiceConstant | ServiceSetting | ServiceUrlOf | ServiceSecretOf
+"""One environment variable's value."""
+
+
+type SettingChoice = ServiceConstant | SettingChoiceNeeding
+"""One value a setting accepts."""
+
+
+class SettingChoiceNeeding(typing.TypedDict):
+    """Values that are choices only where the other settings `needs` names hold one of the
+    values it lists.
+    """
+
+    needs: dict[str, list[ServiceConstant]]
+    """What they are choices under."""
+    values: list[ServiceConstant]
+    """The values."""
+
+
+class WiringContest(typing.TypedDict):
+    """An ask several services claim and nothing has chosen between, so it reaches
+    nothing.
+    """
+
+    by: str
+    """The service that asked."""
+    capability: str
+    """What it asked for."""
+    claimants: list[str]
+    """Every claimant, named — a plugin's with the plugin beside it."""
+
+
+PluginInstalled = typing.TypedDict(
+    "PluginInstalled",
+    {
+        "contributions": typing.NotRequired[list[Contribution]],
+        "declared": typing.NotRequired[PluginDeclaration],
+        "description": typing.NotRequired[str | None],
+        "forms": typing.NotRequired[list[str]],
+        "from": typing.NotRequired[str],
+        "granted": typing.NotRequired[list[PluginGrant]],
+        "installed_at": typing.NotRequired[Instant | None],
+        "manifest": typing.NotRequired[str],
+        "name": typing.NotRequired[str | None],
+        "plugin": str,
+        "provides": typing.NotRequired[list[str]],
+        "recipes": typing.NotRequired[list[PluginRecipe]],
+        "request_proofs": typing.NotRequired[list[PluginRequestProof]],
+        "revision": typing.NotRequired[str],
+        "run_proofs": typing.NotRequired[list[PluginRunProof]],
+        "services": list[PluginPlaced],
+        "signed": typing.NotRequired[str],
+        "tree": typing.NotRequired[str],
+        "version": str,
+    },
+)
+"""One plugin's install, as it was decided."""
+
+
+ServiceMount = typing.TypedDict(
+    "ServiceMount",
+    {
+        "from": str,
+        "ro": typing.NotRequired[bool],
+        "to": str,
+    },
+)
+"""A further path mounted from the service's own mount tree."""
+
+
+__all__ = [
+    "PluginInstalled",
+    "PluginPlaced",
+    "PluginProving",
+    "PluginReached",
+    "PluginReachedProxied",
+    "PluginRequestProof",
+    "PluginRun",
+    "PluginRunProof",
+    "PluginShape",
+    "PluginSharing",
+    "PluginTaking",
+    "PluginVerification",
+    "RecordedWith",
+    "ServiceCertificate",
+    "ServiceFields",
+    "ServiceIdVariables",
+    "ServiceMount",
+    "ServiceNetwork",
+    "ServicePosture",
+    "ServicePublish",
+    "ServiceSecretOf",
+    "ServiceSetting",
+    "ServiceUrlOf",
+    "ServiceUserMode",
+    "ServiceUserModeWritten",
+    "ServiceValue",
+    "SettingChoice",
+    "SettingChoiceNeeding",
+    "WiringContest",
+]

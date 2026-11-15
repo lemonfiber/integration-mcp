@@ -7,8 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.lifecycle__plugins__reset__settings__substitution__update import StackMoveTaken
-from ..shared.lifecycle__quality__reset__update import StackEdit
+from ..shared.stack_edit import StackEdit
+from ..shared.stack_move_taken import StackMoveTaken
 
 
 class ResetEnvelope(typing.TypedDict):

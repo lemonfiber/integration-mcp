@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.step__walkthrough import Line
+from ..shared.line import Line
 
 
 class StepEnvelope(typing.TypedDict):

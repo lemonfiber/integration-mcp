@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.alert__dashboard import Alert
+from ..shared.alert import Alert
 
 
 class AlertEnvelope(typing.TypedDict):

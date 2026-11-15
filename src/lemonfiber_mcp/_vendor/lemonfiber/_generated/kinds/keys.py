@@ -7,7 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.key_claim__keys__minted_key import KeyPurpose
+from ..shared.instant import Instant
+from ..shared.key_purpose import KeyPurpose
 
 
 class KeyListing(typing.TypedDict):
@@ -42,7 +43,7 @@ class ListedKey(typing.TypedDict):
 
     member_minted: bool
     """Whether a household member minted it for themselves."""
-    minted: str
+    minted: Instant
     """When it was minted."""
     name: str
     """The name it was minted under."""
@@ -50,13 +51,13 @@ class ListedKey(typing.TypedDict):
     """The device key whose signature proved its mint, absent where none did."""
     purpose: KeyPurpose
     """What the minter said it is for. A declaration, not something the core verified."""
-    revoked: typing.NotRequired[str | None]
+    revoked: typing.NotRequired[Instant | None]
     """When it was revoked, where it has been."""
     scope: str
     """What it admits: `read`, `act` or `member:<name>`."""
     state: KeyState
     """Where it stands."""
-    used: typing.NotRequired[str | None]
+    used: typing.NotRequired[Instant | None]
     """When it was last admitted, where it has been."""
 
 

@@ -7,8 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.plugins__wiring import Wired
-from ..shared.substitution__wiring import Unfilled
+from ..shared.reaches import Wired
+from ..shared.unfilled import Unfilled
 
 
 class WiringEnvelope(typing.TypedDict):

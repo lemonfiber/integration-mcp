@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.glossary__word import Term
+from ..shared.term import Term
 
 
 class GlossaryEnvelope(typing.TypedDict):

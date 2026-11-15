@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.lifecycle__preview import Plan
+from ..shared.dropped import Plan
 
 
 class PreviewEnvelope(typing.TypedDict):

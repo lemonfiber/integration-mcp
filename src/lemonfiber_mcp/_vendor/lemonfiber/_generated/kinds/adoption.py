@@ -7,8 +7,8 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.adoption__beside__config__import___replacement import Stance
-from ..shared.adoption__migration import CarryingReport
+from ..shared.carrying_report import CarryingReport
+from ..shared.stance import Stance
 
 
 class AdoptReport(typing.TypedDict):

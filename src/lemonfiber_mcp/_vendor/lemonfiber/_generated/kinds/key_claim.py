@@ -7,14 +7,15 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.key_claim__keys__minted_key import KeyPurpose
+from ..shared.instant import Instant
+from ..shared.key_purpose import KeyPurpose
 
 
 class KeyClaim(typing.TypedDict):
     """A key minted as a claim: the link that collects it, and no secret."""
 
-    lapses: str
-    """When the claim stops collecting the key, written as every other instant is."""
+    lapses: Instant
+    """When the claim stops collecting the key."""
     link: str
     """The key link: `lemonfiber://key` with the address, the certificate fingerprint,
     the stack, when the claim lapses and the claim. Shown once, and drawn as a code.

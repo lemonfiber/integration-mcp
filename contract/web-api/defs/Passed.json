@@ -4,11 +4,16 @@
   "type": "object",
   "properties": {
     "at": {
-      "description": "When the attempt was made, absent where the clock could not be written down.",
-      "type": [
-        "string",
-        "null"
-      ]
+      "description": "When the attempt was made, absent on a record kept without one.",
+      "anyOf": [
+        {
+          "$ref": "Instant.json"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     },
     "to": {
       "description": "The services they reached, by the names the member knows them by. Empty where\nthere was nowhere this could send.",

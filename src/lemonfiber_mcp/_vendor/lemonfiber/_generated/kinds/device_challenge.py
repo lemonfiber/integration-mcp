@@ -7,13 +7,15 @@ and CI fails on any difference.
 
 import typing
 
+from ..shared.instant import Instant
+
 
 class DeviceChallenge(typing.TypedDict):
     """A challenge, as the phone is handed it to sign."""
 
     challenge: str
     """The challenge, in base64url, signed as it is written here."""
-    expires: str
+    expires: Instant
     """When it stops standing, one minute after it was issued."""
 
 

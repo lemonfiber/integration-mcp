@@ -21,20 +21,28 @@
     },
     "registered": {
       "description": "When it was registered.",
-      "type": "string"
+      "$ref": "Instant.json"
     },
     "revoked": {
       "description": "When it was revoked, where it has been.",
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "$ref": "Instant.json"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "used": {
       "description": "When it last proved a mint, where it has.",
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "$ref": "Instant.json"
+        },
+        {
+          "type": "null"
+        }
       ]
     }
   },

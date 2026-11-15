@@ -7,7 +7,23 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.music__upgrade import Triggered
+from ..shared.triggered import Triggered
+
+
+type Total = TotalVariant1 | TotalVariant2
+"""What upgrading one kind of media costs in total, or why that could not be worked out."""
+
+
+class TotalVariant1(typing.TypedDict):
+    """The bytes re-fetching what its curator holds below the cutoff would take."""
+
+    bytes: int
+
+
+class TotalVariant2(typing.TypedDict):
+    """Why the total could not be worked out, in the operator's words."""
+
+    unknown: str
 
 
 class UpgradeEnvelope(typing.TypedDict):
@@ -30,15 +46,17 @@ class UpgradeMedia(typing.TypedDict):
     """
 
     media_type: str
-    """The media type — `tv` or `movies`."""
+    """The media type: `tv`, `movies` or `music`."""
     outcome: typing.NotRequired[Triggered | None]
     """What became of the re-search, or `None` where the upgrade was not confirmed
     and only the cost was stated.
     """
     preset: str
-    """The preset in force for it."""
-    size_per_hour: str
-    """Roughly what an hour of it costs at that preset."""
+    """The preset in force for it, or for music the format."""
+    total: Total
+    """What upgrading it costs in total: the runtime its curator holds below the cutoff
+    times the bytes an hour takes at that preset or format.
+    """
 
 
 class UpgradeReport(typing.TypedDict):
@@ -66,6 +84,9 @@ class UpgradeReport(typing.TypedDict):
 
 
 __all__ = [
+    "Total",
+    "TotalVariant1",
+    "TotalVariant2",
     "UpgradeEnvelope",
     "UpgradeMedia",
     "UpgradeReport",

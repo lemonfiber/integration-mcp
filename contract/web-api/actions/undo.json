@@ -4,12 +4,16 @@
     {
       "name": "at",
       "type": {
+        "anyOf": [
+          {
+            "$ref": "../defs/Instant.json"
+          },
+          {
+            "type": "null"
+          }
+        ],
         "default": null,
-        "description": "The stamp of the run to put back, as the history writes it.",
-        "type": [
-          "string",
-          "null"
-        ]
+        "description": "When the run to put back was made, as the history writes it."
       }
     }
   ],

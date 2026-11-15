@@ -7,8 +7,9 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.held__part_way__playing__title import Medium
-from ..shared.held__part_way__title import Pinned
+from ..shared.medium import Medium
+from ..shared.obstacle import Obstacle
+from ..shared.pinned import Pinned
 
 
 class PartWay(typing.TypedDict):
@@ -34,8 +35,8 @@ class PartWay(typing.TypedDict):
     """Where it streams from, where it plays."""
     title: str
     """What it is called, in the words the server holds it under."""
-    unlocated: typing.NotRequired[str | None]
-    """Why no location is stated, where none is."""
+    unlocated: typing.NotRequired[Obstacle | None]
+    """Why no location is stated, where none is, by the code that names it."""
     year: typing.NotRequired[int | None]
     """The year it came out, where the server knows one. Absent rather than guessed:
     two films share a title far more often than they share a title and a year.
@@ -59,8 +60,8 @@ class PartWayReport(typing.TypedDict):
     """Whether it could be read at all. An empty list and an unread one are different
     answers, and what could not be read is said in `findings`.
     """
-    findings: list[str]
-    """What is worth saying about this read, in the words its reader would use."""
+    findings: list[Obstacle]
+    """What stood in the way of this read, each by the code that names it."""
     id: str
     """The identifier the media server files them under."""
     member: str

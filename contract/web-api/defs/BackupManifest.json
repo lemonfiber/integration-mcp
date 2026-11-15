@@ -4,8 +4,8 @@
   "type": "object",
   "properties": {
     "created_at": {
-      "description": "When it was taken. Opaque here; the surface stamps it from the clock.",
-      "type": "string"
+      "description": "When it was taken.",
+      "$ref": "Instant.json"
     },
     "data_root": {
       "description": "The data root it was taken against, to notice a restore to a different one.",

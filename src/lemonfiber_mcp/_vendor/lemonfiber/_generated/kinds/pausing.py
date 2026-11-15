@@ -7,7 +7,7 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.bandwidth__pausing import Pulling
+from ..shared.pulling import Pulling
 
 
 class PausedClient(typing.TypedDict):

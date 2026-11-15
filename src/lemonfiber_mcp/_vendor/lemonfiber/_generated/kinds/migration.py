@@ -7,10 +7,10 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.adoption__migration import CarryingReport
-from ..shared.beside__migration import MovedReport
-from ..shared.import___migration import UnsupportedReport
-from ..shared.lifecycle__migration import ConflictReport
+from ..shared.carrying_report import CarryingReport
+from ..shared.conflict_report import ConflictReport
+from ..shared.moved_report import MovedReport
+from ..shared.unsupported_report import UnsupportedReport
 
 
 class LinkingReport(typing.TypedDict):
@@ -32,6 +32,28 @@ class LinkingReport(typing.TypedDict):
     """
     remedy: str
     """What would fix it, offered."""
+
+
+type Location = LocationVariant1 | LocationVariant2 | LocationVariant3
+"""Where something a service keeps is on this machine, or why that is not said."""
+
+
+class LocationVariant1(typing.TypedDict):
+    """The host path it is mounted from."""
+
+    at: str
+
+
+class LocationVariant2(typing.TypedDict):
+    """It could not be read, and why, in the operator's words."""
+
+    unread: str
+
+
+class LocationVariant3(typing.TypedDict):
+    """The service keeps none, and why, in the operator's words."""
+
+    none: str
 
 
 class MigrationEnvelope(typing.TypedDict):
@@ -92,6 +114,10 @@ class OccupantReport(typing.TypedDict):
 
     adoptable: bool
     """Whether lemonfiber knows this service and could take it over as it stands."""
+    config: Location
+    """Where it reads its configuration from on this machine."""
+    library: Location
+    """Where its library is on this machine."""
     ports: list[int]
     """Every host port it publishes, lowest first."""
     running: bool
@@ -111,6 +137,10 @@ class StandingReport(typing.TypedDict):
 
 __all__ = [
     "LinkingReport",
+    "Location",
+    "LocationVariant1",
+    "LocationVariant2",
+    "LocationVariant3",
     "MigrationEnvelope",
     "MigrationReport",
     "ModeReport",

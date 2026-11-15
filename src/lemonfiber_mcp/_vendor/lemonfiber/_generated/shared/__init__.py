@@ -5,158 +5,168 @@ Generated from the contract vendored in `contract/`. Do not edit: `just generate
 and CI fails on any difference.
 """
 
-from . import (
-    adoption__beside__config__import___replacement as _adoption__beside__config__import___replacement,
-)
-from . import adoption__migration as _adoption__migration
-from . import alert__dashboard as _alert__dashboard
-from . import alert__dashboard__doctor__error__plugins as _alert__dashboard__doctor__error__plugins
-from . import alerts__notify as _alerts__notify
-from . import askable__askable_kinds__asked as _askable__askable_kinds__asked
-from . import askable__dashboard__household as _askable__dashboard__household
-from . import backup__restore as _backup__restore
-from . import bandwidth__pausing as _bandwidth__pausing
-from . import beside__migration as _beside__migration
-from . import boot__lifecycle as _boot__lifecycle
-from . import catalogue__dashboard__lifecycle__status as _catalogue__dashboard__lifecycle__status
-from . import (
-    config__credentials__doctor__outbound__plugins__wiring__wizard as _config__credentials__doctor__outbound__plugins__wiring__wizard,
-)
-from . import config__wizard as _config__wizard
-from . import dashboard__front_door as _dashboard__front_door
-from . import dashboard__household as _dashboard__household
-from . import dashboard__household__invitation as _dashboard__household__invitation
-from . import dashboard__lifecycle__status as _dashboard__lifecycle__status
-from . import device_key__device_keys as _device_key__device_keys
-from . import doctor__error__plugins as _doctor__error__plugins
-from . import doctor__error__plugins__repair as _doctor__error__plugins__repair
-from . import doctor__plugins as _doctor__plugins
-from . import glossary__word as _glossary__word
-from . import held__part_way__playing__title as _held__part_way__playing__title
-from . import held__part_way__title as _held__part_way__title
-from . import import___migration as _import___migration
-from . import key_claim__keys__minted_key as _key_claim__keys__minted_key
-from . import lifecycle__migration as _lifecycle__migration
-from . import (
-    lifecycle__plugins__reset__settings__substitution__update as _lifecycle__plugins__reset__settings__substitution__update,
-)
-from . import (
-    lifecycle__plugins__settings__substitution__update as _lifecycle__plugins__settings__substitution__update,
-)
-from . import lifecycle__preview as _lifecycle__preview
-from . import lifecycle__preview__status as _lifecycle__preview__status
-from . import lifecycle__quality__reset__update as _lifecycle__quality__reset__update
-from . import lifecycle__status as _lifecycle__status
-from . import lifecycle__update as _lifecycle__update
-from . import music__quality as _music__quality
-from . import music__upgrade as _music__upgrade
-from . import news__news_items as _news__news_items
-from . import plugins__settings__status as _plugins__settings__status
-from . import plugins__substitution__wiring as _plugins__substitution__wiring
-from . import plugins__undo as _plugins__undo
-from . import plugins__wiring as _plugins__wiring
-from . import settings__wizard as _settings__wizard
-from . import space__stop_seeding as _space__stop_seeding
-from . import step__walkthrough as _step__walkthrough
-from . import stuck__trace as _stuck__trace
-from . import substitution__wiring as _substitution__wiring
-from . import update__version as _update__version
+from . import action as _action
+from . import address as _address
+from . import alert as _alert
+from . import apis as _apis
+from . import asking_standing as _asking_standing
+from . import candidate as _candidate
+from . import carrying_report as _carrying_report
+from . import changelog_state as _changelog_state
+from . import choosable as _choosable
+from . import code as _code
+from . import condition as _condition
+from . import conflict_report as _conflict_report
+from . import criticality as _criticality
+from . import device_key_backing as _device_key_backing
+from . import disposition as _disposition
+from . import disruptive as _disruptive
+from . import dropped as _dropped
+from . import estimate as _estimate
+from . import filtered as _filtered
+from . import forwarded as _forwarded
+from . import instant as _instant
+from . import key_purpose as _key_purpose
+from . import line as _line
+from . import medium as _medium
+from . import move_offered as _move_offered
+from . import moved_report as _moved_report
+from . import news_kind as _news_kind
+from . import notification_kind as _notification_kind
+from . import obstacle as _obstacle
+from . import pinned as _pinned
+from . import plugin_constraint as _plugin_constraint
+from . import problem as _problem
+from . import problem_severity as _problem_severity
+from . import protocols as _protocols
+from . import pulling as _pulling
+from . import reaches as _reaches
+from . import remedy as _remedy
+from . import scope as _scope
+from . import service as _service
+from . import setting_report as _setting_report
+from . import stack_edit as _stack_edit
+from . import stack_move_taken as _stack_move_taken
+from . import stage as _stage
+from . import stance as _stance
+from . import term as _term
+from . import title_kind as _title_kind
+from . import triggered as _triggered
+from . import unfilled as _unfilled
+from . import unrated as _unrated
+from . import unsupported_report as _unsupported_report
+from . import unvetted as _unvetted
+from . import value_origin as _value_origin
+from . import violation as _violation
+from . import waiting as _waiting
 
-from .adoption__beside__config__import___replacement import *
-from .adoption__migration import *
-from .alert__dashboard import *
-from .alert__dashboard__doctor__error__plugins import *
-from .alerts__notify import *
-from .askable__askable_kinds__asked import *
-from .askable__dashboard__household import *
-from .backup__restore import *
-from .bandwidth__pausing import *
-from .beside__migration import *
-from .boot__lifecycle import *
-from .catalogue__dashboard__lifecycle__status import *
-from .config__credentials__doctor__outbound__plugins__wiring__wizard import *
-from .config__wizard import *
-from .dashboard__front_door import *
-from .dashboard__household import *
-from .dashboard__household__invitation import *
-from .dashboard__lifecycle__status import *
-from .device_key__device_keys import *
-from .doctor__error__plugins import *
-from .doctor__error__plugins__repair import *
-from .doctor__plugins import *
-from .glossary__word import *
-from .held__part_way__playing__title import *
-from .held__part_way__title import *
-from .import___migration import *
-from .key_claim__keys__minted_key import *
-from .lifecycle__migration import *
-from .lifecycle__plugins__reset__settings__substitution__update import *
-from .lifecycle__plugins__settings__substitution__update import *
-from .lifecycle__preview import *
-from .lifecycle__preview__status import *
-from .lifecycle__quality__reset__update import *
-from .lifecycle__status import *
-from .lifecycle__update import *
-from .music__quality import *
-from .music__upgrade import *
-from .news__news_items import *
-from .plugins__settings__status import *
-from .plugins__substitution__wiring import *
-from .plugins__undo import *
-from .plugins__wiring import *
-from .settings__wizard import *
-from .space__stop_seeding import *
-from .step__walkthrough import *
-from .stuck__trace import *
-from .substitution__wiring import *
-from .update__version import *
+from .action import *
+from .address import *
+from .alert import *
+from .apis import *
+from .asking_standing import *
+from .candidate import *
+from .carrying_report import *
+from .changelog_state import *
+from .choosable import *
+from .code import *
+from .condition import *
+from .conflict_report import *
+from .criticality import *
+from .device_key_backing import *
+from .disposition import *
+from .disruptive import *
+from .dropped import *
+from .estimate import *
+from .filtered import *
+from .forwarded import *
+from .instant import *
+from .key_purpose import *
+from .line import *
+from .medium import *
+from .move_offered import *
+from .moved_report import *
+from .news_kind import *
+from .notification_kind import *
+from .obstacle import *
+from .pinned import *
+from .plugin_constraint import *
+from .problem import *
+from .problem_severity import *
+from .protocols import *
+from .pulling import *
+from .reaches import *
+from .remedy import *
+from .scope import *
+from .service import *
+from .setting_report import *
+from .stack_edit import *
+from .stack_move_taken import *
+from .stage import *
+from .stance import *
+from .term import *
+from .title_kind import *
+from .triggered import *
+from .unfilled import *
+from .unrated import *
+from .unsupported_report import *
+from .unvetted import *
+from .value_origin import *
+from .violation import *
+from .waiting import *
 
 __all__: list[str] = []
-__all__ += _adoption__beside__config__import___replacement.__all__
-__all__ += _adoption__migration.__all__
-__all__ += _alert__dashboard.__all__
-__all__ += _alert__dashboard__doctor__error__plugins.__all__
-__all__ += _alerts__notify.__all__
-__all__ += _askable__askable_kinds__asked.__all__
-__all__ += _askable__dashboard__household.__all__
-__all__ += _backup__restore.__all__
-__all__ += _bandwidth__pausing.__all__
-__all__ += _beside__migration.__all__
-__all__ += _boot__lifecycle.__all__
-__all__ += _catalogue__dashboard__lifecycle__status.__all__
-__all__ += _config__credentials__doctor__outbound__plugins__wiring__wizard.__all__
-__all__ += _config__wizard.__all__
-__all__ += _dashboard__front_door.__all__
-__all__ += _dashboard__household.__all__
-__all__ += _dashboard__household__invitation.__all__
-__all__ += _dashboard__lifecycle__status.__all__
-__all__ += _device_key__device_keys.__all__
-__all__ += _doctor__error__plugins.__all__
-__all__ += _doctor__error__plugins__repair.__all__
-__all__ += _doctor__plugins.__all__
-__all__ += _glossary__word.__all__
-__all__ += _held__part_way__playing__title.__all__
-__all__ += _held__part_way__title.__all__
-__all__ += _import___migration.__all__
-__all__ += _key_claim__keys__minted_key.__all__
-__all__ += _lifecycle__migration.__all__
-__all__ += _lifecycle__plugins__reset__settings__substitution__update.__all__
-__all__ += _lifecycle__plugins__settings__substitution__update.__all__
-__all__ += _lifecycle__preview.__all__
-__all__ += _lifecycle__preview__status.__all__
-__all__ += _lifecycle__quality__reset__update.__all__
-__all__ += _lifecycle__status.__all__
-__all__ += _lifecycle__update.__all__
-__all__ += _music__quality.__all__
-__all__ += _music__upgrade.__all__
-__all__ += _news__news_items.__all__
-__all__ += _plugins__settings__status.__all__
-__all__ += _plugins__substitution__wiring.__all__
-__all__ += _plugins__undo.__all__
-__all__ += _plugins__wiring.__all__
-__all__ += _settings__wizard.__all__
-__all__ += _space__stop_seeding.__all__
-__all__ += _step__walkthrough.__all__
-__all__ += _stuck__trace.__all__
-__all__ += _substitution__wiring.__all__
-__all__ += _update__version.__all__
+__all__ += _action.__all__
+__all__ += _address.__all__
+__all__ += _alert.__all__
+__all__ += _apis.__all__
+__all__ += _asking_standing.__all__
+__all__ += _candidate.__all__
+__all__ += _carrying_report.__all__
+__all__ += _changelog_state.__all__
+__all__ += _choosable.__all__
+__all__ += _code.__all__
+__all__ += _condition.__all__
+__all__ += _conflict_report.__all__
+__all__ += _criticality.__all__
+__all__ += _device_key_backing.__all__
+__all__ += _disposition.__all__
+__all__ += _disruptive.__all__
+__all__ += _dropped.__all__
+__all__ += _estimate.__all__
+__all__ += _filtered.__all__
+__all__ += _forwarded.__all__
+__all__ += _instant.__all__
+__all__ += _key_purpose.__all__
+__all__ += _line.__all__
+__all__ += _medium.__all__
+__all__ += _move_offered.__all__
+__all__ += _moved_report.__all__
+__all__ += _news_kind.__all__
+__all__ += _notification_kind.__all__
+__all__ += _obstacle.__all__
+__all__ += _pinned.__all__
+__all__ += _plugin_constraint.__all__
+__all__ += _problem.__all__
+__all__ += _problem_severity.__all__
+__all__ += _protocols.__all__
+__all__ += _pulling.__all__
+__all__ += _reaches.__all__
+__all__ += _remedy.__all__
+__all__ += _scope.__all__
+__all__ += _service.__all__
+__all__ += _setting_report.__all__
+__all__ += _stack_edit.__all__
+__all__ += _stack_move_taken.__all__
+__all__ += _stage.__all__
+__all__ += _stance.__all__
+__all__ += _term.__all__
+__all__ += _title_kind.__all__
+__all__ += _triggered.__all__
+__all__ += _unfilled.__all__
+__all__ += _unrated.__all__
+__all__ += _unsupported_report.__all__
+__all__ += _unvetted.__all__
+__all__ += _value_origin.__all__
+__all__ += _violation.__all__
+__all__ += _waiting.__all__

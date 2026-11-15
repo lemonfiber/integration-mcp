@@ -7,7 +7,9 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.news__news_items import NewsKind
+from ..shared.instant import Instant
+from ..shared.news_kind import NewsKind
+from ..shared.title_kind import TitleKind, TitleUnit
 
 
 class News(typing.TypedDict):
@@ -43,7 +45,7 @@ class NewsProblem(typing.TypedDict):
 
     check: str
     """The check that raised it."""
-    onset: str
+    onset: Instant
     """When the stack first saw it wrong since it last saw it right, in whole seconds
     since the epoch: the same moment the health summary names for it.
     """
@@ -54,16 +56,20 @@ class NewsProblem(typing.TypedDict):
 class NewsRequest(typing.TypedDict):
     """One request, by its reference."""
 
-    asked: typing.NotRequired[str | None]
+    asked: typing.NotRequired[Instant | None]
     """When it was asked for, where that is known."""
     by: str
     """Who asked for it, by the name the media server holds them under."""
+    kind: typing.NotRequired[TitleKind | None]
+    """The kind of title it asks for, as the household list names it."""
     request: str
     """The reference the household list names it with: the request service's number
     (`42`), or `music-<n>` or `books-<n>` for an ask the core keeps.
     """
     title: typing.NotRequired[str | None]
     """What it is called, where a service has been told about it."""
+    unit: typing.NotRequired[TitleUnit | None]
+    """What an ask for music or books asks for, as the household list names it."""
 
 
 class NewsUpdate(typing.TypedDict):

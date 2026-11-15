@@ -7,8 +7,9 @@ and CI fails on any difference.
 
 import typing
 
-from ..shared.held__part_way__playing__title import Medium
-from ..shared.held__part_way__title import Pinned
+from ..shared.medium import Medium
+from ..shared.obstacle import Obstacle
+from ..shared.pinned import Pinned
 
 
 class Held(typing.TypedDict):
@@ -35,8 +36,8 @@ class Held(typing.TypedDict):
     """Where it streams from, where it plays."""
     title: str
     """What it is called, in the words the server holds it under."""
-    unlocated: typing.NotRequired[str | None]
-    """Why no location is stated, where none is."""
+    unlocated: typing.NotRequired[Obstacle | None]
+    """Why no location is stated, where none is, by the code that names it."""
     year: typing.NotRequired[int | None]
     """The year it came out, where the server knows one. Absent rather than guessed:
     two films share a title far more often than they share a title and a year.
@@ -63,12 +64,12 @@ class HeldReport(typing.TypedDict):
     would tell a household they own nothing on the day the media server rebooted.
     Anything that could not be read is said in `findings` and this goes false.
     """
-    findings: list[str]
-    """What is worth saying about this shelf, in the words its reader would use.
+    findings: list[Obstacle]
+    """What stood in the way of reading this shelf, each by the code that names it.
 
     Always written, empty or not. A field the schema requires and the document
     sometimes omits is one a reader has to guess about, and an empty list already
-    says the thing it would say: there is nothing to report about this shelf.
+    says the thing it would say: nothing stood in the way.
     """
     holdings: list[Held]
     """What they hold, newest first."""
