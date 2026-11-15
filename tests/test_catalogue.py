@@ -32,12 +32,13 @@ HOUSEHOLD_TOOLS: Final = frozenset(
         "read_askable",
         "read_askable_poster",
         "read_askable_kinds",
+        "read_requests_poster",
         "connection",
     },
 )
 """The tools a household member is offered words for: their requests, their shelf and each title on it with its
 pictures, what they are part-way through and playing, their search and its posters, the kinds they may ask for,
-and the connection."""
+the covers of their own requests, and the connection."""
 
 
 def capability_set(states: dict[str, CapabilityState], scope: CredentialScope = "operator") -> CapabilitySet:
@@ -313,6 +314,7 @@ def test_every_read_with_an_address_is_found_by_it() -> None:
         ("read/held/t%2F1", "read_held_by_id", {"id": "t%2F1"}),
         ("held/t1/poster", "read_held_poster", {"id": "t1"}),
         ("askable/603/poster", "read_askable_poster", {"id": "603"}),
+        ("requests/music-3/poster", "read_requests_poster", {"reference": "music-3"}),
         ("bundle/support.tar.gz", "read_bundle", {"name": "support.tar.gz"}),
     ],
 )

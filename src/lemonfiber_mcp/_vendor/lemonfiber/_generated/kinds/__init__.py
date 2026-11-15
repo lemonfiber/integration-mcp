@@ -51,6 +51,8 @@ from . import minted_key as _minted_key
 from . import music as _music
 from . import news as _news
 from . import news_items as _news_items
+from . import notify as _notify
+from . import notify_mine as _notify_mine
 from . import outbound as _outbound
 from . import pairing as _pairing
 from . import part_way as _part_way
@@ -143,6 +145,8 @@ from .minted_key import *
 from .music import *
 from .news import *
 from .news_items import *
+from .notify import *
+from .notify_mine import *
 from .outbound import *
 from .pairing import *
 from .part_way import *
@@ -236,6 +240,8 @@ __all__ += _minted_key.__all__
 __all__ += _music.__all__
 __all__ += _news.__all__
 __all__ += _news_items.__all__
+__all__ += _notify.__all__
+__all__ += _notify_mine.__all__
 __all__ += _outbound.__all__
 __all__ += _pairing.__all__
 __all__ += _part_way.__all__

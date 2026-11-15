@@ -11,6 +11,7 @@ from . import (
 from . import adoption__migration as _adoption__migration
 from . import alert__dashboard as _alert__dashboard
 from . import alert__dashboard__doctor__error__plugins as _alert__dashboard__doctor__error__plugins
+from . import alerts__notify as _alerts__notify
 from . import askable__askable_kinds__asked as _askable__askable_kinds__asked
 from . import askable__dashboard__household as _askable__dashboard__household
 from . import backup__restore as _backup__restore
@@ -65,6 +66,7 @@ from .adoption__beside__config__import___replacement import *
 from .adoption__migration import *
 from .alert__dashboard import *
 from .alert__dashboard__doctor__error__plugins import *
+from .alerts__notify import *
 from .askable__askable_kinds__asked import *
 from .askable__dashboard__household import *
 from .backup__restore import *
@@ -114,6 +116,7 @@ __all__ += _adoption__beside__config__import___replacement.__all__
 __all__ += _adoption__migration.__all__
 __all__ += _alert__dashboard.__all__
 __all__ += _alert__dashboard__doctor__error__plugins.__all__
+__all__ += _alerts__notify.__all__
 __all__ += _askable__askable_kinds__asked.__all__
 __all__ += _askable__dashboard__household.__all__
 __all__ += _backup__restore.__all__

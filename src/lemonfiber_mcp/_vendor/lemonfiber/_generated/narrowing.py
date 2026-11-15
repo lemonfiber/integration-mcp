@@ -55,6 +55,8 @@ from .kinds import (
     MusicEnvelope,
     NewsEnvelope,
     NewsItemsEnvelope,
+    NotifyEnvelope,
+    NotifyMineEnvelope,
     OutboundEnvelope,
     PairingEnvelope,
     PartWayEnvelope,
@@ -204,6 +206,10 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["news"], /) -> NewsEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["news-items"], /) -> NewsItemsEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["notify"], /) -> NotifyEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["notify-mine"], /) -> NotifyMineEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["outbound"], /) -> OutboundEnvelope: ...
     @typing.overload

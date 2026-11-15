@@ -135,12 +135,12 @@ class PluginProving(typing.TypedDict):
     """Why it is worth asserting."""
 
 
-type PluginReached = PluginReachedLoopback | PluginReachedHousehold
+type PluginReached = PluginReachedLoopback | PluginReachedProxied | PluginReachedHousehold
 """How an installed service is reached, where it is reached at all.
 
 The tier is the arm, so the label a tier earns lives only in the arm entitled to
-one. Only a household service is proxied — the bundled policy is that an admin
-surface does not get a name on the household network — and a record able to carry
+one. Only a household or a proxied service has a label — the bundled policy is that an
+admin surface does not get a name on the household network — and a record able to carry
 a loopback service with a hostname would be a record able to describe the thing
 that policy exists to prevent.
 
@@ -177,6 +177,20 @@ class PluginReachedLoopback(typing.TypedDict):
     port: int
     """The port the service listens on."""
     tier: typing.Literal["loopback"]
+
+
+class PluginReachedProxied(typing.TypedDict):
+    """From this machine on its port, and from the household by name through the stack's
+    own proxy alone.
+    """
+
+    group: typing.NotRequired[str | None]
+    """The group on the bundled dashboard, where the manifest named one."""
+    hostname: str
+    """The single label in front of the operator's domain."""
+    port: int
+    """The port the service listens on."""
+    tier: typing.Literal["proxied"]
 
 
 class PluginRequestProof(typing.TypedDict):
@@ -243,23 +257,6 @@ class PluginSharing(typing.TypedDict):
     """Where that service's configuration directory lands inside the adapter."""
     upstream: str
     """The service whose files it writes."""
-
-
-class PluginTaking(typing.TypedDict):
-    """One service taking a privileged shape, as the reading states it."""
-
-    approval: str
-    """What approving it is written as, apart from the offer."""
-    devices: list[str]
-    """The devices it is given."""
-    grants: list[str]
-    """The kernel capabilities it is given."""
-    grouped: bool
-    """Whether it is added to the group owning those devices on the engine's host."""
-    service: str
-    """The service taking it."""
-    shape: PluginShape
-    """The shape it takes."""
 
 
 type PluginVerdict = (
@@ -347,6 +344,8 @@ class ServiceFields(typing.TypedDict):
     record already holds.
     """
 
+    args: typing.NotRequired[list[str]]
+    """The arguments its image's own entrypoint is handed, in order."""
     certificate: typing.NotRequired[ServiceCertificate | None]
     """The certificate lemonfiber makes for it, where it declares one."""
     config_ro: typing.NotRequired[bool]
@@ -518,12 +517,12 @@ __all__ = [
     "PluginReached",
     "PluginReachedHousehold",
     "PluginReachedLoopback",
+    "PluginReachedProxied",
     "PluginRequestProof",
     "PluginRun",
     "PluginRunProof",
     "PluginShape",
     "PluginSharing",
-    "PluginTaking",
     "PluginVerdict",
     "PluginVerdictFailed",
     "PluginVerdictFailingAsDeclared",

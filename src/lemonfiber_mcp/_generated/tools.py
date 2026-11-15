@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Every tool the server offers, as the contract describes it.
 
-Generated from the contract lemonfiber f493bb8c4ef878445062bb225d93e92296bb89df published, vendored in `contract/web-api/`.
+Generated from the contract lemonfiber 13659f53d634c9d3ae05141706a9a910a1b3b614 published, vendored in `contract/web-api/`.
 Do not edit: `just generate` rewrites it, and CI fails on any difference.
 """
 
@@ -12,7 +12,7 @@ from lemonfiber_mcp.shapes import Reach, ToolShape
 API_VERSION: Final = 1
 """The `api_version` the tools were generated for."""
 
-CONTRACT: Final = 'f493bb8c4ef878445062bb225d93e92296bb89df'
+CONTRACT: Final = '13659f53d634c9d3ae05141706a9a910a1b3b614'
 """The lemonfiber revision whose contract the tools were generated from."""
 
 TOOLS: Final[tuple[ToolShape, ...]] = (
@@ -227,6 +227,30 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
         parameters=(),
         input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
         resource='lemonfiber://read/stack',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_notify',
+        reach=Reach.READ,
+        target='notify',
+        capability='/api/notify',
+        parameters=(),
+        input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
+        resource='lemonfiber://read/notify',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_notify_mine',
+        reach=Reach.READ,
+        target='notify/mine',
+        capability='/api/notify/mine',
+        parameters=('member',),
+        input_schema={'type': 'object', 'properties': {'member': {'type': 'string'}}, 'additionalProperties': False},
+        resource='lemonfiber://read/notify/mine{?member}',
         read_only=True,
         destructive=False,
         idempotent=True,
@@ -617,12 +641,30 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
         reach=Reach.FILE,
         target='askable/{id}/poster',
         capability='/api/askable/{id}/poster',
-        parameters=('id', 'member', 'kind'),
+        parameters=('id', 'member', 'kind', 'unit'),
         input_schema={'type': 'object',
-                      'properties': {'id': {'type': 'string'}, 'member': {'type': 'string'}, 'kind': {'type': 'string'}},
+                      'properties': {'id': {'type': 'string'},
+                                     'member': {'type': 'string'},
+                                     'kind': {'type': 'string'},
+                                     'unit': {'type': 'string'}},
                       'required': ['id'],
                       'additionalProperties': False},
-        resource='lemonfiber://askable/{id}/poster{?member,kind}',
+        resource='lemonfiber://askable/{id}/poster{?member,kind,unit}',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_requests_poster',
+        reach=Reach.FILE,
+        target='requests/{reference}/poster',
+        capability='/api/requests/{reference}/poster',
+        parameters=('reference', 'member'),
+        input_schema={'type': 'object',
+                      'properties': {'reference': {'type': 'string'}, 'member': {'type': 'string'}},
+                      'required': ['reference'],
+                      'additionalProperties': False},
+        resource='lemonfiber://requests/{reference}/poster{?member}',
         read_only=True,
         destructive=False,
         idempotent=True,

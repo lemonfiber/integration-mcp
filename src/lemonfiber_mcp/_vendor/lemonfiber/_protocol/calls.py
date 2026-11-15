@@ -41,6 +41,9 @@ UNKEPT_SEGMENTS: Final = frozenset({"", ".", ".."})
 TITLE: Final = "id"
 """The segment a title's picture is read under: the id the title is listed by."""
 
+REFERENCE: Final = "reference"
+"""The segment a kept ask's cover is read under: the reference the household list names it by."""
+
 ANY_TYPE: Final = "*/*"
 """What a request for a file takes, whatever it is served as."""
 
@@ -172,9 +175,9 @@ def bundle_call(name: str) -> Call:
     return Call(HTTPMethod.GET, f"{BUNDLE}/{segment(name)}", {"Accept": ANY_TYPE})
 
 
-def picture_call(template: str, title: str, query: Query | None) -> Call:
-    """Ask for one of a title's pictures, by the id it is listed under."""
-    path = placed(template, TITLE, title)
+def picture_call(template: str, name: str, value: str, query: Query | None) -> Call:
+    """Ask for one picture, by the value its path's segment `name` is filled with."""
+    path = placed(template, name, value)
     return Call(HTTPMethod.GET, path + search(query), {"Accept": ", ".join(PICTURE_TYPES)}, most=PICTURE_MOST)
 
 

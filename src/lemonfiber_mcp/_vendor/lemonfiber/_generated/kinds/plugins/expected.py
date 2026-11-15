@@ -304,7 +304,7 @@ class PluginPlaceholder(typing.TypedDict):
     """The secret it names, by its id."""
 
 
-type PluginPlaceholderForm = typing.Literal["plain", "pbkdf2"]
+type PluginPlaceholderForm = typing.Literal["plain", "pbkdf2", "bcrypt"]
 """The form a placeholder asks its secret to be written in."""
 
 

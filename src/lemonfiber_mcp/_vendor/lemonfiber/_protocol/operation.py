@@ -91,9 +91,9 @@ def bundle(name: str) -> Operation[BundleFile]:
     return Operation(bundle_call(name), lambda answer: bundle_of(name, answer), again=True)
 
 
-def picture(template: str, title: str, query: Query | None) -> Operation[Picture]:
-    """Fetch one of a title's pictures, as the raster image it is."""
-    return Operation(picture_call(template, title, query), picture_of, again=True)
+def picture(template: str, name: str, value: str, query: Query | None) -> Operation[Picture]:
+    """Fetch one picture, by the value its path's segment `name` is filled with, as the raster image it is."""
+    return Operation(picture_call(template, name, value, query), picture_of, again=True)
 
 
 def action(name: str, arguments: Mapping[str, Json] | None) -> Operation[Envelope]:
