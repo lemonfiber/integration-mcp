@@ -36,6 +36,7 @@ from . import forms as _forms
 from . import front_door as _front_door
 from . import glossary as _glossary
 from . import grant as _grant
+from . import guide as _guide
 from . import handoff as _handoff
 from . import held as _held
 from . import history as _history
@@ -139,6 +140,7 @@ from .forms import *
 from .front_door import *
 from .glossary import *
 from .grant import *
+from .guide import *
 from .handoff import *
 from .held import *
 from .history import *
@@ -243,6 +245,7 @@ __all__ += _forms.__all__
 __all__ += _front_door.__all__
 __all__ += _glossary.__all__
 __all__ += _grant.__all__
+__all__ += _guide.__all__
 __all__ += _handoff.__all__
 __all__ += _held.__all__
 __all__ += _history.__all__
