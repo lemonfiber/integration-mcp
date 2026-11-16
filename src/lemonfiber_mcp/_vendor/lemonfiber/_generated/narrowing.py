@@ -40,6 +40,7 @@ from .kinds import (
     FrontDoorEnvelope,
     GlossaryEnvelope,
     GrantEnvelope,
+    GuideEnvelope,
     HandoffEnvelope,
     HeldEnvelope,
     HistoryEnvelope,
@@ -185,6 +186,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["glossary"], /) -> GlossaryEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["grant"], /) -> GrantEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["guide"], /) -> GuideEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["handoff"], /) -> HandoffEnvelope: ...
     @typing.overload

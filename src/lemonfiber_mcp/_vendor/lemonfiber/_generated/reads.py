@@ -43,6 +43,8 @@ class Read(enum.StrEnum):
     """Answers with `part-way`; takes `member` and `most`."""
     CHANNELS = "channels"
     """Answers with `channels`; takes `member`."""
+    GUIDE = "guide"
+    """Answers with `guide`; takes `member`."""
     ASKABLE = "askable"
     """Answers with `askable`; takes `member`, `term`, `after`, `kind` and `unit`."""
     ASKABLE_KINDS = "askable/kinds"
@@ -181,6 +183,7 @@ READS: typing.Final[typing.Mapping[Read, Readable]] = types.MappingProxyType(
             ("part-way",), (ReadParameter("member", False), ReadParameter("most", False))
         ),
         Read.CHANNELS: Readable(("channels",), (ReadParameter("member", False),)),
+        Read.GUIDE: Readable(("guide",), (ReadParameter("member", False),)),
         Read.ASKABLE: Readable(
             ("askable",),
             (
