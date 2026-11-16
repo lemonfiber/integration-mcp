@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   sdk-drift:
-    uses: lemonfiber/spec/.github/workflows/upstream-drift.yml@c0fa21b081b24ecf98d855c2d14e07f562ffcd4b # v1.0.153
+    uses: lemonfiber/spec/.github/workflows/upstream-drift.yml@74bf6bf2d9214bed1dcb832f2c1e77855b5a51f5 # v1.0.155
     with:
       lock: "vendored"
       upstream: "sdk-python"
