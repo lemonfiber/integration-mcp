@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Every tool the server offers, as the contract describes it.
 
-Generated from the contract lemonfiber 6a2d9bbd6d8c0b7a09258f6352d427c89b8bc2b6 published, vendored in `contract/web-api/`.
+Generated from the contract lemonfiber bfad4d1b0b66204836fc9a2f8aad73e9337b312d published, vendored in `contract/web-api/`.
 Do not edit: `just generate` rewrites it, and CI fails on any difference.
 """
 
@@ -12,7 +12,7 @@ from lemonfiber_mcp.shapes import Reach, ToolShape
 API_VERSION: Final = 1
 """The `api_version` the tools were generated for."""
 
-CONTRACT: Final = '6a2d9bbd6d8c0b7a09258f6352d427c89b8bc2b6'
+CONTRACT: Final = 'bfad4d1b0b66204836fc9a2f8aad73e9337b312d'
 """The lemonfiber revision whose contract the tools were generated from."""
 
 TOOLS: Final[tuple[ToolShape, ...]] = (
@@ -161,6 +161,18 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
         parameters=('member',),
         input_schema={'type': 'object', 'properties': {'member': {'type': 'string'}}, 'additionalProperties': False},
         resource='lemonfiber://read/channels{?member}',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_guide',
+        reach=Reach.READ,
+        target='guide',
+        capability='/api/guide',
+        parameters=('member',),
+        input_schema={'type': 'object', 'properties': {'member': {'type': 'string'}}, 'additionalProperties': False},
+        resource='lemonfiber://read/guide{?member}',
         read_only=True,
         destructive=False,
         idempotent=True,

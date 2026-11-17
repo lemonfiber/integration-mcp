@@ -39,6 +39,7 @@ from .kinds import (
     FrontDoorEnvelope,
     GlossaryEnvelope,
     GrantEnvelope,
+    GuideEnvelope,
     HandoffEnvelope,
     HeldEnvelope,
     HistoryEnvelope,
@@ -147,6 +148,7 @@ type Kind = typing.Literal[
     "front-door",
     "glossary",
     "grant",
+    "guide",
     "handoff",
     "held",
     "history",
@@ -256,6 +258,7 @@ type Envelope = (
     | FrontDoorEnvelope
     | GlossaryEnvelope
     | GrantEnvelope
+    | GuideEnvelope
     | HandoffEnvelope
     | HeldEnvelope
     | HistoryEnvelope

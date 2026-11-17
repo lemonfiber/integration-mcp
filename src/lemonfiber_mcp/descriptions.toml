@@ -155,6 +155,13 @@ member = "Whose, by the name they are known by."
 [read_channels.household]
 description = "The live TV channels you can watch, and what is on each now."
 
+[read_guide]
+operator = "The live TV guide one member may watch: each channel with its programmes from now across the guide window, leaving out a channel whose programme now is outside their limits and leaving a gap for a programme outside them."
+[read_guide.parameters]
+member = "Whose, by the name they are known by."
+[read_guide.household]
+description = "The live TV guide you can watch: what is on each channel now and what comes on next."
+
 [read_settled]
 operator = "What setup settled, read from the configuration as it stands: where the library is kept, which ways of downloading are configured, the user and group the services run as, and whether this stack is set up."
 
