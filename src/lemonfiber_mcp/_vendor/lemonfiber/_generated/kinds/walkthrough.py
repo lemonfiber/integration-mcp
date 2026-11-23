@@ -8,6 +8,7 @@ and CI fails on any difference.
 import typing
 
 from ..shared.line import Line, WalkthroughStep
+from ..shared.reason import Reason, Shape
 
 
 class Handover(typing.TypedDict):
@@ -25,25 +26,6 @@ file and two.
 
 type Next = typing.Literal["more-content", "household", "client-apps"]
 """One thing to do next."""
-
-
-type Reason = typing.Literal[
-    "no-indexers",
-    "indexers-failed",
-    "nothing-matched",
-    "none-met-the-preset",
-    "tunnel-down",
-    "not-grabbed",
-    "stalled",
-    "import-failed",
-    "no-media-server",
-    "not-visible",
-]
-"""Why a walkthrough could not go on."""
-
-
-type Shape = typing.Literal["pipeline", "library-only"]
-"""Which walkthrough this stack is offered."""
 
 
 class Stopped(typing.TypedDict):
@@ -123,8 +105,6 @@ __all__ = [
     "Handover",
     "Link",
     "Next",
-    "Reason",
-    "Shape",
     "Stopped",
     "WalkthroughEnvelope",
     "WalkthroughReport",

@@ -21,6 +21,7 @@ from .kinds import (
     BesideEnvelope,
     BootEnvelope,
     BundleEnvelope,
+    CallerEnvelope,
     CapabilitiesEnvelope,
     CatalogueEnvelope,
     CertificateEnvelope,
@@ -46,12 +47,14 @@ from .kinds import (
     HostingEnvelope,
     HouseholdEnvelope,
     ImportEnvelope,
+    InFlightEnvelope,
     InvitationEnvelope,
     JobEnvelope,
     KeyClaimEnvelope,
     KeysEnvelope,
     LifecycleEnvelope,
     LogEnvelope,
+    LogsEnvelope,
     MigrationEnvelope,
     MintedKeyEnvelope,
     MusicEnvelope,
@@ -62,9 +65,11 @@ from .kinds import (
     OutboundEnvelope,
     PairingEnvelope,
     PartWayEnvelope,
+    PasswordEnvelope,
     PausingEnvelope,
     PlayEnvelope,
     PlayingEnvelope,
+    PluginCatalogueEnvelope,
     PluginClaimsEnvelope,
     PluginConformanceEnvelope,
     PluginProvenanceEnvelope,
@@ -77,6 +82,7 @@ from .kinds import (
     PushEndpointsEnvelope,
     QualityEnvelope,
     QueueEnvelope,
+    RanEnvelope,
     RemovalEnvelope,
     RepairEnvelope,
     ReplacementEnvelope,
@@ -84,11 +90,14 @@ from .kinds import (
     RestoreEnvelope,
     SeedEnvelope,
     SelfUpdateEnvelope,
+    ServedEnvelope,
     SettingsEnvelope,
     SettledEnvelope,
     SetupEnvelope,
+    SignInCodeEnvelope,
     SpaceEnvelope,
     StackEnvelope,
+    StandingEnvelope,
     StartEnvelope,
     StatusEnvelope,
     StepEnvelope,
@@ -105,6 +114,7 @@ from .kinds import (
     UpgradeEnvelope,
     VersionEnvelope,
     WalkthroughEnvelope,
+    WalkthroughOfferEnvelope,
     WatchEnvelope,
     WatchedEnvelope,
     WatcherEnvelope,
@@ -130,6 +140,7 @@ type Kind = typing.Literal[
     "beside",
     "boot",
     "bundle",
+    "caller",
     "capabilities",
     "catalogue",
     "certificate",
@@ -155,12 +166,14 @@ type Kind = typing.Literal[
     "hosting",
     "household",
     "import",
+    "in-flight",
     "invitation",
     "job",
     "key-claim",
     "keys",
     "lifecycle",
     "log",
+    "logs",
     "migration",
     "minted-key",
     "music",
@@ -171,9 +184,11 @@ type Kind = typing.Literal[
     "outbound",
     "pairing",
     "part-way",
+    "password",
     "pausing",
     "play",
     "playing",
+    "plugin-catalogue",
     "plugin-claims",
     "plugin-conformance",
     "plugin-provenance",
@@ -186,6 +201,7 @@ type Kind = typing.Literal[
     "push-endpoints",
     "quality",
     "queue",
+    "ran",
     "removal",
     "repair",
     "replacement",
@@ -193,11 +209,14 @@ type Kind = typing.Literal[
     "restore",
     "seed",
     "self-update",
+    "served",
     "settings",
     "settled",
     "setup",
+    "sign-in-code",
     "space",
     "stack",
+    "standing",
     "start",
     "status",
     "step",
@@ -214,6 +233,7 @@ type Kind = typing.Literal[
     "upgrade",
     "version",
     "walkthrough",
+    "walkthrough-offer",
     "watch",
     "watched",
     "watcher",
@@ -240,6 +260,7 @@ type Envelope = (
     | BesideEnvelope
     | BootEnvelope
     | BundleEnvelope
+    | CallerEnvelope
     | CapabilitiesEnvelope
     | CatalogueEnvelope
     | CertificateEnvelope
@@ -265,12 +286,14 @@ type Envelope = (
     | HostingEnvelope
     | HouseholdEnvelope
     | ImportEnvelope
+    | InFlightEnvelope
     | InvitationEnvelope
     | JobEnvelope
     | KeyClaimEnvelope
     | KeysEnvelope
     | LifecycleEnvelope
     | LogEnvelope
+    | LogsEnvelope
     | MigrationEnvelope
     | MintedKeyEnvelope
     | MusicEnvelope
@@ -281,9 +304,11 @@ type Envelope = (
     | OutboundEnvelope
     | PairingEnvelope
     | PartWayEnvelope
+    | PasswordEnvelope
     | PausingEnvelope
     | PlayEnvelope
     | PlayingEnvelope
+    | PluginCatalogueEnvelope
     | PluginClaimsEnvelope
     | PluginConformanceEnvelope
     | PluginProvenanceEnvelope
@@ -296,6 +321,7 @@ type Envelope = (
     | PushEndpointsEnvelope
     | QualityEnvelope
     | QueueEnvelope
+    | RanEnvelope
     | RemovalEnvelope
     | RepairEnvelope
     | ReplacementEnvelope
@@ -303,11 +329,14 @@ type Envelope = (
     | RestoreEnvelope
     | SeedEnvelope
     | SelfUpdateEnvelope
+    | ServedEnvelope
     | SettingsEnvelope
     | SettledEnvelope
     | SetupEnvelope
+    | SignInCodeEnvelope
     | SpaceEnvelope
     | StackEnvelope
+    | StandingEnvelope
     | StartEnvelope
     | StatusEnvelope
     | StepEnvelope
@@ -324,6 +353,7 @@ type Envelope = (
     | UpgradeEnvelope
     | VersionEnvelope
     | WalkthroughEnvelope
+    | WalkthroughOfferEnvelope
     | WatchEnvelope
     | WatchedEnvelope
     | WatcherEnvelope

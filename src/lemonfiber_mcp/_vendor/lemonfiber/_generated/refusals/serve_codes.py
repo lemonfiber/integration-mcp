@@ -17,5 +17,10 @@ SERVE: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
     "SERVE-8": ListedRefusal(
         "UNANSWERED", 500, "Raised when an action's work ended before it had an answer to give."
     ),
+    "SERVE-9": ListedRefusal(
+        "NOT_SERVING",
+        500,
+        "Raised when how the web surface is served is asked of a run that is not serving it.",
+    ),
 }
 """What the contract says of each `SERVE` code."""

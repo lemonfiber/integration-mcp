@@ -15,6 +15,7 @@ from .cred_codes import CRED
 from .device_codes import DEVICE
 from .form_codes import FORM
 from .gone_codes import GONE
+from .host_codes import HOST
 from .key_codes import KEY
 from .life_codes import LIFE
 from .listed import ListedRefusal, RefusalCode
@@ -51,6 +52,7 @@ REFUSAL_CODES: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = types.
         **DEVICE,
         **FORM,
         **GONE,
+        **HOST,
         **KEY,
         **LIFE,
         **MIGRATE,

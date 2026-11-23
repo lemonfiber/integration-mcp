@@ -59,6 +59,15 @@ class Plan(typing.TypedDict):
     """What the stack estimates the services that would start need."""
     forms: list[str]
     """The forms the operator named, in the order they named them."""
+    installing: typing.NotRequired[list[UpInstallOffered]]
+    """Each part this build carries that the forms hold and this machine has never run,
+    offered as an install from the build before a start writes anything; answered by
+    [`Self::offer`]. Empty on every plan but a preview's.
+    """
+    offer: typing.NotRequired[str | None]
+    """The offer a start answers to take every install in [`Self::installing`], where it
+    could be read.
+    """
     profiles: list[str]
     """The profiles to activate, sorted so the command is reproducible."""
     running: typing.NotRequired[list[str] | None]
@@ -84,6 +93,19 @@ class Plan(typing.TypedDict):
     """
 
 
+class UpInstallOffered(typing.TypedDict):
+    """An install of a part the bundle installs that a start offers, by the plugin and the
+    offer its install reads as.
+    """
+
+    offer: typing.NotRequired[str | None]
+    """The name its install's offer goes by, where it could be read."""
+    plugin: str
+    """The plugin the bundle installs, in place of the stack's own service of its id."""
+    why: typing.NotRequired[str | None]
+    """Why its install could not be read, where it could not."""
+
+
 class Vanished(typing.TypedDict):
     """A plugin naming forms the stack does not declare."""
 
@@ -97,5 +119,6 @@ __all__ = [
     "Dropped",
     "Footprint",
     "Plan",
+    "UpInstallOffered",
     "Vanished",
 ]

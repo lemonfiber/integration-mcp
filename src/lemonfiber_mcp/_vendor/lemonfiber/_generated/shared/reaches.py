@@ -74,6 +74,7 @@ type WiringSettled = (
     | WiringSettledContested
     | WiringSettledChosen
     | WiringSettledUnfilled
+    | WiringSettledDeclined
 )
 """How an ask was settled."""
 
@@ -100,6 +101,14 @@ class WiringSettledContested(typing.TypedDict):
     claimants: list[str]
     """Every candidate, named, so a choice is made from a list."""
     settled: typing.Literal["contested"]
+
+
+class WiringSettledDeclined(typing.TypedDict):
+    """The operator chose that nothing fills it."""
+
+    over: list[str]
+    """Every claimant passed over."""
+    settled: typing.Literal["declined"]
 
 
 class WiringSettledEach(typing.TypedDict):
@@ -129,6 +138,7 @@ __all__ = [
     "WiringSettled",
     "WiringSettledChosen",
     "WiringSettledContested",
+    "WiringSettledDeclined",
     "WiringSettledEach",
     "WiringSettledOutright",
     "WiringSettledUnfilled",

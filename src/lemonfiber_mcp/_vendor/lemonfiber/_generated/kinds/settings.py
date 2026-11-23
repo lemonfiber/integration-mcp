@@ -45,7 +45,9 @@ class Reader(typing.TypedDict):
     service: str
     """The service."""
     variable: str
-    """The variable it is read into."""
+    """The variable it is read into, or `schedule` where the setting names when the
+    service runs.
+    """
 
 
 type SecretFrom = typing.Literal["operator", "recipe", "granted", "minted"]

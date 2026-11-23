@@ -22,6 +22,7 @@ from .kinds import (
     BesideEnvelope,
     BootEnvelope,
     BundleEnvelope,
+    CallerEnvelope,
     CapabilitiesEnvelope,
     CatalogueEnvelope,
     CertificateEnvelope,
@@ -47,12 +48,14 @@ from .kinds import (
     HostingEnvelope,
     HouseholdEnvelope,
     ImportEnvelope,
+    InFlightEnvelope,
     InvitationEnvelope,
     JobEnvelope,
     KeyClaimEnvelope,
     KeysEnvelope,
     LifecycleEnvelope,
     LogEnvelope,
+    LogsEnvelope,
     MigrationEnvelope,
     MintedKeyEnvelope,
     MusicEnvelope,
@@ -63,9 +66,11 @@ from .kinds import (
     OutboundEnvelope,
     PairingEnvelope,
     PartWayEnvelope,
+    PasswordEnvelope,
     PausingEnvelope,
     PlayEnvelope,
     PlayingEnvelope,
+    PluginCatalogueEnvelope,
     PluginClaimsEnvelope,
     PluginConformanceEnvelope,
     PluginProvenanceEnvelope,
@@ -78,6 +83,7 @@ from .kinds import (
     PushEndpointsEnvelope,
     QualityEnvelope,
     QueueEnvelope,
+    RanEnvelope,
     RemovalEnvelope,
     RepairEnvelope,
     ReplacementEnvelope,
@@ -85,11 +91,14 @@ from .kinds import (
     RestoreEnvelope,
     SeedEnvelope,
     SelfUpdateEnvelope,
+    ServedEnvelope,
     SettingsEnvelope,
     SettledEnvelope,
     SetupEnvelope,
+    SignInCodeEnvelope,
     SpaceEnvelope,
     StackEnvelope,
+    StandingEnvelope,
     StartEnvelope,
     StatusEnvelope,
     StepEnvelope,
@@ -106,6 +115,7 @@ from .kinds import (
     UpgradeEnvelope,
     VersionEnvelope,
     WalkthroughEnvelope,
+    WalkthroughOfferEnvelope,
     WatchEnvelope,
     WatchedEnvelope,
     WatcherEnvelope,
@@ -146,6 +156,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["boot"], /) -> BootEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["bundle"], /) -> BundleEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["caller"], /) -> CallerEnvelope: ...
     @typing.overload
     def __call__(
         self, envelope: Envelope, kind: typing.Literal["capabilities"], /
@@ -201,6 +213,8 @@ class KindNarrowing(typing.Protocol):
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["import"], /) -> ImportEnvelope: ...
     @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["in-flight"], /) -> InFlightEnvelope: ...
+    @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["invitation"], /) -> InvitationEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["job"], /) -> JobEnvelope: ...
@@ -212,6 +226,8 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["lifecycle"], /) -> LifecycleEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["log"], /) -> LogEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["logs"], /) -> LogsEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["migration"], /) -> MigrationEnvelope: ...
     @typing.overload
@@ -233,11 +249,17 @@ class KindNarrowing(typing.Protocol):
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["part-way"], /) -> PartWayEnvelope: ...
     @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["password"], /) -> PasswordEnvelope: ...
+    @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["pausing"], /) -> PausingEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["play"], /) -> PlayEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["playing"], /) -> PlayingEnvelope: ...
+    @typing.overload
+    def __call__(
+        self, envelope: Envelope, kind: typing.Literal["plugin-catalogue"], /
+    ) -> PluginCatalogueEnvelope: ...
     @typing.overload
     def __call__(
         self, envelope: Envelope, kind: typing.Literal["plugin-claims"], /
@@ -275,6 +297,8 @@ class KindNarrowing(typing.Protocol):
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["queue"], /) -> QueueEnvelope: ...
     @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["ran"], /) -> RanEnvelope: ...
+    @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["removal"], /) -> RemovalEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["repair"], /) -> RepairEnvelope: ...
@@ -289,15 +313,21 @@ class KindNarrowing(typing.Protocol):
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["self-update"], /) -> SelfUpdateEnvelope: ...
     @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["served"], /) -> ServedEnvelope: ...
+    @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["settings"], /) -> SettingsEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["settled"], /) -> SettledEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["setup"], /) -> SetupEnvelope: ...
     @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["sign-in-code"], /) -> SignInCodeEnvelope: ...
+    @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["space"], /) -> SpaceEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["stack"], /) -> StackEnvelope: ...
+    @typing.overload
+    def __call__(self, envelope: Envelope, kind: typing.Literal["standing"], /) -> StandingEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["start"], /) -> StartEnvelope: ...
     @typing.overload
@@ -334,6 +364,10 @@ class KindNarrowing(typing.Protocol):
     def __call__(self, envelope: Envelope, kind: typing.Literal["version"], /) -> VersionEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["walkthrough"], /) -> WalkthroughEnvelope: ...
+    @typing.overload
+    def __call__(
+        self, envelope: Envelope, kind: typing.Literal["walkthrough-offer"], /
+    ) -> WalkthroughOfferEnvelope: ...
     @typing.overload
     def __call__(self, envelope: Envelope, kind: typing.Literal["watch"], /) -> WatchEnvelope: ...
     @typing.overload

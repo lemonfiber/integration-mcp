@@ -6,11 +6,11 @@ and CI fails on any difference.
 """
 
 from . import affected as _affected
-from . import panel_vpn_unavailable_data as _panel_vpn_unavailable_data
+from . import panel_vpn_unavailable as _panel_vpn_unavailable
 
 from .affected import *
-from .panel_vpn_unavailable_data import *
+from .panel_vpn_unavailable import *
 
 __all__: list[str] = []
 __all__ += _affected.__all__
-__all__ += _panel_vpn_unavailable_data.__all__
+__all__ += _panel_vpn_unavailable.__all__

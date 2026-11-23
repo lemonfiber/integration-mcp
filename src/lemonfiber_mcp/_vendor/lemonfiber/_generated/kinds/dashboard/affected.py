@@ -8,6 +8,7 @@ and CI fails on any difference.
 import typing
 
 from ...shared.address import FrontDoorReport
+from ...shared.dashboard_protocol import DashboardProtocol
 from ...shared.estimate import HouseholdReport
 from ...shared.instant import Instant
 from ...shared.problem_severity import ProblemSeverity
@@ -49,12 +50,6 @@ class Affected(typing.TypedDict):
     """How bad it is."""
     summary: str
     """What is wrong, in one line."""
-
-
-type DashboardProtocol = typing.Literal["usenet", "torrent"]
-"""Which protocol a transfer is moving over, since the same download reads
-differently on each — a Usenet download has no peers, a torrent has no server.
-"""
 
 
 type DashboardReading = DashboardReadingKnown | DashboardReadingStale | DashboardReadingUnknown
@@ -427,6 +422,11 @@ class PanelVpnReady(typing.TypedDict):
     panel: typing.Literal["ready"]
 
 
+class PanelVpnUnavailableData(typing.TypedDict):
+    reason: str
+    """Why the panel could not be filled, in the operator's terms."""
+
+
 class Queue(typing.TypedDict):
     """One curator's queue, and how much of it is stuck."""
 
@@ -493,7 +493,6 @@ class Vpn(typing.TypedDict):
 
 __all__ = [
     "Affected",
-    "DashboardProtocol",
     "DashboardReading",
     "DashboardReadingKnown",
     "DashboardReadingStale",
@@ -541,6 +540,7 @@ __all__ = [
     "PanelStorageUnavailableData",
     "PanelVpnPending",
     "PanelVpnReady",
+    "PanelVpnUnavailableData",
     "Queue",
     "Storage",
     "Transfer",

@@ -18,8 +18,10 @@ from .affected import (
     PanelStorage,
     PanelVpnPending,
     PanelVpnReady,
+    PanelVpnUnavailableData,
 )
 from ...shared.alert import Alert
+from ...shared.run_health import ScheduledService
 
 
 class DashboardEnvelope(typing.TypedDict):
@@ -49,11 +51,6 @@ class PanelVpnUnavailable(typing.TypedDict):
 
     data: PanelVpnUnavailableData
     panel: typing.Literal["unavailable"]
-
-
-class PanelVpnUnavailableData(typing.TypedDict):
-    reason: str
-    """Why the panel could not be filled, in the operator's terms."""
 
 
 class Snapshot(typing.TypedDict):
@@ -98,6 +95,8 @@ class Snapshot(typing.TypedDict):
     """
     queue: PanelArray_of_Queue
     """The per-service queues."""
+    scheduled: list[ScheduledService]
+    """Each run-and-exit service, with how its last run ended."""
     services: PanelArray_of_Service
     """Every service and what it is doing."""
     storage: PanelStorage
@@ -173,7 +172,6 @@ __all__ = [
     "DashboardEnvelope",
     "PanelVpn",
     "PanelVpnUnavailable",
-    "PanelVpnUnavailableData",
     "Snapshot",
     "Stall",
     "Stuck",
