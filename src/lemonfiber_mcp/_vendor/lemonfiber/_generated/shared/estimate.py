@@ -159,6 +159,11 @@ class MemberAccess(typing.TypedDict):
 class MemberRequest(typing.TypedDict):
     """One thing a household member asked for, and where it stands in their words."""
 
+    also_asked: typing.NotRequired[list[str]]
+    """The other members an ask the core keeps is also for, by name, where more than one
+    member asked for it: one ask, ruled on once for all of them. Only on the
+    household's whole list; a member's own read never names anybody else who asked.
+    """
     arrived: typing.NotRequired[Instant | None]
     """When the title arrived on the media server, as the request service says. Absent,
     not null, until it is there.
@@ -174,8 +179,9 @@ class MemberRequest(typing.TypedDict):
     """
     id: str
     """The reference it is named by again when somebody rules on it: the number the
-    request service files it under (`42`), or `music-<n>` or `books-<n>` for an ask
-    for music or books the core keeps itself.
+    request service files it under (`42`), `tv-<n>` or `movies-<n>` for an ask the core
+    keeps until it files it as the request service's owner, or `music-<n>` or
+    `books-<n>` for an ask for music or books the core keeps itself.
     """
     kind: typing.NotRequired[TitleKind | None]
     """The kind of title it asks for: a series, a film, music or books. Absent, not

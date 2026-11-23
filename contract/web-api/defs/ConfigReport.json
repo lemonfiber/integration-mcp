@@ -14,6 +14,13 @@
         "null"
       ]
     },
+    "decisions": {
+      "description": "Every answer setup writes, in the catalogue's order, whether or not anything holds\nit. Never a value: a value is read where it is held, withheld there as it is.",
+      "type": "array",
+      "items": {
+        "$ref": "DecisionReport.json"
+      }
+    },
     "rehearsed": {
       "description": "Whether this was a rehearsal, so a change that `changed` reports was one\nthat *would* be made rather than one that was.",
       "type": "boolean"
@@ -35,10 +42,26 @@
       "items": {
         "$ref": "SettingReport.json"
       }
+    },
+    "unmanaged": {
+      "description": "Each area the operator declared unmanaged, in the order written, with what it\ncovers now. Empty where nothing is declared. An area and a reason are the\noperator's own text, to be shown as plain text.",
+      "type": "array",
+      "items": {
+        "$ref": "UnmanagedReport.json"
+      }
+    },
+    "unmanaged_more": {
+      "description": "How many declared areas `unmanaged` leaves out for being too many.",
+      "type": "integer",
+      "format": "uint",
+      "minimum": 0
     }
   },
   "required": [
     "settings",
+    "decisions",
+    "unmanaged",
+    "unmanaged_more",
     "changed",
     "rehearsed"
   ]

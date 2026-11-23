@@ -25,6 +25,8 @@ class Problem(typing.TypedDict):
     """What it means for the operator."""
     remedies: list[Remedy]
     """What to do, most likely first."""
+    retry_after: typing.NotRequired[int | None]
+    """How many whole seconds to wait before asking again, where the refusal says."""
     severity: ProblemSeverity
     """How much it matters."""
     state: ProblemState

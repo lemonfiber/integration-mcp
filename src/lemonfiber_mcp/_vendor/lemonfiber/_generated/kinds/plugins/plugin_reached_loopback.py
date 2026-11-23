@@ -11,10 +11,10 @@ from .expected import (
     Contribution,
     Expect,
     PluginAsking,
+    PluginBuiltOn,
     PluginChangedCheck,
     PluginDeclaration,
     PluginReachedHousehold,
-    PluginReachedLoopback,
     PluginRecipe,
     PluginRequest,
     ServiceConstant,
@@ -31,6 +31,8 @@ class PluginPlaced(typing.TypedDict):
     """Every capability it asks for."""
     asks_for: typing.NotRequired[str | None]
     """What it asks for there, where it says."""
+    built_on: typing.NotRequired[PluginBuiltOn | None]
+    """The upstream image and release its image is built on, where its manifest says."""
     config_path: str
     """Where inside the container its one configuration directory is mounted.
 
@@ -161,6 +163,16 @@ of the system rather than a request a plugin made.
 """
 
 
+class PluginReachedLoopback(typing.TypedDict):
+    """From this machine and nowhere else. No route, and no label to route to."""
+
+    group: typing.NotRequired[str | None]
+    """The group on the bundled dashboard, where the manifest named one."""
+    port: int
+    """The port the service listens on."""
+    tier: typing.Literal["loopback"]
+
+
 class PluginReachedProxied(typing.TypedDict):
     """From this machine on its port, and from the household by name through the stack's
     own proxy alone.
@@ -284,6 +296,19 @@ party, or, written `\"minted\"`, a value made for that run alone.
 """
 
 
+class Schedule(typing.TypedDict):
+    """The setting naming when a run-and-exit service runs, and the times where it holds
+    nothing.
+    """
+
+    default: str
+    """The times where the setting holds nothing: a five-field cron expression or one of
+    `@hourly`, `@daily`, `@weekly` and `@monthly`.
+    """
+    setting: str
+    """The setting, as `<plugin>:<name>`."""
+
+
 class ServiceCertificate(typing.TypedDict):
     """The certificate lemonfiber makes for a service before it first starts."""
 
@@ -322,6 +347,8 @@ class ServiceFields(typing.TypedDict):
     """Its further published ports."""
     rebuilt: typing.NotRequired[list[str]]
     """The paths beneath its configuration directory it rebuilds when they are missing."""
+    schedule: typing.NotRequired[Schedule | None]
+    """When it runs, where it runs to completion on a schedule rather than for good."""
     shares_config: typing.NotRequired[str | None]
     """Where the whole configuration directory of the service it fronts lands in it."""
     tmpfs: typing.NotRequired[list[str]]
@@ -351,6 +378,10 @@ class ServiceNetwork(typing.TypedDict):
     fenced: typing.NotRequired[bool]
     """Whether it fetches whatever address it is handed, and so runs inside a fence that
     refuses every private address.
+    """
+    internal: typing.NotRequired[bool]
+    """Whether it is held inside the stack, behind a fence passing only what is inside its
+    own networks.
     """
     via: typing.NotRequired[str | None]
     """The capability whose filler's network it runs inside."""
@@ -437,19 +468,6 @@ class SettingChoiceNeeding(typing.TypedDict):
     """The values."""
 
 
-class WiringContest(typing.TypedDict):
-    """An ask several services claim and nothing has chosen between, so it reaches
-    nothing.
-    """
-
-    by: str
-    """The service that asked."""
-    capability: str
-    """What it asked for."""
-    claimants: list[str]
-    """Every claimant, named — a plugin's with the plugin beside it."""
-
-
 PluginInstalled = typing.TypedDict(
     "PluginInstalled",
     {
@@ -493,6 +511,7 @@ __all__ = [
     "PluginPlaced",
     "PluginProving",
     "PluginReached",
+    "PluginReachedLoopback",
     "PluginReachedProxied",
     "PluginRequestProof",
     "PluginRun",
@@ -502,6 +521,7 @@ __all__ = [
     "PluginTaking",
     "PluginVerification",
     "RecordedWith",
+    "Schedule",
     "ServiceCertificate",
     "ServiceFields",
     "ServiceIdVariables",
@@ -517,5 +537,4 @@ __all__ = [
     "ServiceValue",
     "SettingChoice",
     "SettingChoiceNeeding",
-    "WiringContest",
 ]

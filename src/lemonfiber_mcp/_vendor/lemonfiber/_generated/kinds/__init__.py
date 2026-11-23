@@ -18,6 +18,7 @@ from . import bandwidth as _bandwidth
 from . import beside as _beside
 from . import boot as _boot
 from . import bundle as _bundle
+from . import caller as _caller
 from . import capabilities as _capabilities
 from . import catalogue as _catalogue
 from . import certificate as _certificate
@@ -43,12 +44,14 @@ from . import history as _history
 from . import hosting as _hosting
 from . import household as _household
 from . import import_ as _import_
+from . import in_flight as _in_flight
 from . import invitation as _invitation
 from . import job as _job
 from . import key_claim as _key_claim
 from . import keys as _keys
 from . import lifecycle as _lifecycle
 from . import log as _log
+from . import logs as _logs
 from . import migration as _migration
 from . import minted_key as _minted_key
 from . import music as _music
@@ -59,9 +62,11 @@ from . import notify_mine as _notify_mine
 from . import outbound as _outbound
 from . import pairing as _pairing
 from . import part_way as _part_way
+from . import password as _password
 from . import pausing as _pausing
 from . import play as _play
 from . import playing as _playing
+from . import plugin_catalogue as _plugin_catalogue
 from . import plugin_claims as _plugin_claims
 from . import plugin_conformance as _plugin_conformance
 from . import plugin_provenance as _plugin_provenance
@@ -74,6 +79,7 @@ from . import push_endpoint as _push_endpoint
 from . import push_endpoints as _push_endpoints
 from . import quality as _quality
 from . import queue as _queue
+from . import ran as _ran
 from . import removal as _removal
 from . import repair as _repair
 from . import replacement as _replacement
@@ -81,11 +87,14 @@ from . import reset as _reset
 from . import restore as _restore
 from . import seed as _seed
 from . import self_update as _self_update
+from . import served as _served
 from . import settings as _settings
 from . import settled as _settled
 from . import setup as _setup
+from . import sign_in_code as _sign_in_code
 from . import space as _space
 from . import stack as _stack
+from . import standing as _standing
 from . import start as _start
 from . import status as _status
 from . import step as _step
@@ -102,6 +111,7 @@ from . import update as _update
 from . import upgrade as _upgrade
 from . import version as _version
 from . import walkthrough as _walkthrough
+from . import walkthrough_offer as _walkthrough_offer
 from . import watch as _watch
 from . import watched as _watched
 from . import watcher as _watcher
@@ -122,6 +132,7 @@ from .bandwidth import *
 from .beside import *
 from .boot import *
 from .bundle import *
+from .caller import *
 from .capabilities import *
 from .catalogue import *
 from .certificate import *
@@ -147,12 +158,14 @@ from .history import *
 from .hosting import *
 from .household import *
 from .import_ import *
+from .in_flight import *
 from .invitation import *
 from .job import *
 from .key_claim import *
 from .keys import *
 from .lifecycle import *
 from .log import *
+from .logs import *
 from .migration import *
 from .minted_key import *
 from .music import *
@@ -163,9 +176,11 @@ from .notify_mine import *
 from .outbound import *
 from .pairing import *
 from .part_way import *
+from .password import *
 from .pausing import *
 from .play import *
 from .playing import *
+from .plugin_catalogue import *
 from .plugin_claims import *
 from .plugin_conformance import *
 from .plugin_provenance import *
@@ -178,6 +193,7 @@ from .push_endpoint import *
 from .push_endpoints import *
 from .quality import *
 from .queue import *
+from .ran import *
 from .removal import *
 from .repair import *
 from .replacement import *
@@ -185,11 +201,14 @@ from .reset import *
 from .restore import *
 from .seed import *
 from .self_update import *
+from .served import *
 from .settings import *
 from .settled import *
 from .setup import *
+from .sign_in_code import *
 from .space import *
 from .stack import *
+from .standing import *
 from .start import *
 from .status import *
 from .step import *
@@ -206,6 +225,7 @@ from .update import *
 from .upgrade import *
 from .version import *
 from .walkthrough import *
+from .walkthrough_offer import *
 from .watch import *
 from .watched import *
 from .watcher import *
@@ -227,6 +247,7 @@ __all__ += _bandwidth.__all__
 __all__ += _beside.__all__
 __all__ += _boot.__all__
 __all__ += _bundle.__all__
+__all__ += _caller.__all__
 __all__ += _capabilities.__all__
 __all__ += _catalogue.__all__
 __all__ += _certificate.__all__
@@ -252,12 +273,14 @@ __all__ += _history.__all__
 __all__ += _hosting.__all__
 __all__ += _household.__all__
 __all__ += _import_.__all__
+__all__ += _in_flight.__all__
 __all__ += _invitation.__all__
 __all__ += _job.__all__
 __all__ += _key_claim.__all__
 __all__ += _keys.__all__
 __all__ += _lifecycle.__all__
 __all__ += _log.__all__
+__all__ += _logs.__all__
 __all__ += _migration.__all__
 __all__ += _minted_key.__all__
 __all__ += _music.__all__
@@ -268,9 +291,11 @@ __all__ += _notify_mine.__all__
 __all__ += _outbound.__all__
 __all__ += _pairing.__all__
 __all__ += _part_way.__all__
+__all__ += _password.__all__
 __all__ += _pausing.__all__
 __all__ += _play.__all__
 __all__ += _playing.__all__
+__all__ += _plugin_catalogue.__all__
 __all__ += _plugin_claims.__all__
 __all__ += _plugin_conformance.__all__
 __all__ += _plugin_provenance.__all__
@@ -283,6 +308,7 @@ __all__ += _push_endpoint.__all__
 __all__ += _push_endpoints.__all__
 __all__ += _quality.__all__
 __all__ += _queue.__all__
+__all__ += _ran.__all__
 __all__ += _removal.__all__
 __all__ += _repair.__all__
 __all__ += _replacement.__all__
@@ -290,11 +316,14 @@ __all__ += _reset.__all__
 __all__ += _restore.__all__
 __all__ += _seed.__all__
 __all__ += _self_update.__all__
+__all__ += _served.__all__
 __all__ += _settings.__all__
 __all__ += _settled.__all__
 __all__ += _setup.__all__
+__all__ += _sign_in_code.__all__
 __all__ += _space.__all__
 __all__ += _stack.__all__
+__all__ += _standing.__all__
 __all__ += _start.__all__
 __all__ += _status.__all__
 __all__ += _step.__all__
@@ -311,6 +340,7 @@ __all__ += _update.__all__
 __all__ += _upgrade.__all__
 __all__ += _version.__all__
 __all__ += _walkthrough.__all__
+__all__ += _walkthrough_offer.__all__
 __all__ += _watch.__all__
 __all__ += _watched.__all__
 __all__ += _watcher.__all__

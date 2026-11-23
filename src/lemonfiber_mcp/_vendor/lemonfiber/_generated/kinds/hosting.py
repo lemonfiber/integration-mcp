@@ -91,7 +91,7 @@ class HostingReport(typing.TypedDict):
     """
 
 
-type Manager = typing.Literal["launchd", "systemd", "unsupported"]
+type Manager = typing.Literal["launchd", "systemd", "task-scheduler", "unsupported"]
 """The service manager a machine has, or the absence of one lemonfiber configures.
 
 The absence is the default, because a machine nobody has told is a machine

@@ -62,6 +62,8 @@ class DoctorVerdictFail(typing.TypedDict):
     outcome: typing.Literal["fail"]
     remedies: list[Remedy]
     """What to do, most likely first."""
+    retry_after: typing.NotRequired[int | None]
+    """How many whole seconds to wait before asking again, where the refusal says."""
     severity: ProblemSeverity
     """How much it matters."""
     state: ProblemState
@@ -117,6 +119,8 @@ class DoctorVerdictWarn(typing.TypedDict):
     outcome: typing.Literal["warn"]
     remedies: list[Remedy]
     """What to do, most likely first."""
+    retry_after: typing.NotRequired[int | None]
+    """How many whole seconds to wait before asking again, where the refusal says."""
     severity: ProblemSeverity
     """How much it matters."""
     state: ProblemState

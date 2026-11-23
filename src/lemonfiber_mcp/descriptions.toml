@@ -268,6 +268,18 @@ to = "A version to read moving to, in place of the newest."
 [read_plugins]
 operator = "The plugins installed on this stack, what each declared and what it may reach."
 
+[read_plugins_catalogue]
+operator = "What the plugin catalogue offers: every plugin its verified index lists, when that index was published, or why it was not read or is switched off. Installs nothing."
+
+[read_in_flight]
+operator = "Each download still coming down that stopping would interrupt, with its protocol, its name and how far it has got. Ask this before stopping anything. It stops nothing."
+[read_in_flight.parameters]
+forms = "Forms a stop would take down, by name. Leave out, with services, for the whole stack."
+services = "Services a stop would take down, by name. Leave out, with forms, for the whole stack."
+
+[read_served]
+operator = "How this run serves its surface: the port, whether it is offered to the network or to this machine alone, and the certificate it presents where it is encrypted. Never a key."
+
 [read_wiring]
 operator = "What this stack wires to what: each capability a service asks for, what provides it, and how that was settled."
 

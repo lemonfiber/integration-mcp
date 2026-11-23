@@ -85,6 +85,8 @@ type SeedState = (
     | SeedStateUnmanaged
     | SeedStateWouldWire
     | SeedStateWouldAdopt
+    | SeedStateTakenBack
+    | SeedStateWouldTakeBack
     | SeedStateObserved
     | SeedStateUnmatched
     | SeedStateSkipped
@@ -210,6 +212,14 @@ class SeedStateStale(typing.TypedDict):
     state: typing.Literal["stale"]
 
 
+class SeedStateTakenBack(typing.TypedDict):
+    """A download client lemonfiber created in a curator, taken back out of it because
+    nothing here answers where it points any more.
+    """
+
+    state: typing.Literal["taken-back"]
+
+
 class SeedStateUnmanaged(typing.TypedDict):
     """A value the service already held that lemonfiber never wrote — the operator's
     own, pre-existing. Adopted as the baseline this run rather than reported as
@@ -253,6 +263,12 @@ class SeedStateWouldAdopt(typing.TypedDict):
     """
 
     state: typing.Literal["would-adopt"]
+
+
+class SeedStateWouldTakeBack(typing.TypedDict):
+    """A download client a real run would take back, and this one did not."""
+
+    state: typing.Literal["would-take-back"]
 
 
 class SeedStateWouldWire(typing.TypedDict):
@@ -320,10 +336,12 @@ __all__ = [
     "SeedStateRestarted",
     "SeedStateSkipped",
     "SeedStateStale",
+    "SeedStateTakenBack",
     "SeedStateUnmanaged",
     "SeedStateUnmatched",
     "SeedStateWired",
     "SeedStateWouldAdopt",
+    "SeedStateWouldTakeBack",
     "SeedStateWouldWire",
     "Wiring",
 ]

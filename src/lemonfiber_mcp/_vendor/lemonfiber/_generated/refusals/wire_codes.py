@@ -39,5 +39,10 @@ WIRE: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
         400,
         "Raised where the service chosen already fills the capability, so there is nothing to change.",
     ),
+    "WIRE-8": ListedRefusal(
+        "VPN_DECLINED",
+        409,
+        "Raised where a choice names what fills the egress guard while torrents run without a VPN.",
+    ),
 }
 """What the contract says of each `WIRE` code."""

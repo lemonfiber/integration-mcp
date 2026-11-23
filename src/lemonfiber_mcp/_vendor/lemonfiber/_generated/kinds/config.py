@@ -44,6 +44,10 @@ class ConfigReport(typing.TypedDict):
     landed, since the moment before it happens is the moment it is worth reading.
     Absent for a read, and for a change to a setting nobody catalogued a cost for.
     """
+    decisions: list[DecisionReport]
+    """Every answer setup writes, in the catalogue's order, whether or not anything holds
+    it. Never a value: a value is read where it is held, withheld there as it is.
+    """
     rehearsed: bool
     """Whether this was a rehearsal, so a change that `changed` reports was one
     that *would* be made rather than one that was.
@@ -55,10 +59,78 @@ class ConfigReport(typing.TypedDict):
     """
     settings: list[SettingReport]
     """The settings asked about — one for a lookup, all of them for a listing."""
+    unmanaged: list[UnmanagedReport]
+    """Each area the operator declared unmanaged, in the order written, with what it
+    covers now. Empty where nothing is declared. An area and a reason are the
+    operator's own text, to be shown as plain text.
+    """
+    unmanaged_more: int
+    """How many declared areas `unmanaged` leaves out for being too many."""
 
 
 type Cost = typing.Literal["cheap", "consequential"]
 """What changing a decision costs."""
+
+
+type CoveredKind = typing.Literal["service", "path", "setting"]
+"""What a thing a declaration covers is, read off where it was found.
+
+Never off its name, since a stack may name a service `config`: one area can cover a
+service, a file and a setting at once, each listed as what it is.
+"""
+
+
+class CoveredReport(typing.TypedDict):
+    """One thing a declaration covers."""
+
+    kind: CoveredKind
+    """What it is."""
+    name: str
+    """Its name: a service's id, a file's place in the stack or the project, or a
+    setting's key.
+    """
+
+
+type DecisionKey = typing.Literal[
+    "DATA_ROOT",
+    "MEDIA_SERVER_MODE",
+    "LEMONFIBER_USENET",
+    "LEMONFIBER_TORRENT",
+    "LEMONFIBER_VPN",
+    "PUID",
+    "PGID",
+    "VPN_PROVIDER",
+    "INDEXER_URL",
+    "INDEXER_APIKEY",
+    "USENET_HOST",
+    "USENET_PORT",
+    "USENET_USER",
+    "USENET_PASS",
+    "USENET_TLS",
+    "LEMONFIBER_FRONT_DOOR",
+    "TZ",
+    "LEMONFIBER_LOCALE",
+]
+"""The setting an answer setup writes is held in."""
+
+
+class DecisionReport(typing.TypedDict):
+    """One answer setup writes, as it can be changed afterwards."""
+
+    affects: str
+    """What changing it affects, in the core's words."""
+    cost: Cost
+    """What changing it costs."""
+    credential: bool
+    """Whether its value is withheld as a credential."""
+    held: bool
+    """Whether the answer is held, in the configuration or the settings store."""
+    key: DecisionKey
+    """The setting the answer is kept in."""
+    setting: typing.NotRequired[str | None]
+    """The name `settings set` takes, where the settings store keeps the answer. Absent
+    where `config set` takes it.
+    """
 
 
 class Edited(typing.TypedDict):
@@ -170,6 +242,25 @@ class Review(typing.TypedDict):
     """Where the proposal stands."""
 
 
+class UnmanagedReport(typing.TypedDict):
+    """One area the operator declared unmanaged, as it covers things now."""
+
+    area: str
+    """The area as written, a control or layout character written as its bytes in hex."""
+    area_cut: bool
+    """Whether `area` was cut short."""
+    covers: list[CoveredReport]
+    """Each thing the area covers now, in the order the stack holds them. Empty where it
+    covers nothing.
+    """
+    covers_more: int
+    """How many covered things `covers` leaves out for being too many."""
+    why: str
+    """The reason the operator gave, written as `area` is."""
+    why_cut: bool
+    """Whether `why` was cut short."""
+
+
 ConfigChange = typing.TypedDict(
     "ConfigChange",
     {
@@ -194,9 +285,14 @@ __all__ = [
     "ConfigEnvelope",
     "ConfigReport",
     "Cost",
+    "CoveredKind",
+    "CoveredReport",
+    "DecisionKey",
+    "DecisionReport",
     "Edited",
     "Findings",
     "LibraryPath",
     "Opening",
     "Review",
+    "UnmanagedReport",
 ]

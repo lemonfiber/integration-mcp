@@ -8,10 +8,7 @@ and CI fails on any difference.
 import typing
 
 from ..shared.protocols import Protocols
-
-
-type SetUp = typing.Literal["none", "part-way", "done"]
-"""Whether this stack is set up."""
+from ..shared.set_up import SetUp
 
 
 class SettledEnvelope(typing.TypedDict):
@@ -58,7 +55,6 @@ ServiceUser = typing.TypedDict(
 
 __all__ = [
     "ServiceUser",
-    "SetUp",
     "SettledEnvelope",
     "SettledReport",
     "UserFrom",

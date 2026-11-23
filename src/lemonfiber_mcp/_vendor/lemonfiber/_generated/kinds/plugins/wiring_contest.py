@@ -15,13 +15,12 @@ from .expected import (
     PluginPlaceholder,
     PluginRecipeRan,
 )
-from .plugin_reached_proxied import (
+from .plugin_reached_loopback import (
     PluginInstalled,
     PluginProving,
     PluginSharing,
     PluginTaking,
     PluginVerification,
-    WiringContest,
 )
 from ...shared.action import UndoReversal
 from ...shared.instant import Instant
@@ -401,6 +400,19 @@ class PluginsEnvelope(typing.TypedDict):
     kind: typing.Literal["plugins"]
 
 
+class WiringContest(typing.TypedDict):
+    """An ask several services claim and nothing has chosen between, so it reaches
+    nothing.
+    """
+
+    by: str
+    """The service that asked."""
+    capability: str
+    """What it asked for."""
+    claimants: list[str]
+    """Every claimant, named — a plugin's with the plugin beside it."""
+
+
 PluginSource = typing.TypedDict(
     "PluginSource",
     {
@@ -455,4 +467,5 @@ __all__ = [
     "PluginUnfilled",
     "PluginUpdate",
     "PluginsEnvelope",
+    "WiringContest",
 ]

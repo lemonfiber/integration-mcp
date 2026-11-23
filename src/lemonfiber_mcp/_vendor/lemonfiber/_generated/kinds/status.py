@@ -9,6 +9,7 @@ import typing
 
 from ..shared.condition import Condition
 from ..shared.filtered import Filtered
+from ..shared.run_health import ScheduledService
 from ..shared.service import Service, ServiceState
 from ..shared.waiting import Waiting
 
@@ -99,6 +100,12 @@ class StatusReport(typing.TypedDict):
     """
     forms: list[str]
     """The forms asked about; empty means the whole stack was."""
+    scheduled: list[ScheduledService]
+    """Each run-and-exit service, with how its last run ended.
+
+    Apart from the services, which are kept running: one of these has a container
+    only while a run of it is going, and its health is the exit of its last run.
+    """
     services: list[Service]
     """Each service, worst first.
 

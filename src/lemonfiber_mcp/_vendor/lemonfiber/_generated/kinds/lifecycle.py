@@ -9,7 +9,7 @@ import typing
 
 from ..shared.condition import Condition
 from ..shared.conflict_report import ConflictReport
-from ..shared.dropped import Plan
+from ..shared.dropped import Plan, UpInstallOffered
 from ..shared.forwarded import Forwarded
 from ..shared.move_offered import MoveOffered
 from ..shared.service import Service
@@ -76,6 +76,16 @@ class LifecycleReport(typing.TypedDict):
     moves: typing.NotRequired[list[MoveOffered]]
     """Each part this release installs as a plugin that the stack still runs as its own
     service: a move in place on offer, named by every start and taken by none.
+    """
+    networks_created: typing.NotRequired[list[str]]
+    """Every network of the project the engine held none of, by the engine's name: created
+    before a start, or named and left uncreated by a rehearsal. Empty for every other
+    action.
+    """
+    networks_recreated: typing.NotRequired[list[str]]
+    """Every network of the project the engine held in another shape than the project
+    gives it, by the engine's name: taken away and created again before a start, with
+    every service on it, or named and left by a rehearsal. Empty for every other action.
     """
     offer: typing.NotRequired[str | None]
     """The offer a restart answers: the services it would restart, named so that a
@@ -187,22 +197,8 @@ class Switched(typing.TypedDict):
     """Stopped, because the new closure does not hold them."""
 
 
-class UpInstallOffered(typing.TypedDict):
-    """An install of a part the bundle installs that a start offers, by the plugin and the
-    offer its install reads as.
-    """
-
-    offer: typing.NotRequired[str | None]
-    """The name its install's offer goes by, where it could be read."""
-    plugin: str
-    """The plugin the bundle installs, in place of the stack's own service of its id."""
-    why: typing.NotRequired[str | None]
-    """Why its install could not be read, where it could not."""
-
-
 __all__ = [
     "LifecycleEnvelope",
     "LifecycleReport",
     "Switched",
-    "UpInstallOffered",
 ]

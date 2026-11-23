@@ -1,7 +1,7 @@
 # Copyright (c) 2026 NightWorksIO
 """Every tool the server offers, as the contract describes it.
 
-Generated from the contract lemonfiber bfad4d1b0b66204836fc9a2f8aad73e9337b312d published, vendored in `contract/web-api/`.
+Generated from the contract lemonfiber 95fe562fea8f5cf3bb75030149ca0ce3246c9fab published, vendored in `contract/web-api/`.
 Do not edit: `just generate` rewrites it, and CI fails on any difference.
 """
 
@@ -12,7 +12,7 @@ from lemonfiber_mcp.shapes import Reach, ToolShape
 API_VERSION: Final = 1
 """The `api_version` the tools were generated for."""
 
-CONTRACT: Final = 'bfad4d1b0b66204836fc9a2f8aad73e9337b312d'
+CONTRACT: Final = '95fe562fea8f5cf3bb75030149ca0ce3246c9fab'
 """The lemonfiber revision whose contract the tools were generated from."""
 
 TOOLS: Final[tuple[ToolShape, ...]] = (
@@ -263,6 +263,33 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
         parameters=(),
         input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
         resource='lemonfiber://read/settled',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_in_flight',
+        reach=Reach.READ,
+        target='in-flight',
+        capability='/api/in-flight',
+        parameters=('forms', 'services'),
+        input_schema={'type': 'object',
+                      'properties': {'forms': {'type': 'array', 'items': {'type': 'string'}},
+                                     'services': {'type': 'array', 'items': {'type': 'string'}}},
+                      'additionalProperties': False},
+        resource='lemonfiber://read/in-flight{?forms*,services*}',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_served',
+        reach=Reach.READ,
+        target='served',
+        capability='/api/served',
+        parameters=(),
+        input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
+        resource='lemonfiber://read/served',
         read_only=True,
         destructive=False,
         idempotent=True,
@@ -579,6 +606,18 @@ TOOLS: Final[tuple[ToolShape, ...]] = (
         parameters=(),
         input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
         resource='lemonfiber://read/plugins',
+        read_only=True,
+        destructive=False,
+        idempotent=True,
+    ),
+    ToolShape(
+        name='read_plugins_catalogue',
+        reach=Reach.READ,
+        target='plugins/catalogue',
+        capability='/api/plugins/catalogue',
+        parameters=(),
+        input_schema={'type': 'object', 'properties': {}, 'additionalProperties': False},
+        resource='lemonfiber://read/plugins/catalogue',
         read_only=True,
         destructive=False,
         idempotent=True,

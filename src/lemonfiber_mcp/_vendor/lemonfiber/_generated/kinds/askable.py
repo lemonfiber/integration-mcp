@@ -18,6 +18,10 @@ class Askable(typing.TypedDict):
     """Its artist or author, where it is music or books and one is known."""
     cover: typing.NotRequired[str | None]
     """Where its cover is published, where it is music or books and has one."""
+    found: typing.NotRequired[str | None]
+    """The token vouching that this member's search offered it, for their ask to hand
+    back, where the core could sign one.
+    """
     id: str
     """The id it is asked for by."""
     kind: TitleKind

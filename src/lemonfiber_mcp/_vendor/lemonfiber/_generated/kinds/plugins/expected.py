@@ -105,6 +105,17 @@ class PluginAsking(typing.TypedDict):
     """
 
 
+class PluginBuiltOn(typing.TypedDict):
+    """The upstream image a service's image is built on, and the release of it the build
+    started from.
+    """
+
+    image: str
+    """The upstream image's registry path as the build names it, without tag or digest."""
+    release: str
+    """The upstream's release the build started from, as that image tags it."""
+
+
 class PluginChange(typing.TypedDict):
     """One change installing a plugin makes to the machine.
 
@@ -276,16 +287,6 @@ class PluginReachedHousehold(typing.TypedDict):
     tier: typing.Literal["household"]
 
 
-class PluginReachedLoopback(typing.TypedDict):
-    """From this machine and nowhere else. No route, and no label to route to."""
-
-    group: typing.NotRequired[str | None]
-    """The group on the bundled dashboard, where the manifest named one."""
-    port: int
-    """The port the service listens on."""
-    tier: typing.Literal["loopback"]
-
-
 class PluginRecipe(typing.TypedDict):
     """One recipe, as an operator agrees to what it does."""
 
@@ -340,25 +341,29 @@ class PluginRecipeRan(typing.TypedDict):
 class PluginRequest(typing.TypedDict):
     """What is asked, and where.
 
-    Three fields and no more, and the third is the one worth explaining. A service that
-    answers XML unless a caller asks for JSON cannot satisfy a capability whose probe
-    requires a JSON assertion, and until this field there was nowhere to ask: Plex
-    answers `text/xml` at every path, including the one its health probe uses, unless
-    the request carries `Accept: application/json`.
+    A method, a path and one media type, and on a plugin's own proof the headers it names
+    from [`NAMED_HEADERS`]. A service that answers XML unless a caller asks for JSON cannot
+    satisfy a capability whose probe requires a JSON assertion, so `accept` asks for one
+    representation: Plex answers `text/xml` at every path unless the request carries
+    `Accept: application/json`.
 
-    **It is one media type and not a header map, and the difference is the point.** A
-    probe declares who it is asked as, and `none` on every `guarded` probe has meant what
-    it says partly because nothing could be presented. A map of headers would make that a
-    convention a reviewer has to hold — any service may name its credential header
-    whatever it likes, so no list of refused names could ever be closed — where one named
-    field keeps it a property of the format. A probe still cannot present anything,
-    because there is nowhere to write it.
+    **The headers a proof may send are a closed list, and the difference is the point.**
+    A probe declares who it is asked as, and `none` on every `guarded` probe means what it
+    says because nothing can be presented. A service may name its credential header
+    whatever it likes, so no list of refused names could ever be closed; a list of allowed
+    names is, each a header the core has read as carrying no credential. A claim probe and
+    a contributed check carry none, and a value shaped like a secret is refused.
     """
 
     accept: typing.NotRequired[str | None]
     """The one representation the answer is asked for, as a media type.
 
     Absent where the service needs no asking, which is most of them.
+    """
+    headers: typing.NotRequired[dict[str, str]]
+    """Each header a proof sends, by its name, to its value: a name from the closed list
+    the core holds, `Target-URL` alone, and a value shaped like no secret. A proof
+    alone may carry any.
     """
     method: str
     """The HTTP method."""
@@ -516,6 +521,7 @@ __all__ = [
     "Expected",
     "ExpectedKind",
     "PluginAsking",
+    "PluginBuiltOn",
     "PluginChange",
     "PluginChangedCheck",
     "PluginDeclaration",
@@ -529,7 +535,6 @@ __all__ = [
     "PluginPlaceholderForm",
     "PluginPuts",
     "PluginReachedHousehold",
-    "PluginReachedLoopback",
     "PluginRecipe",
     "PluginRecipeInput",
     "PluginRecipeOn",

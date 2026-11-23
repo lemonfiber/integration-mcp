@@ -27,6 +27,29 @@ ADMIT: typing.Final[typing.Mapping[RefusalCode, ListedRefusal]] = {
         400,
         "Raised when the password chosen at a claim is shorter than the least this takes.",
     ),
+    "ADMIT-15": ListedRefusal(
+        "CODE_NOT_WAITING",
+        401,
+        "Raised when a sign-in by a code names a handle that waits on nothing for this caller.",
+    ),
+    "ADMIT-16": ListedRefusal(
+        "TOO_MANY_CODES", 429, "Raised when one source has asked for as many codes to sign in by as it may."
+    ),
+    "ADMIT-17": ListedRefusal(
+        "SIGNS_IN_BY_PASSWORD",
+        409,
+        "Raised when a code to sign in by is asked of a household whose members sign in with a password.",
+    ),
+    "ADMIT-18": ListedRefusal(
+        "NOT_A_CODE_REQUEST",
+        400,
+        "Raised when what was sent to ask for or finish a sign-in by a code cannot be read.",
+    ),
+    "ADMIT-19": ListedRefusal(
+        "NO_SESSION",
+        500,
+        "Raised when this machine would not supply the bytes a session's secret is made of.",
+    ),
     "ADMIT-4": ListedRefusal(
         "NOT_ADMITTED", 403, "Raised when a request carried no token, session or key this run admits."
     ),
