@@ -131,7 +131,7 @@ async def test_a_key_that_cannot_be_written_is_said_to_be_lost(stack: Stack, tmp
     with pytest.raises(settings.SettingsError) as refused:
         await cli.collected_key(environment)
     assert str(refused.value) == (
-        "LEMONFIBER_KEY_FILE names a file that could not be written; the key it would have held is lost."
+        "LEMONFIBER_KEY_FILE names a file that could not be written; the key it was to hold is lost."
     )
 
 
