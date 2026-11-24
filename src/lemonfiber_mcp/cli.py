@@ -251,9 +251,7 @@ async def collected_key(environment: Mapping[str, str]) -> str:
     try:
         state.write(path, f"{key['secret']}\n".encode())
     except OSError:
-        msg = (
-            f"{settings.KEY_FILE} names a file that could not be written; the key it would have held is lost."
-        )
+        msg = f"{settings.KEY_FILE} names a file that could not be written; the key it was to hold is lost."
         raise settings.SettingsError(msg) from None
     address = key.get("address") or link.address.base
     pin = key.get("pin") or link.pin.hex
