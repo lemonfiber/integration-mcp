@@ -375,6 +375,6 @@ def test_a_missing_contract_is_refused(root: pathlib.Path, capsys: pytest.Captur
 
 def test_the_generator_spells_what_the_server_reads_as_the_server_does() -> None:
     assert generate_tools.OFFER == stack.OFFER
-    assert f"{catalogue.SCHEME}://" == generate_tools.SCHEME
+    assert generate_tools.SCHEME.partition("://") == (catalogue.SCHEME, "://", "")
     assert generate_tools.PLACEHOLDER.pattern == stack.PLACED.pattern
     assert generate_tools.LOGS == LOGS

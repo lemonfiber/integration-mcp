@@ -96,8 +96,9 @@ async def test_a_claim_the_stack_turns_away_says_why_in_its_words_and_writes_not
 ) -> None:
     stack.reply("/api/keys/claim", Reply(401, problem("KEY-12", "That claim collects no key.")))
     file = tmp_path / "assistant.key"
+    environment = asked(link(stack.url, stack.pin), file)
     with pytest.raises(settings.SettingsError) as refused:
-        await cli.collected_key(asked(link(stack.url, stack.pin), file))
+        await cli.collected_key(environment)
     assert str(refused.value) == (
         "The stack collected no key with LEMONFIBER_KEY_LINK: That claim collects no key. "
         "Mint the key as a claim again."
@@ -111,8 +112,9 @@ async def test_a_claim_goes_nowhere_but_the_certificate_the_link_pins(
     tmp_path: pathlib.Path,
 ) -> None:
     file = tmp_path / "assistant.key"
+    environment = asked(link(stack.url, OTHER_PIN), file)
     with pytest.raises(settings.SettingsError) as refused:
-        await cli.collected_key(asked(link(stack.url, OTHER_PIN), file))
+        await cli.collected_key(environment)
     assert str(refused.value).startswith(
         "The key could not be collected: The stack's certificate is not the one",
     )
@@ -125,8 +127,9 @@ async def test_a_key_that_cannot_be_written_is_said_to_be_lost(stack: Stack, tmp
     stack.reply("/api/keys/claim", Reply(body=minted(stack)))
     blocked = tmp_path / "taken"
     blocked.write_text("")
+    environment = asked(link(stack.url, stack.pin), blocked / "assistant.key")
     with pytest.raises(settings.SettingsError) as refused:
-        await cli.collected_key(asked(link(stack.url, stack.pin), blocked / "assistant.key"))
+        await cli.collected_key(environment)
     assert str(refused.value) == (
         "LEMONFIBER_KEY_FILE names a file that could not be written; the key it would have held is lost."
     )

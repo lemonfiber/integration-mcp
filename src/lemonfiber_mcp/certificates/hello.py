@@ -111,7 +111,7 @@ def read(data: bytes) -> Hello | Incomplete:
         return INCOMPLETE
     try:
         return hello(Reader(record.take(length)))
-    except ValueError, UnicodeDecodeError:
+    except ValueError:
         return NOTHING_ASKED
 
 

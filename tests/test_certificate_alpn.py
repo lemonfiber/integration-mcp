@@ -123,8 +123,9 @@ def test_every_other_connection_is_shown_the_server_certificate(tmp_path: pathli
     served = served_context(tmp_path, pending)
     browsing = shaken(served, validator([alpn.HTTP_1_1]), NAME)
     assert browsing.selected_alpn_protocol() == alpn.HTTP_1_1
+    shown = presented(browsing).extensions
     with pytest.raises(x509.ExtensionNotFound):
-        presented(browsing).extensions.get_extension_for_oid(alpn.ACME_IDENTIFIER)
-    elsewhere = shaken(served, validator([alpn.ACME_TLS]), "other.example")
+        shown.get_extension_for_oid(alpn.ACME_IDENTIFIER)
+    elsewhere = presented(shaken(served, validator([alpn.ACME_TLS]), "other.example")).extensions
     with pytest.raises(x509.ExtensionNotFound):
-        presented(elsewhere).extensions.get_extension_for_oid(alpn.ACME_IDENTIFIER)
+        elsewhere.get_extension_for_oid(alpn.ACME_IDENTIFIER)

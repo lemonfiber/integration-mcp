@@ -27,7 +27,7 @@ stop() {
 	docker network rm "${NETWORK}" >/dev/null 2>&1 || true
 }
 
-if [ "${1:-}" = stop ]; then
+if [[ "${1:-}" = stop ]]; then
 	stop
 	exit 0
 fi
@@ -37,7 +37,7 @@ chmod 0700 "${HELD}"
 
 # Where a container reaches this machine: itself, on Linux's host network, and
 # Docker Desktop's gateway elsewhere.
-if [ "$(uname -s)" = Linux ]; then
+if [[ "$(uname -s)" = Linux ]]; then
 	placed=(--network host)
 	host_ip=127.0.0.1
 	dns=127.0.0.1:8053
@@ -73,7 +73,7 @@ docker run -d --name lemonfiber-mcp-challtestsrv "${placed[@]}" -p 8055:8055 -p 
 	-defaultIPv4 "${host_ip}" -defaultIPv6 "" -http01 "" -https01 "" -tlsalpn01 "" >/dev/null
 for name in pebble pebble-eab; do
 	port=14000
-	[ "${name}" = pebble-eab ] && port=14001
+	[[ "${name}" = pebble-eab ]] && port=14001
 	docker run -d --name "lemonfiber-mcp-${name}" "${placed[@]}" -p "${port}:${port}" \
 		-e PEBBLE_VA_NOSLEEP=1 -e PEBBLE_WFE_NONCEREJECT=0 \
 		-v "${HELD}/${name}.json:/config.json:ro" "${PEBBLE}" -config /config.json -dnsserver "${dns}" >/dev/null
