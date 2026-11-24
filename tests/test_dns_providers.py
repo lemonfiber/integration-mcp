@@ -587,8 +587,9 @@ def test_a_name_in_no_zone_the_provider_holds_is_refused(
     with HttpStandIn(answer) as api:
         for module in (cloudflare, digitalocean, hetzner, desec):
             monkeypatch.setattr(module, "ENDPOINT", api.url)
+        provider = made()
         with pytest.raises(ProviderError, match="holds no"):
-            made().present(NAME, VALUE)
+            provider.present(NAME, VALUE)
 
 
 SIGN_IN: Final = "sign-in"
@@ -673,15 +674,17 @@ def test_a_refusal_names_the_api_the_status_and_the_path_and_never_the_credentia
             monkeypatch.setattr(module, "ENDPOINT", api.url)
         monkeypatch.setattr(azuredns, "LOGIN", api.url)
         monkeypatch.setattr(azuredns, "MANAGEMENT", api.url)
+        provider = made(api.url)
         with pytest.raises(ProviderError) as refused:
-            made(api.url).present(name, VALUE)
+            provider.present(name, VALUE)
     assert str(refused.value) == said
 
 
 def test_an_api_that_cannot_be_reached_says_so(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(cloudflare, "ENDPOINT", "http://127.0.0.1:9")
+    provider = cloudflare.Cloudflare(CREDENTIAL)
     with pytest.raises(ProviderError, match="could not be reached: ConnectionError"):
-        cloudflare.Cloudflare(CREDENTIAL).present(NAME, VALUE)
+        provider.present(NAME, VALUE)
 
 
 def test_an_access_token_is_asked_for_again_five_minutes_before_it_ends(
@@ -737,8 +740,10 @@ def test_an_api_that_does_not_answer_in_time_is_refused(monkeypatch: pytest.Monk
         return answered(200, {})
 
     monkeypatch.setattr(api_module, "TIMEOUT_SECONDS", 0.1)
-    with HttpStandIn(slow) as api, pytest.raises(ProviderError, match="could not be reached: ReadTimeout"):
-        Api("Stand-in", api.url).send(HTTPMethod.GET, "/anything")
+    with HttpStandIn(slow) as stand_in:
+        api = Api("Stand-in", stand_in.url)
+        with pytest.raises(ProviderError, match="could not be reached: ReadTimeout"):
+            api.send(HTTPMethod.GET, "/anything")
 
 
 @pytest.mark.parametrize(

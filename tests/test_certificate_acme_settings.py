@@ -72,10 +72,12 @@ def test_a_binding_key_file_that_holds_nothing_readable_is_refused(
 ) -> None:
     held = tmp_path / "hmac"
     held.write_bytes(content)
+    binding = Binding("kid-1", held)
     with pytest.raises(TlsSettingsError, match=acme_settings.EAB_HMAC_FILE):
-        Binding("kid-1", held).hmac_key()
+        binding.hmac_key()
 
 
 def test_a_missing_binding_key_file_is_refused(tmp_path: pathlib.Path) -> None:
+    binding = Binding("kid-1", tmp_path / "missing")
     with pytest.raises(TlsSettingsError, match="could not be read"):
-        Binding("kid-1", tmp_path / "missing").hmac_key()
+        binding.hmac_key()

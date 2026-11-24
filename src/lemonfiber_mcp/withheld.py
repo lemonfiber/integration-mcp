@@ -69,7 +69,7 @@ def install(withholding: Withholding) -> logging.Handler:
     handler = logging.StreamHandler()
     handler.setFormatter(WithholdingFormatter(withholding, "%(asctime)s %(levelname)s %(name)s: %(message)s"))
     root = logging.getLogger()
-    for existing in list(root.handlers):
+    for existing in root.handlers.copy():
         root.removeHandler(existing)
     root.addHandler(handler)
     root.setLevel(logging.INFO)

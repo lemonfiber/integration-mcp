@@ -214,8 +214,9 @@ def test_exec_whose_program_does_not_end_in_time_is_refused(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(exec_module, "TIMEOUT_SECONDS", 0.2)
+    provider = Exec(program(tmp_path, "sleep 5"))
     with pytest.raises(ProviderError, match="present failed: TimeoutExpired"):
-        Exec(program(tmp_path, "sleep 5")).present(NAME, VALUE)
+        provider.present(NAME, VALUE)
 
 
 def test_exec_says_when_the_program_fails(tmp_path: pathlib.Path) -> None:
@@ -383,8 +384,9 @@ def test_names_that_cannot_be_looked_up_are_refused() -> None:
     def unconfigured() -> dns.resolver.Resolver:
         raise dns.resolver.NoResolverConfiguration
 
+    answering = Dns01(Recording(), resolver=unconfigured)
     with pytest.raises(CertificateError) as refused:
-        Dns01(Recording(), resolver=unconfigured).where("mcp.home.example")
+        answering.where("mcp.home.example")
     assert str(refused.value) == (
         "Names could not be looked up to answer DNS-01 for mcp.home.example: NoResolverConfiguration."
     )

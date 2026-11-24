@@ -424,9 +424,10 @@ async def test_a_certificate_is_issued_by_dns_01_through_the_operators_program(
     )
     served = await obtained(source, dt.datetime.now(dt.UTC))
     assert making_covered(served) == set(names)
+    resolver = challtestsrv_resolver()
     for name in names:
         with pytest.raises(dns.exception.DNSException):
-            challtestsrv_resolver().resolve(f"_acme-challenge.{name}.", "TXT")
+            resolver.resolve(f"_acme-challenge.{name}.", "TXT")
 
 
 def test_a_directory_that_cannot_be_reached_at_start_leaves_a_certificate_standing_in(

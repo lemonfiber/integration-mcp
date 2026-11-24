@@ -123,12 +123,17 @@ ADDRESSED: Final[tuple[tuple[re.Pattern[str], ToolShape], ...]] = tuple(
 """Every read a resource address names, by what its address matches below the scheme."""
 
 
+def tabled(value: object, what: str) -> dict[str, object]:
+    """Return a TOML table as a mapping, refusing anything else."""
+    if not isinstance(value, dict):
+        msg = f"{what} is not a table"
+        raise TypeError(msg)
+    return cast("dict[str, object]", value)
+
+
 def strings(value: object) -> dict[str, str]:
     """Return a TOML table of strings as a mapping, refusing anything else."""
-    if not isinstance(value, dict):
-        msg = "a parameters table is not a table"
-        raise TypeError(msg)
-    table = cast("dict[str, object]", value)
+    table = tabled(value, "a parameters table")
     if not all(isinstance(text, str) for text in table.values()):
         msg = "a parameter's description is not text"
         raise TypeError(msg)
@@ -139,8 +144,8 @@ def read_words(text: str) -> dict[str, Words]:
     """Return the words written for each tool, as `descriptions.toml` writes them."""
     written: dict[str, Words] = {}
     for name, entry in tomllib.loads(text).items():
-        table = cast("dict[str, object]", entry)
-        household = cast("dict[str, object]", table.get("household", {}))
+        table = tabled(entry, f"the words for {name}")
+        household = tabled(table.get("household", {}), f"the household words for {name}")
         described = household.get("description")
         written[name] = Words(
             operator=str(table["operator"]),

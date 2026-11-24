@@ -27,6 +27,7 @@ from typing import Final, cast
 
 ROOT: Final = pathlib.Path(__file__).resolve().parent.parent
 CONTRACT: Final = pathlib.Path("contract/web-api")
+INDEX: Final = "index.json"
 REVISION: Final = pathlib.Path("contract/VERSION")
 OUTPUT: Final = pathlib.Path("src/lemonfiber_mcp/_generated/tools.py")
 SPOKEN: Final = 1
@@ -84,12 +85,17 @@ def table(value: object, where: pathlib.Path) -> Json:
     return cast("Json", value)
 
 
-def rows(value: object, where: pathlib.Path) -> list[Json]:
-    """Return a JSON list of objects, refusing anything else."""
+def array(value: object, where: pathlib.Path) -> list[object]:
+    """Return a JSON list, refusing anything else."""
     if not isinstance(value, list):
         msg = f"{where} does not hold a list where one is expected."
         raise GenerationError(msg)
-    return [table(row, where) for row in cast("list[object]", value)]
+    return cast("list[object]", value)
+
+
+def rows(value: object, where: pathlib.Path) -> list[Json]:
+    """Return a JSON list of objects, refusing anything else."""
+    return [table(row, where) for row in array(value, where)]
 
 
 def resolved(schema: object, where: pathlib.Path, seen: tuple[pathlib.Path, ...] = ()) -> object:
@@ -162,10 +168,16 @@ def read_shape(entry: Json, where: pathlib.Path) -> Shape:
     if placed:
         schema["required"] = list(placed)
     schema["additionalProperties"] = False
+    if file:
+        reach = "file"
+    elif path == LOGS:
+        reach = "logs"
+    else:
+        reach = "read"
     template = ",".join(f"{row.get('name')}{'*' if row.get('repeatable') is True else ''}" for row in listed)
     return Shape(
         name=read_name(target, file=file),
-        reach="file" if file else "logs" if path == LOGS else "read",
+        reach=reach,
         target=target,
         capability=path,
         parameters=names,
@@ -180,13 +192,13 @@ def read_shape(entry: Json, where: pathlib.Path) -> Shape:
 def action_shapes(entry: Json, contract: pathlib.Path, index: Json) -> list[Shape]:
     """Return the tools an action a key may call becomes: itself, and its rehearsal where it has one."""
     action = str(entry.get("action", ""))
-    actions = table(index.get("actions", {}), contract / "index.json")
+    actions = table(index.get("actions", {}), contract / INDEX)
     if action not in actions:
         msg = f"{action!r} is listed as callable by a key, and the contract publishes no such action."
         raise GenerationError(msg)
     where = contract / str(actions[action])
     published = table(loaded(where), where)
-    consent = {str(name) for name in cast("list[object]", published.get("consent", []))}
+    consent = {str(name) for name in array(published.get("consent", []), where)}
     arguments: list[tuple[str, Json]] = [
         (str(row.get("name")), table(resolved(row.get("type", {}), where), where))
         for row in rows(published.get("arguments", []), where)
@@ -253,7 +265,7 @@ def snake(name: str) -> str:
 def shapes(root: pathlib.Path) -> list[Shape]:
     """Return every tool the vendored contract generates, refusing a contract this generator cannot read."""
     contract = root / CONTRACT
-    index = table(loaded(contract / "index.json"), contract / "index.json")
+    index = table(loaded(contract / INDEX), contract / INDEX)
     spoken = index.get("api_version")
     if spoken != SPOKEN:
         msg = f"the vendored contract speaks api_version {spoken!r}, and this generator implements {SPOKEN}."
@@ -294,22 +306,28 @@ def module(generated: list[Shape], revision: str) -> str:
         "TOOLS: Final[tuple[ToolShape, ...]] = (",
     ]
     for shape in generated:
-        lines.append("    ToolShape(")
-        lines.append(f"        name={shape.name!r},")
-        lines.append(f"        reach=Reach.{shape.reach.upper()},")
-        lines.append(f"        target={shape.target!r},")
-        lines.append(f"        capability={shape.capability!r},")
-        lines.append(f"        parameters={shape.parameters!r},")
         schema = pprint.pformat(shape.input_schema, width=100, sort_dicts=False)
-        lines.append("        input_schema=" + schema.replace("\n", "\n" + " " * 21) + ",")
-        lines.append(f"        resource={shape.resource!r},")
-        lines.append(f"        read_only={shape.read_only!r},")
-        lines.append(f"        destructive={shape.destructive!r},")
-        lines.append(f"        idempotent={shape.idempotent!r},")
-        lines.append("    ),")
-    lines.append(")")
-    lines.append(
-        '"""Each tool, reads first in the order the contract lists them, then the actions a key may call."""',
+        lines.extend(
+            (
+                "    ToolShape(",
+                f"        name={shape.name!r},",
+                f"        reach=Reach.{shape.reach.upper()},",
+                f"        target={shape.target!r},",
+                f"        capability={shape.capability!r},",
+                f"        parameters={shape.parameters!r},",
+                "        input_schema=" + schema.replace("\n", "\n" + " " * 21) + ",",
+                f"        resource={shape.resource!r},",
+                f"        read_only={shape.read_only!r},",
+                f"        destructive={shape.destructive!r},",
+                f"        idempotent={shape.idempotent!r},",
+                "    ),",
+            ),
+        )
+    lines.extend(
+        (
+            ")",
+            '"""Each tool, reads first in the order the contract lists them, then the actions a key may call."""',
+        ),
     )
     return "\n".join(lines) + "\n"
 
