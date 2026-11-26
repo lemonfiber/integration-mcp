@@ -95,6 +95,10 @@ class SettingRead(typing.TypedDict):
 
     choices: typing.NotRequired[list[Choosable] | None]
     """Every value it accepts, where its manifest declares them."""
+    default: typing.NotRequired[str | None]
+    """What the core reads while no value is recorded, for one of the core's own settings
+    that holds anything then; a service's setting has its manifest's on each reader.
+    """
     environment: typing.NotRequired[str | None]
     """The environment file's key it is held under, where it is held there."""
     name: str

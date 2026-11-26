@@ -56,6 +56,7 @@ from . import stage as _stage
 from . import stance as _stance
 from . import term as _term
 from . import title_kind as _title_kind
+from . import tree as _tree
 from . import triggered as _triggered
 from . import unfilled as _unfilled
 from . import unrated as _unrated
@@ -116,6 +117,7 @@ from .stage import *
 from .stance import *
 from .term import *
 from .title_kind import *
+from .tree import *
 from .triggered import *
 from .unfilled import *
 from .unrated import *
@@ -177,6 +179,7 @@ __all__ += _stage.__all__
 __all__ += _stance.__all__
 __all__ += _term.__all__
 __all__ += _title_kind.__all__
+__all__ += _tree.__all__
 __all__ += _triggered.__all__
 __all__ += _unfilled.__all__
 __all__ += _unrated.__all__

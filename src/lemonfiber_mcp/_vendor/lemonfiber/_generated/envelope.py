@@ -28,6 +28,7 @@ from .kinds import (
     ChannelsEnvelope,
     ClientsEnvelope,
     ConfigEnvelope,
+    CopyingEnvelope,
     CredentialsEnvelope,
     DashboardEnvelope,
     DeviceChallengeEnvelope,
@@ -55,12 +56,14 @@ from .kinds import (
     LifecycleEnvelope,
     LogEnvelope,
     LogsEnvelope,
+    LogsExportedEnvelope,
     MigrationEnvelope,
     MintedKeyEnvelope,
     MusicEnvelope,
     NewsEnvelope,
     NewsItemsEnvelope,
     NotifyEnvelope,
+    NotifyHeardEnvelope,
     NotifyMineEnvelope,
     OutboundEnvelope,
     PairingEnvelope,
@@ -84,8 +87,10 @@ from .kinds import (
     QueueEnvelope,
     RanEnvelope,
     RemovalEnvelope,
+    RenewedEnvelope,
     RepairEnvelope,
     ReplacementEnvelope,
+    ReplayEnvelope,
     ResetEnvelope,
     RestoreEnvelope,
     SeedEnvelope,
@@ -110,6 +115,7 @@ from .kinds import (
     TunedEnvelope,
     UndoEnvelope,
     UninstallEnvelope,
+    UntunedEnvelope,
     UpdateEnvelope,
     UpgradeEnvelope,
     VersionEnvelope,
@@ -147,6 +153,7 @@ type Kind = typing.Literal[
     "channels",
     "clients",
     "config",
+    "copying",
     "credentials",
     "dashboard",
     "device-challenge",
@@ -174,12 +181,14 @@ type Kind = typing.Literal[
     "lifecycle",
     "log",
     "logs",
+    "logs-exported",
     "migration",
     "minted-key",
     "music",
     "news",
     "news-items",
     "notify",
+    "notify-heard",
     "notify-mine",
     "outbound",
     "pairing",
@@ -203,8 +212,10 @@ type Kind = typing.Literal[
     "queue",
     "ran",
     "removal",
+    "renewed",
     "repair",
     "replacement",
+    "replay",
     "reset",
     "restore",
     "seed",
@@ -229,6 +240,7 @@ type Kind = typing.Literal[
     "tuned",
     "undo",
     "uninstall",
+    "untuned",
     "update",
     "upgrade",
     "version",
@@ -267,6 +279,7 @@ type Envelope = (
     | ChannelsEnvelope
     | ClientsEnvelope
     | ConfigEnvelope
+    | CopyingEnvelope
     | CredentialsEnvelope
     | DashboardEnvelope
     | DeviceChallengeEnvelope
@@ -294,12 +307,14 @@ type Envelope = (
     | LifecycleEnvelope
     | LogEnvelope
     | LogsEnvelope
+    | LogsExportedEnvelope
     | MigrationEnvelope
     | MintedKeyEnvelope
     | MusicEnvelope
     | NewsEnvelope
     | NewsItemsEnvelope
     | NotifyEnvelope
+    | NotifyHeardEnvelope
     | NotifyMineEnvelope
     | OutboundEnvelope
     | PairingEnvelope
@@ -323,8 +338,10 @@ type Envelope = (
     | QueueEnvelope
     | RanEnvelope
     | RemovalEnvelope
+    | RenewedEnvelope
     | RepairEnvelope
     | ReplacementEnvelope
+    | ReplayEnvelope
     | ResetEnvelope
     | RestoreEnvelope
     | SeedEnvelope
@@ -349,6 +366,7 @@ type Envelope = (
     | TunedEnvelope
     | UndoEnvelope
     | UninstallEnvelope
+    | UntunedEnvelope
     | UpdateEnvelope
     | UpgradeEnvelope
     | VersionEnvelope
