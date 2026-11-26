@@ -233,6 +233,9 @@ operator = "What each service in this stack is for, what is lost while it is dow
 [read_stored]
 operator = "What lemonfiber keeps on this machine, where, and why, marking what holds a credential. It also names what is not lemonfiber's."
 
+[read_copying]
+operator = "The backup or restore running on this machine now: how much is written of what it will write, the part it is on, and whether it is working, slowed on purpose or stalled. It says so where none runs."
+
 [read_uninstall]
 operator = "What one of the four removals would take: every container, image and path, with what each occupies. It reads; it removes nothing."
 [read_uninstall.parameters]

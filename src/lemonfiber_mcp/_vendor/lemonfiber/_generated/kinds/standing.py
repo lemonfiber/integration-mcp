@@ -8,11 +8,21 @@ and CI fails on any difference.
 import typing
 
 
+type PlayOrigin = str
+"""The origin a browser plays a title from, as a content security policy names it:
+its scheme, host and port alone.
+"""
+
+
 class StackStanding(typing.TypedDict):
     """What the web API composes its routes and its answers from."""
 
     members_mint: bool
     """Whether household members may mint keys for themselves."""
+    plays_from: typing.NotRequired[PlayOrigin | None]
+    """The origin a browser plays a title from, which the page's policy allows, where
+    the core knows one: built from the stack's front door, never from a request.
+    """
     stack: typing.NotRequired[str | None]
     """The stack's own identifier, the one pairing material carries; absent where this
     machine has nowhere to keep one.
@@ -36,6 +46,7 @@ class StandingEnvelope(typing.TypedDict):
 
 
 __all__ = [
+    "PlayOrigin",
     "StackStanding",
     "StandingEnvelope",
 ]

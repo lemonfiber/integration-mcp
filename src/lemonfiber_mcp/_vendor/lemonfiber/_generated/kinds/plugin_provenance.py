@@ -8,13 +8,44 @@ and CI fails on any difference.
 import typing
 
 
-class Based(typing.TypedDict):
-    """What a service says its image is built on, and what this build makes of it."""
+type Based = BasedRecorded | BasedUnproven | BasedRefused
+"""What a service says its image is built on, and what this build makes of it."""
 
+
+class BasedRecorded(typing.TypedDict):
+    """The build of every platform's image is recorded as starting from it."""
+
+    basis: typing.Literal["recorded"]
+    digests: list[str]
+    """The digest of the upstream image each build is recorded as starting from."""
     image: str
     """The upstream image, as the manifest names it."""
     release: str
     """The upstream's release, as the manifest names it."""
+
+
+class BasedRefused(typing.TypedDict):
+    """The build of some platform's image is not recorded as starting from it."""
+
+    basis: typing.Literal["refused"]
+    image: str
+    """The upstream image, as the manifest names it."""
+    release: str
+    """The upstream's release, as the manifest names it."""
+    why: str
+    """What each such build is recorded as starting from."""
+
+
+class BasedUnproven(typing.TypedDict):
+    """The build provenance could not be asked for."""
+
+    basis: typing.Literal["unproven"]
+    image: str
+    """The upstream image, as the manifest names it."""
+    release: str
+    """The upstream's release, as the manifest names it."""
+    why: str
+    """What stopped it being asked for."""
 
 
 class PluginProvenanceEnvelope(typing.TypedDict):
@@ -27,8 +58,12 @@ class PluginProvenanceEnvelope(typing.TypedDict):
     kind: typing.Literal["plugin-provenance"]
 
 
-class Vouch(typing.TypedDict):
-    """What one of a plugin's images is vouched for."""
+type Vouch = VouchSigned | VouchUnproven | VouchRefused
+"""What one of a plugin's images is vouched for."""
+
+
+class VouchRefused(typing.TypedDict):
+    """A signature is offered and it does not hold."""
 
     built_on: typing.NotRequired[Based | None]
     """What the service says its image is built on, and what its build provenance makes
@@ -38,8 +73,47 @@ class Vouch(typing.TypedDict):
     """The digest that fixes what runs."""
     image: str
     """The registry path, as the manifest declares it."""
+    provenance: typing.Literal["refused"]
     service: str
     """The service the image runs as."""
+    why: str
+    """Every way it does not."""
+
+
+class VouchSigned(typing.TypedDict):
+    """A signature over a payload naming this digest verified against a held key."""
+
+    built_on: typing.NotRequired[Based | None]
+    """What the service says its image is built on, and what its build provenance makes
+    of that, where it says.
+    """
+    by: str
+    """Which key it verified against, so the answer names what was trusted."""
+    digest: str
+    """The digest that fixes what runs."""
+    image: str
+    """The registry path, as the manifest declares it."""
+    provenance: typing.Literal["signed"]
+    service: str
+    """The service the image runs as."""
+
+
+class VouchUnproven(typing.TypedDict):
+    """Nothing was established, and nothing follows from it either way."""
+
+    built_on: typing.NotRequired[Based | None]
+    """What the service says its image is built on, and what its build provenance makes
+    of that, where it says.
+    """
+    digest: str
+    """The digest that fixes what runs."""
+    image: str
+    """The registry path, as the manifest declares it."""
+    provenance: typing.Literal["unproven"]
+    service: str
+    """The service the image runs as."""
+    why: str
+    """What stopped it being established."""
 
 
 class Vouched(typing.TypedDict):
@@ -62,7 +136,13 @@ class Vouched(typing.TypedDict):
 
 __all__ = [
     "Based",
+    "BasedRecorded",
+    "BasedRefused",
+    "BasedUnproven",
     "PluginProvenanceEnvelope",
     "Vouch",
+    "VouchRefused",
+    "VouchSigned",
+    "VouchUnproven",
     "Vouched",
 ]
